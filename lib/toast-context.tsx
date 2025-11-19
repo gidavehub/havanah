@@ -196,7 +196,10 @@ function Toast({ toast, onRemove }: { toast: Toast; onRemove: () => void }) {
 export function useToast() {
   const context = React.useContext(ToastContext);
   if (!context) {
-    throw new Error('useToast must be used within ToastProvider');
+    // Return a default context during SSR/build time
+    return {
+      showToast: () => {},
+    };
   }
   return context;
 }
