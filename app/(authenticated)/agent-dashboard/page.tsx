@@ -12,22 +12,56 @@ export default function AgentDashboardPage() {
   const { theme, toggleTheme } = useTheme();
 
   useEffect(() => {
-    if (!loading && !user) {
-      router.push('/auth/login');
-    }
-    if (!loading && user && user.role !== 'agent') {
-      router.push('/user-dashboard');
+    if (!loading) {
+      if (!user) {
+        router.push('/auth/login');
+      } else if (user.role !== 'agent') {
+        router.push('/user-dashboard');
+      }
     }
   }, [user, loading, router]);
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-background-light dark:bg-background-dark">
-        <div className="text-center space-y-4">
-          <div className="inline-flex items-center justify-center w-16 h-16 rounded-full glass animate-pulse">
-            <span className="text-2xl font-bold text-gradient-primary">H</span>
+      <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', backgroundColor: 'var(--background-light)' }} className={theme === 'dark' ? 'dark-mode' : ''}>
+        <style jsx>{`
+          .loading-container {
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+          }
+          .loading-badge {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 4rem;
+            height: 4rem;
+            border-radius: 50%;
+            background: var(--glass-light);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            animation: pulse 2s ease-in-out infinite;
+            margin: 0 auto;
+          }
+          .loading-text {
+            color: var(--text-muted-light);
+            font-size: 1rem;
+          }
+          .loading-letter {
+            font-size: 1.5rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+          }
+        `}</style>
+        <div className="loading-container">
+          <div className="loading-badge">
+            <span className="loading-letter">H</span>
           </div>
-          <p className="text-text-muted-light dark:text-text-muted-dark">Loading dashboard...</p>
+          <p className="loading-text">Loading dashboard...</p>
         </div>
       </div>
     );
@@ -36,185 +70,388 @@ export default function AgentDashboardPage() {
   if (!user || user.role !== 'agent') return null;
 
   return (
-    <div className={`min-h-screen bg-background-light dark:bg-background-dark transition-colors ${theme === 'dark' ? 'dark-mode' : ''}`}>
-      {/* Navigation */}
-      <nav className="glass backdrop-blur-md border-b border-border-light dark:border-border-dark sticky top-0 z-40">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex items-center justify-between">
-          <Link href="/" className="flex items-center gap-2 group">
-            <div className="w-10 h-10 rounded-full glass flex items-center justify-center group-hover:scale-110 transition-transform">
-              <span className="text-lg font-bold bg-gradient-primary bg-clip-text text-transparent">H</span>
-            </div>
-            <span className="font-bold text-lg text-gradient-primary hidden sm:inline">Havanah</span>
-          </Link>
+    <div className={theme === 'dark' ? 'dark-mode' : ''}>
+      <style jsx>{`
+        .agent-dashboard-wrapper {
+          min-height: 100vh;
+          background-color: var(--background-light);
+          transition: background-color var(--transition-base);
+        }
 
-          <div className="hidden md:flex items-center gap-6">
-            <a href="/agent-dashboard" className="text-sm font-medium text-primary">Dashboard</a>
-            <a href="/listings" className="text-sm hover:text-primary transition-colors">My Listings</a>
-            <a href="/bookings" className="text-sm hover:text-primary transition-colors">Bookings</a>
-            <a href="/earnings" className="text-sm hover:text-primary transition-colors">Earnings</a>
-            <a href="/profile" className="text-sm hover:text-primary transition-colors">Profile</a>
-          </div>
+        body.dark-mode .agent-dashboard-wrapper {
+          background-color: var(--background-dark);
+        }
 
-          <div className="flex items-center gap-4">
-            <button
-              onClick={toggleTheme}
-              className="p-2 rounded-lg glass hover:bg-background-light/50 dark:hover:bg-background-dark/50 transition-colors"
-            >
-              {theme === 'dark' ? '☀️' : '🌙'}
-            </button>
-            <button
-              onClick={() => {
-                signOut().then(() => router.push('/'));
-              }}
-              className="btn-secondary px-4 py-2 text-sm"
-            >
-              Sign Out
-            </button>
-          </div>
-        </div>
-      </nav>
+        .nav-bar {
+          background: var(--glass-light);
+          backdrop-filter: blur(12px);
+          border-bottom: 1px solid var(--border-light);
+          position: sticky;
+          top: 0;
+          z-index: 40;
+          transition: all var(--transition-fast);
+        }
 
-      {/* Main content */}
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        {/* Welcome header */}
-        <div className="mb-12">
-          <h1 className="text-4xl font-bold mb-2 text-gradient-primary">
-            Welcome back, {(user as any)?.displayName || 'Agent'}! 🎯
-          </h1>
-          <p className="text-text-muted-light dark:text-text-muted-dark">
-            Manage your listings, bookings, and grow your business on Havanah
-          </p>
-        </div>
+        body.dark-mode .nav-bar {
+          background: var(--glass-dark);
+          border-bottom-color: var(--border-dark);
+        }
 
-        {/* Key metrics */}
-        <div className="grid md:grid-cols-4 gap-6 mb-12">
-          {[
-            { label: 'Total Earnings', value: '125,400 GMD', icon: '💵', change: '+12.5%' },
-            { label: 'Active Listings', value: '24', icon: '📋', change: '+3' },
-            { label: 'Pending Bookings', value: '8', icon: '⏳', change: '-2' },
-            { label: 'Rating', value: '4.9★', icon: '⭐', change: '+0.1' },
-          ].map((metric, index) => (
-            <div key={index} className="card-glass p-6 animate-fade-in" style={{ animationDelay: `${index * 100}ms` }}>
-              <div className="flex items-start justify-between mb-2">
-                <span className="text-3xl">{metric.icon}</span>
-                <span className="text-xs font-semibold text-green-500">{metric.change}</span>
-              </div>
-              <p className="text-sm text-text-muted-light dark:text-text-muted-dark mb-1">{metric.label}</p>
-              <p className="text-2xl font-bold">{metric.value}</p>
-            </div>
-          ))}
-        </div>
+        .nav-content {
+          max-width: 80rem;
+          margin: 0 auto;
+          padding: 1rem 1rem;
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+        }
 
-        {/* Main dashboard grid */}
-        <div className="grid md:grid-cols-3 gap-6">
-          <div className="md:col-span-2 space-y-6">
-            {/* Revenue chart placeholder */}
-            <div className="card-glass p-8">
-              <h2 className="text-2xl font-bold mb-6">Revenue This Month</h2>
-              <div className="h-64 bg-background-light/50 dark:bg-background-dark/50 rounded-lg flex items-center justify-center">
-                <div className="text-center">
-                  <div className="text-5xl mb-2">📊</div>
-                  <p className="text-text-muted-light dark:text-text-muted-dark">Revenue chart will display here</p>
+        .nav-left {
+          display: flex;
+          align-items: center;
+          gap: 0.5rem;
+        }
+
+        .logo-link {
+          display: flex;
+          align-items: center;
+          gap: 0.5rem;
+          text-decoration: none;
+        }
+
+        .logo-badge {
+          width: 2.5rem;
+          height: 2.5rem;
+          border-radius: 50%;
+          background: var(--glass-light);
+          border: 1px solid rgba(255, 255, 255, 0.3);
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          transition: transform 0.3s;
+        }
+
+        .logo-badge:hover {
+          transform: scale(1.1);
+        }
+
+        body.dark-mode .logo-badge {
+          background: var(--glass-dark);
+        }
+
+        .logo-letter {
+          font-size: 1.125rem;
+          font-weight: 700;
+          background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%);
+          -webkit-background-clip: text;
+          -webkit-text-fill-color: transparent;
+          background-clip: text;
+        }
+
+        .logo-text {
+          font-weight: 700;
+          font-size: 1.125rem;
+          background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%);
+          -webkit-background-clip: text;
+          -webkit-text-fill-color: transparent;
+          background-clip: text;
+          display: none;
+        }
+
+        @media (min-width: 640px) {
+          .logo-text {
+            display: inline;
+          }
+        }
+
+        .nav-center {
+          display: none;
+          align-items: center;
+          gap: 1.5rem;
+          font-size: 0.875rem;
+        }
+
+        @media (min-width: 768px) {
+          .nav-center {
+            display: flex;
+          }
+        }
+
+        .nav-center a {
+          color: var(--text-light);
+          text-decoration: none;
+          font-weight: 500;
+          transition: color 0.3s;
+        }
+
+        body.dark-mode .nav-center a {
+          color: var(--text-dark);
+        }
+
+        .nav-center a:hover {
+          color: var(--primary);
+        }
+
+        .nav-center a.active {
+          color: var(--primary);
+          font-weight: 600;
+        }
+
+        .nav-right {
+          display: flex;
+          align-items: center;
+          gap: 1rem;
+        }
+
+        .theme-toggle {
+          padding: 0.5rem;
+          border-radius: 0.5rem;
+          background: transparent;
+          border: none;
+          cursor: pointer;
+          font-size: 1rem;
+          transition: all 0.3s;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          width: 2.5rem;
+          height: 2.5rem;
+        }
+
+        .theme-toggle:hover {
+          background: rgba(43, 173, 238, 0.1);
+        }
+
+        .signout-btn {
+          padding: 0.5rem 1rem;
+          background: var(--glass-light);
+          color: var(--text-light);
+          border: 1px solid var(--border-light);
+          border-radius: 9999px;
+          font-size: 0.875rem;
+          font-weight: 600;
+          cursor: pointer;
+          backdrop-filter: blur(12px);
+          transition: all 0.3s;
+        }
+
+        body.dark-mode .signout-btn {
+          background: var(--glass-dark);
+          color: var(--text-dark);
+          border-color: var(--border-dark);
+        }
+
+        .signout-btn:hover {
+          background: rgba(43, 173, 238, 0.1);
+          border-color: var(--primary);
+          color: var(--primary);
+        }
+
+        .main-content {
+          max-width: 80rem;
+          margin: 0 auto;
+          padding: 3rem 1rem;
+        }
+
+        .welcome-header {
+          margin-bottom: 3rem;
+        }
+
+        .welcome-title {
+          font-size: 2.25rem;
+          font-weight: 700;
+          background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%);
+          -webkit-background-clip: text;
+          -webkit-text-fill-color: transparent;
+          background-clip: text;
+          margin-bottom: 0.5rem;
+        }
+
+        .welcome-subtitle {
+          color: var(--text-muted-light);
+          font-size: 1rem;
+        }
+
+        body.dark-mode .welcome-subtitle {
+          color: var(--text-muted-dark);
+        }
+
+        .metrics-grid {
+          display: grid;
+          grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+          gap: 1.5rem;
+          margin-bottom: 3rem;
+        }
+
+        .metric-card {
+          background: var(--glass-light);
+          backdrop-filter: blur(12px);
+          border: 1px solid rgba(255, 255, 255, 0.3);
+          border-radius: 0.5rem;
+          padding: 1.5rem;
+          animation: fadeIn 0.5s ease-out;
+        }
+
+        body.dark-mode .metric-card {
+          background: var(--glass-dark);
+          border-color: rgba(255, 255, 255, 0.1);
+        }
+
+        .metric-header {
+          display: flex;
+          align-items: flex-start;
+          justify-content: space-between;
+          margin-bottom: 0.5rem;
+        }
+
+        .metric-icon {
+          font-size: 2rem;
+        }
+
+        .metric-change {
+          font-size: 0.875rem;
+          font-weight: 600;
+          padding: 0.25rem 0.75rem;
+          border-radius: 9999px;
+          background: rgba(34, 197, 94, 0.1);
+          color: #22c55e;
+        }
+
+        .metric-change.negative {
+          background: rgba(239, 68, 68, 0.1);
+          color: #ef4444;
+        }
+
+        .metric-label {
+          color: var(--text-muted-light);
+          font-size: 0.875rem;
+          margin-bottom: 0.5rem;
+          font-weight: 500;
+        }
+
+        body.dark-mode .metric-label {
+          color: var(--text-muted-dark);
+        }
+
+        .metric-value {
+          font-size: 1.875rem;
+          font-weight: 700;
+          color: var(--text-light);
+        }
+
+        body.dark-mode .metric-value {
+          color: var(--text-dark);
+        }
+
+        .recent-activity {
+          margin-top: 2rem;
+        }
+
+        .recent-title {
+          font-size: 1.375rem;
+          font-weight: 700;
+          margin-bottom: 1rem;
+          color: var(--text-light);
+        }
+
+        body.dark-mode .recent-title {
+          color: var(--text-dark);
+        }
+
+        .recent-subtitle {
+          color: var(--text-muted-light);
+          font-size: 0.875rem;
+        }
+
+        body.dark-mode .recent-subtitle {
+          color: var(--text-muted-dark);
+        }
+
+        @keyframes fadeIn {
+          from { opacity: 0; }
+          to { opacity: 1; }
+        }
+      `}</style>
+
+      <div className="agent-dashboard-wrapper">
+        {/* Navigation */}
+        <nav className="nav-bar">
+          <div className="nav-content">
+            <div className="nav-left">
+              <Link href="/" className="logo-link">
+                <div className="logo-badge">
+                  <span className="logo-letter">H</span>
                 </div>
-              </div>
+                <span className="logo-text">Havanah</span>
+              </Link>
             </div>
 
-            {/* Recent bookings */}
-            <div className="card-glass p-8">
-              <div className="flex items-center justify-between mb-6">
-                <h2 className="text-2xl font-bold">Recent Bookings</h2>
-                <Link href="/bookings" className="text-primary text-sm font-semibold hover:text-primary-dark">
-                  View All →
-                </Link>
-              </div>
-              <div className="space-y-3">
-                {[
-                  { client: 'Fatou K.', service: 'Home Cleaning', price: '1,200 GMD', status: 'Completed' },
-                  { client: 'Omar M.', service: 'Car Rental', price: '2,500 GMD', status: 'In Progress' },
-                  { client: 'Aisatou D.', service: 'Photography', price: '3,000 GMD', status: 'Upcoming' },
-                  { client: 'Isatou J.', service: 'Event Planning', price: '5,000 GMD', status: 'Pending' },
-                ].map((booking, index) => (
-                  <div key={index} className="p-4 rounded-lg bg-background-light/50 dark:bg-background-dark/50 flex items-center justify-between hover:bg-background-light dark:hover:bg-background-dark transition-colors cursor-pointer">
-                    <div className="flex items-center gap-4 flex-1">
-                      <div className="w-10 h-10 rounded-full glass flex items-center justify-center text-lg">
-                        👤
-                      </div>
-                      <div className="flex-1">
-                        <h3 className="font-semibold text-sm">{booking.client}</h3>
-                        <p className="text-xs text-text-muted-light dark:text-text-muted-dark">{booking.service}</p>
-                      </div>
-                    </div>
-                    <div className="text-right">
-                      <p className="font-semibold text-sm">{booking.price}</p>
-                      <span className={`text-xs font-semibold px-2 py-1 rounded-full inline-block mt-1 ${
-                        booking.status === 'Completed' ? 'bg-green-500/20 text-green-600' :
-                        booking.status === 'In Progress' ? 'bg-blue-500/20 text-blue-600' :
-                        booking.status === 'Upcoming' ? 'bg-yellow-500/20 text-yellow-600' :
-                        'bg-gray-500/20 text-gray-600'
-                      }`}>
-                        {booking.status}
-                      </span>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
-
-          {/* Sidebar */}
-          <div className="space-y-6">
-            <div className="card-glass p-8 sticky top-32">
-              <h2 className="text-xl font-bold mb-4">Quick Actions</h2>
-              <div className="space-y-3">
-                <button className="btn-primary w-full py-3 rounded-lg text-sm font-medium">
-                  + Create Listing
-                </button>
-                <button className="btn-secondary w-full py-3 rounded-lg text-sm font-medium">
-                  Manage Listings
-                </button>
-                <button className="w-full px-4 py-3 rounded-lg glass border border-border-light dark:border-border-dark hover:border-primary transition-colors text-sm font-medium">
-                  View Messages
-                </button>
-                <button className="w-full px-4 py-3 rounded-lg glass border border-border-light dark:border-border-dark hover:border-primary transition-colors text-sm font-medium">
-                  Edit Profile
-                </button>
-              </div>
+            <div className="nav-center">
+              <a href="/agent-dashboard" className="active">Dashboard</a>
+              <a href="/listings">My Listings</a>
+              <a href="/bookings">Bookings</a>
+              <a href="/earnings">Earnings</a>
+              <a href="/profile">Profile</a>
             </div>
 
-            <div className="card-glass p-8">
-              <h3 className="text-lg font-bold mb-4">📈 Growth Tips</h3>
-              <ul className="space-y-3 text-sm text-text-muted-light dark:text-text-muted-dark">
-                <li className="flex gap-2">
-                  <span className="text-primary flex-shrink-0">✓</span>
-                  <span>Add high-quality photos to your listings</span>
-                </li>
-                <li className="flex gap-2">
-                  <span className="text-primary flex-shrink-0">✓</span>
-                  <span>Respond to booking inquiries within 2 hours</span>
-                </li>
-                <li className="flex gap-2">
-                  <span className="text-primary flex-shrink-0">✓</span>
-                  <span>Maintain a 4.5+ star rating</span>
-                </li>
-                <li className="flex gap-2">
-                  <span className="text-primary flex-shrink-0">✓</span>
-                  <span>Update availability regularly</span>
-                </li>
-              </ul>
-            </div>
-
-            <div className="card-glass p-8">
-              <h3 className="text-lg font-bold mb-4">🎁 Premium Plan</h3>
-              <p className="text-xs text-text-muted-light dark:text-text-muted-dark mb-4">
-                Upgrade to Premium for 5,000 GMD/month and unlock priority placement, analytics, and marketing tools.
-              </p>
-              <button className="btn-primary w-full py-2 text-sm rounded-lg">
-                Upgrade Now
+            <div className="nav-right">
+              <button onClick={toggleTheme} className="theme-toggle">
+                {theme === 'dark' ? '☀️' : '🌙'}
+              </button>
+              <button
+                onClick={() => {
+                  signOut().then(() => router.push('/'));
+                }}
+                className="signout-btn"
+              >
+                Sign Out
               </button>
             </div>
           </div>
-        </div>
-      </main>
+        </nav>
+
+        {/* Main content */}
+        <main className="main-content">
+          {/* Welcome header */}
+          <div className="welcome-header">
+            <h1 className="welcome-title">
+              Welcome back, {(user as any)?.displayName || 'Agent'}! 🎯
+            </h1>
+            <p className="welcome-subtitle">
+              Manage your listings, bookings, and grow your business on Havanah
+            </p>
+          </div>
+
+          {/* Key metrics */}
+          <div className="metrics-grid">
+            {[
+              { label: 'Total Earnings', value: '125,400 GMD', icon: '💵', change: '+12.5%' },
+              { label: 'Active Listings', value: '24', icon: '📋', change: '+3' },
+              { label: 'Pending Bookings', value: '8', icon: '⏳', change: '-2' },
+              { label: 'Rating', value: '4.9★', icon: '⭐', change: '+0.1' },
+            ].map((metric, index) => (
+              <div key={index} className="metric-card" style={{ animationDelay: `${index * 100}ms` }}>
+                <div className="metric-header">
+                  <span className="metric-icon">{metric.icon}</span>
+                  <span className={`metric-change ${metric.change.startsWith('-') ? 'negative' : ''}`}>
+                    {metric.change}
+                  </span>
+                </div>
+                <p className="metric-label">{metric.label}</p>
+                <p className="metric-value">{metric.value}</p>
+              </div>
+            ))}
+          </div>
+
+          {/* Recent activity section */}
+          <div className="recent-activity">
+            <h2 className="recent-title">Recent Activity</h2>
+            <p className="recent-subtitle">
+              Your latest bookings and listings activity will appear here.
+            </p>
+          </div>
+        </main>
+      </div>
     </div>
   );
 }
