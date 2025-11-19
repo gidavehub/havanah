@@ -1,65 +1,204 @@
-import Image from "next/image";
+'use client';
+
+import { useState } from 'react';
+import ExplorePage from '../components/ExplorePage';
+import ItemDetailsPage from '../components/ItemDetailsPage';
+import AgentDashboardPage from '../components/AgentDashboardPage';
+import UserDashboardPage from '../components/UserDashboardPage';
+import CheckoutPage from '../components/CheckoutPage';
+import MessagingPage from '../components/MessagingPage';
 
 export default function Home() {
+  const [currentPage, setCurrentPage] = useState('explore');
+  const [darkMode, setDarkMode] = useState(false);
+  const [navOpen, setNavOpen] = useState(true);
+
+  const pages = [
+    { id: 'explore', label: 'Explore' },
+    { id: 'item-details', label: 'Item Details' },
+    { id: 'agent-dashboard', label: 'Agent Dashboard' },
+    { id: 'user-dashboard', label: 'User Dashboard' },
+    { id: 'checkout', label: 'Checkout' },
+    { id: 'messaging', label: 'Messaging' },
+  ];
+
   return (
-    <div className="flex min-h-screen items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex min-h-screen w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
-        </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
+    <div className={darkMode ? 'dark-mode' : ''}>
+      <style jsx>{`
+        .nav-container {
+          position: fixed;
+          top: 0;
+          left: 0;
+          right: 0;
+          background: rgba(255, 255, 255, 0.95);
+          backdrop-filter: blur(10px);
+          border-bottom: 1px solid var(--border-light);
+          z-index: 100;
+          padding: 1rem 2rem;
+          transition: all 0.3s ease;
+        }
+
+        .dark-mode .nav-container {
+          background: rgba(16, 28, 34, 0.95);
+          border-bottom-color: var(--border-dark);
+        }
+
+        .nav-header {
+          display: flex;
+          align-items: center;
+          gap: 1rem;
+          max-width: 1400px;
+          margin: 0 auto;
+        }
+
+        .nav-toggle-btn {
+          background: none;
+          border: none;
+          cursor: pointer;
+          padding: 0.5rem;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          color: var(--text-light);
+          transition: all 0.3s;
+        }
+
+        .dark-mode .nav-toggle-btn {
+          color: var(--text-dark);
+        }
+
+        .nav-toggle-btn:hover {
+          color: var(--primary);
+        }
+
+        .nav-tabs {
+          display: flex;
+          gap: 1rem;
+          max-width: 1400px;
+          margin: 0 auto;
+          flex-wrap: wrap;
+          align-items: center;
+          overflow-x: auto;
+          max-height: ${navOpen ? '100px' : '0px'};
+          overflow: hidden;
+          transition: max-height 0.3s ease;
+        }
+
+        .nav-tabs.open {
+          max-height: 100px;
+        }
+
+        .nav-tab {
+          padding: 0.5rem 1.5rem;
+          border: none;
+          background: transparent;
+          color: var(--text-muted-light);
+          font-family: 'Manrope', sans-serif;
+          font-size: 0.875rem;
+          font-weight: 500;
+          cursor: pointer;
+          border-radius: 9999px;
+          transition: all 0.3s ease;
+          white-space: nowrap;
+        }
+
+        .dark-mode .nav-tab {
+          color: var(--text-muted-dark);
+        }
+
+        .nav-tab:hover {
+          color: var(--primary);
+          background-color: rgba(43, 173, 238, 0.1);
+        }
+
+        .nav-tab.active {
+          color: var(--primary);
+          background-color: rgba(43, 173, 238, 0.2);
+          font-weight: 600;
+        }
+
+        .dark-mode .nav-tab.active {
+          background-color: rgba(43, 173, 238, 0.3);
+        }
+
+        .nav-spacer {
+          flex: 1;
+        }
+
+        .dark-mode-btn {
+          padding: 0.5rem 1.5rem;
+          border: none;
+          background: transparent;
+          color: var(--text-muted-light);
+          font-family: 'Manrope', sans-serif;
+          font-size: 0.875rem;
+          font-weight: 500;
+          cursor: pointer;
+          border-radius: 9999px;
+          transition: all 0.3s ease;
+          white-space: nowrap;
+        }
+
+        .dark-mode .dark-mode-btn {
+          color: var(--text-muted-dark);
+        }
+
+        .dark-mode-btn:hover {
+          color: var(--primary);
+          background-color: rgba(43, 173, 238, 0.1);
+        }
+      `}</style>
+
+      {/* Navigation */}
+      <nav className="nav-container">
+        <div className="nav-header">
+          <button
+            className="nav-toggle-btn"
+            onClick={() => setNavOpen(!navOpen)}
+            title={navOpen ? 'Collapse Navigator' : 'Expand Navigator'}
           >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
+            <span className="material-symbols-outlined">
+              {navOpen ? 'expand_less' : 'expand_more'}
+            </span>
+          </button>
+          <div className={`nav-tabs ${navOpen ? 'open' : ''}`}>
+            {pages.map((page) => (
+              <button
+                key={page.id}
+                className={`nav-tab ${currentPage === page.id ? 'active' : ''}`}
+                onClick={() => setCurrentPage(page.id)}
+              >
+                {page.label}
+              </button>
+            ))}
+            <div className="nav-spacer"></div>
+            <button
+              className="dark-mode-btn"
+              onClick={() => setDarkMode(!darkMode)}
+            >
+              {darkMode ? '☀️ Light' : '🌙 Dark'}
+            </button>
+          </div>
         </div>
-      </main>
+      </nav>
+
+      {/* Explore Page */}
+      {currentPage === 'explore' && <ExplorePage />}
+
+      {/* Item Details Page */}
+      {currentPage === 'item-details' && <ItemDetailsPage />}
+
+      {/* Agent Dashboard Page */}
+      {currentPage === 'agent-dashboard' && <AgentDashboardPage />}
+
+      {/* User Dashboard Page */}
+      {currentPage === 'user-dashboard' && <UserDashboardPage />}
+
+      {/* Checkout Page */}
+      {currentPage === 'checkout' && <CheckoutPage />}
+
+      {/* Messaging Page */}
+      {currentPage === 'messaging' && <MessagingPage />}
     </div>
   );
 }
