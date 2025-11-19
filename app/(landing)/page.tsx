@@ -4,6 +4,12 @@ import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { useTheme } from '@/lib/theme-context';
 import Head from 'next/head';
+import dynamic from 'next/dynamic';
+
+// Dynamically import components for showcase
+const CheckoutPage = dynamic(() => import('@/components/CheckoutPage'), { ssr: false, loading: () => <div className="h-96 bg-surface rounded animate-pulse"></div> });
+const UserDashboardPage = dynamic(() => import('@/components/UserDashboardPage'), { ssr: false, loading: () => <div className="h-96 bg-surface rounded animate-pulse"></div> });
+const MessagingPage = dynamic(() => import('@/components/MessagingPage'), { ssr: false, loading: () => <div className="h-96 bg-surface rounded animate-pulse"></div> });
 
 // --- SVG Icon Components --- //
 const SearchIcon = () => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>;
@@ -142,48 +148,61 @@ export default function LandingPage() {
         nav {
           position: fixed;
           top: 0;
-          left: 0;
-          right: 0;
+          left: 50%;
+          transform: translateX(-50%);
           z-index: 1000;
           transition: all var(--transition-base);
+          width: 98%;
+          max-width: 1200px;
+          margin-top: 1rem;
+          border-radius: 1rem;
         }
         nav.scrolled {
-          background-color: rgba(255, 255, 255, 0.5);
+          background-color: rgba(255, 255, 255, 0.7);
           backdrop-filter: blur(10px);
           -webkit-backdrop-filter: blur(10px);
-          border-bottom: 1px solid var(--border);
+          border: 1px solid var(--border);
+          margin-top: 0.5rem;
         }
         .dark-mode nav.scrolled {
-          background-color: rgba(26, 41, 51, 0.5);
+          background-color: rgba(26, 41, 51, 0.7);
         }
         .nav-content {
           display: flex;
           align-items: center;
           justify-content: space-between;
-          height: 80px;
+          height: 70px;
+          padding: 0 1.5rem;
         }
         .logo {
           display: flex;
           align-items: center;
           gap: 0.75rem;
+          flex-shrink: 0;
         }
         .logo img {
-            width: auto;
-            height: 50px; /* Increased size */
+          width: auto;
+          height: 60px;
+          transition: transform 0.3s ease;
+        }
+        .logo:hover img {
+          transform: scale(1.1);
         }
         .logo span {
           font-size: 1.5rem;
           font-weight: 800;
-          display: none; /* Hide text as requested, logo image is self-explanatory */
+          display: none;
         }
         .nav-links {
           display: none;
           gap: 2rem;
+          align-items: center;
         }
         .nav-links a {
           font-weight: 500;
           color: var(--text-muted);
           transition: color var(--transition-base);
+          white-space: nowrap;
         }
         .nav-links a:hover {
           color: var(--primary);
@@ -543,9 +562,9 @@ export default function LandingPage() {
             </Link>
             <div className="nav-links">
               <a href="#features">Features</a>
+              <a href="#components">Components</a>
               <a href="#showcase">Showcase</a>
               <a href="#pricing">Pricing</a>
-              <a href="#faq">FAQ</a>
             </div>
             <div className="nav-actions">
               <button onClick={toggleTheme} className="theme-toggle" title="Toggle theme">
@@ -636,6 +655,45 @@ export default function LandingPage() {
                     <div className="browser-dot" style={{ backgroundColor: '#27c93f' }}></div>
                   </div>
                   <img src="https://i.imgur.com/9C89zJG.png" alt="Havanah User Dashboard" />
+                </div>
+              </div>
+            </div>
+          </section>
+
+          {/* Live Components Showcase Section */}
+          <section id="components" className="section">
+            <div className="container">
+              <div className="section-header">
+                <h2>Explore Our <span className="gradient-text">Features</span></h2>
+                <p>Get a real-time look at the powerful tools we've built for our users and service providers.</p>
+              </div>
+              
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(350px, 1fr))', gap: '2rem', marginBottom: '3rem' }}>
+                {/* User Dashboard Component */}
+                <div style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: '1rem', padding: '1.5rem', minHeight: '500px', overflow: 'auto', maxHeight: '600px' }}>
+                  <h3 style={{ marginBottom: '1rem', fontWeight: 700, fontSize: '1.25rem' }}>User Dashboard</h3>
+                  <p style={{ color: 'var(--text-muted)', marginBottom: '1rem', fontSize: '0.9rem' }}>Manage your bookings, view your services, and track your payments all in one place.</p>
+                  <div style={{ minHeight: '400px', opacity: 0.9 }}>
+                    <UserDashboardPage />
+                  </div>
+                </div>
+
+                {/* Checkout Component */}
+                <div style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: '1rem', padding: '1.5rem', minHeight: '500px', overflow: 'auto', maxHeight: '600px' }}>
+                  <h3 style={{ marginBottom: '1rem', fontWeight: 700, fontSize: '1.25rem' }}>Secure Checkout</h3>
+                  <p style={{ color: 'var(--text-muted)', marginBottom: '1rem', fontSize: '0.9rem' }}>Fast, secure payment processing with multiple payment methods and buyer protection.</p>
+                  <div style={{ minHeight: '400px', opacity: 0.9 }}>
+                    <CheckoutPage />
+                  </div>
+                </div>
+
+                {/* Messaging Component */}
+                <div style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: '1rem', padding: '1.5rem', minHeight: '500px', overflow: 'auto', maxHeight: '600px' }}>
+                  <h3 style={{ marginBottom: '1rem', fontWeight: 700, fontSize: '1.25rem' }}>Peer-to-Peer Messaging</h3>
+                  <p style={{ color: 'var(--text-muted)', marginBottom: '1rem', fontSize: '0.9rem' }}>Direct messaging with service providers and users for transparent communication.</p>
+                  <div style={{ minHeight: '400px', opacity: 0.9 }}>
+                    <MessagingPage />
+                  </div>
                 </div>
               </div>
             </div>

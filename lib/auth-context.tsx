@@ -92,7 +92,18 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const signIn = async (email: string, password: string) => {
     try {
       const result = await signInWithEmailAndPassword(auth, email, password);
-      setUser(result.user as User);
+      
+      // Fetch user data from Firestore to get role
+      const userDocRef = doc(db, 'users', result.user.uid);
+      const userDoc = await getDoc(userDocRef);
+      
+      const userData = userDoc.data();
+      setUser({
+        ...result.user,
+        role: userData?.role || 'user',
+        profileComplete: userData?.profileComplete || false,
+        createdAt: userData?.createdAt?.toDate(),
+      } as User);
     } catch (error) {
       throw error;
     }
