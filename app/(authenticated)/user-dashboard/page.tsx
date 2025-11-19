@@ -6,6 +6,8 @@ import Link from 'next/link';
 import { useEffect } from 'react';
 import { useTheme } from '@/lib/theme-context';
 
+export const dynamic = 'force-dynamic';
+
 export default function UserDashboardPage() {
   const { user, loading, signOut } = useAuth();
   const router = useRouter();

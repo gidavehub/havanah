@@ -3,13 +3,20 @@
 import { useAuth } from '@/lib/auth-context';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useTheme } from '@/lib/theme-context';
+
+export const dynamic = 'force-dynamic';
 
 export default function AgentDashboardPage() {
   const { user, loading, signOut } = useAuth();
   const router = useRouter();
   const { theme, toggleTheme } = useTheme();
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   useEffect(() => {
     if (!loading) {
