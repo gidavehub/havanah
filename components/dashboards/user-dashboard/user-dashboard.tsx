@@ -1,6 +1,6 @@
 'use client';
 
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
 import Link from 'next/link';
 import { 
@@ -9,49 +9,156 @@ import {
   MdSell, 
   MdArrowForward, 
   MdAccessTime,
-  MdNotifications
+  MdNotifications,
+  MdCheckCircle,
+  MdCancel,
+  MdHourglassEmpty
 } from 'react-icons/md';
+import { 
+  collection, 
+  query, 
+  where, 
+  getDocs, 
+  orderBy, 
+  getDoc,
+  doc,
+  Timestamp
+} from 'firebase/firestore';
+import { getFirestoreInstance } from '@/lib/firebase';
 import { useAuth } from '@/lib/auth-store';
+import { useToast } from '@/components/toast/toast';
 import styles from './user-dashboard.module.css';
 
-// Mock Data (In a real app, fetch this via the services hooks)
-const activeServices = [
-  {
-    id: '1',
-    title: 'Audi A4 Rental',
-    image: 'https://images.unsplash.com/photo-1606664515524-ed2f786a0bd6?q=80&w=1000&auto=format&fit=crop',
-    type: 'Rental',
-    startDate: 'June 1, 2024',
-    endDate: 'July 1, 2024',
-    timeLeft: '15 days',
-    progress: 50,
-    status: 'active'
-  },
-  {
-    id: '2',
-    title: 'Downtown Loft',
-    image: 'https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?q=80&w=1000&auto=format&fit=crop',
-    type: 'Lease',
-    startDate: 'Jan 15, 2024',
-    endDate: 'Jan 15, 2025',
-    timeLeft: '6 months',
-    progress: 45,
-    status: 'active'
-  },
-  {
-    id: '3',
-    title: 'Porsche 911 Carrera',
-    image: 'https://images.unsplash.com/photo-1503376763036-066120622c74?q=80&w=1000&auto=format&fit=crop',
-    type: 'Owned',
-    purchaseDate: 'March 22, 2024',
-    status: 'completed'
-  }
-];
+// Types
+interface ServiceItem {
+  id: string;
+  listingId: string;
+  title: string;
+  image: string;
+  type: 'house' | 'car';
+  category: 'rent' | 'sale';
+  status: 'pending' | 'accepted' | 'rejected';
+  amount?: number;
+  startDate?: any;
+  endDate?: any;
+  createdAt: any;
+}
 
-const spendingData = [40, 65, 35, 85, 55, 90]; // Mock percentages for chart
+interface SpendingData {
+  total: number;
+  monthly: number[];
+}
 
 export default function UserDashboard() {
-  const { user } = useAuth();
+  const { user, loading: authLoading } = useAuth();
+  const toast = useToast();
+
+  // State
+  const [services, setServices] = useState<ServiceItem[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [spending, setSpending] = useState<SpendingData>({ total: 0, monthly: [0,0,0,0,0,0] });
+
+  // Fetch User Data
+  useEffect(() => {
+    const fetchData = async () => {
+      if (!user?.id) return;
+
+      try {
+        const db = getFirestoreInstance();
+        
+        // Fetch Inquiries/Applications made by user
+        const inquiriesRef = collection(db, 'inquiries');
+        const q = query(
+          inquiriesRef, 
+          where('userId', '==', user.id),
+          orderBy('createdAt', 'desc')
+        );
+        
+        const snapshot = await getDocs(q);
+        const items: ServiceItem[] = [];
+        let totalSpent = 0;
+
+        // We need to fetch listing details for images/titles if not stored in inquiry
+        // Optimisation: In production, store small snapshot of listing in inquiry to avoid N+1 reads
+        // Here we assume title is in inquiry, but image might need fetch or default
+        
+        for (const docSnap of snapshot.docs) {
+          const data = docSnap.data();
+          
+          // Helper to get image (in real app, fetch listing doc if needed)
+          // For now, we'll use a placeholder if not present, or assume we passed it
+          let imageUrl = 'https://images.unsplash.com/photo-1560518883-ce09059eeffa?q=80&w=1000&auto=format&fit=crop';
+          
+          // Try to fetch listing image if we have listingId
+          if (data.listingId) {
+            try {
+              const listingSnap = await getDoc(doc(db, 'listings', data.listingId));
+              if (listingSnap.exists()) {
+                const lData = listingSnap.data();
+                if (lData.images && lData.images.length > 0) {
+                  imageUrl = lData.images[0];
+                }
+              }
+            } catch (e) {
+              // Ignore fetch error
+            }
+          }
+
+          items.push({
+            id: docSnap.id,
+            listingId: data.listingId,
+            title: data.listingTitle || 'Unknown Listing',
+            image: imageUrl,
+            type: data.listingType || 'house', // Ensure these fields exist in inquiry creation
+            category: data.listingCategory || 'rent',
+            status: data.status,
+            amount: data.offerAmount || 0,
+            createdAt: data.createdAt
+          });
+
+          if (data.status === 'accepted' && data.offerAmount) {
+            totalSpent += data.offerAmount;
+          }
+        }
+
+        setServices(items);
+        setSpending({
+          total: totalSpent,
+          monthly: [10, 25, 15, 30, 40, 60] // Mock chart data distribution for visual
+        });
+        setIsLoading(false);
+
+      } catch (error) {
+        console.error("Error fetching user data:", error);
+        toast.error("Load Error", "Failed to load your dashboard");
+        setIsLoading(false);
+      }
+    };
+
+    if (!authLoading && user) {
+      fetchData();
+    }
+  }, [user, authLoading, toast]);
+
+  // Categorize services
+  const activeServices = services.filter(s => s.status === 'accepted');
+  const pendingApplications = services.filter(s => s.status === 'pending');
+
+  const formatDate = (timestamp: any) => {
+    if (!timestamp) return 'N/A';
+    // Handle Firestore Timestamp
+    const date = timestamp.toDate ? timestamp.toDate() : new Date(timestamp);
+    return date.toLocaleDateString();
+  };
+
+  if (authLoading || isLoading) {
+    return (
+      <div className={styles.loadingContainer}>
+        <div className={styles.spinner}></div>
+        <p>Loading your dashboard...</p>
+      </div>
+    );
+  }
 
   return (
     <div className={styles.container}>
@@ -63,10 +170,10 @@ export default function UserDashboard() {
           className={styles.welcomeText}
         >
           <h1 className={styles.title}>
-            Welcome back, <span className={styles.userName}>{user?.displayName?.split(' ')[0] || 'Olivia'}</span>!
+            Welcome back, <span className={styles.userName}>{user?.displayName?.split(' ')[0] || 'User'}</span>!
           </h1>
           <p className={styles.subtitle}>
-            You have {activeServices.filter(s => s.status === 'active').length} active rentals and 1 purchased vehicle.
+            You have {activeServices.length} active services and {pendingApplications.length} pending applications.
           </p>
         </motion.div>
         
@@ -77,7 +184,9 @@ export default function UserDashboard() {
             className={styles.notificationBtn}
           >
             <MdNotifications className={styles.bellIcon} />
-            <span className={styles.badge}>2</span>
+            {pendingApplications.length > 0 && (
+              <span className={styles.badge}>{pendingApplications.length}</span>
+            )}
           </motion.button>
         </div>
       </header>
@@ -85,77 +194,93 @@ export default function UserDashboard() {
       {/* Main Grid */}
       <div className={styles.dashboardGrid}>
         
-        {/* Left Column: Services */}
+        {/* Left Column: Services & Applications */}
         <div className={styles.mainContent}>
-          <div className={styles.sectionHeader}>
-            <h2>My Services</h2>
-          </div>
+          
+          {/* Active Services Section */}
+          <div className={styles.sectionBlock}>
+            <div className={styles.sectionHeader}>
+              <h2>Active Services</h2>
+            </div>
 
-          <div className={styles.cardsList}>
-            {activeServices.map((service, index) => (
-              <motion.div 
-                key={service.id}
-                className={styles.serviceCard}
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: index * 0.1 }}
-                whileHover={{ y: -5, boxShadow: '0 12px 30px rgba(16, 185, 129, 0.1)' }}
-              >
-                {/* Card Background Glow Effect */}
-                <div className={styles.cardGlow} />
-
-                <div className={styles.cardImageContainer}>
-                  <img src={service.image} alt={service.title} className={styles.cardImage} />
-                  <div className={styles.cardBadge}>{service.type}</div>
-                </div>
-                
-                <div className={styles.cardContent}>
-                  <div className={styles.cardInfo}>
-                    <h3>{service.title}</h3>
+            {activeServices.length === 0 ? (
+              <div className={styles.emptyState}>
+                <p>No active rentals or purchases yet.</p>
+                <Link href="/explore" className={styles.btnPrimarySmall}>Explore Listings</Link>
+              </div>
+            ) : (
+              <div className={styles.cardsList}>
+                {activeServices.map((service, index) => (
+                  <motion.div 
+                    key={service.id}
+                    className={styles.serviceCard}
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: index * 0.1 }}
+                    whileHover={{ y: -5, boxShadow: '0 12px 30px rgba(16, 185, 129, 0.1)' }}
+                  >
+                    <div className={styles.cardGlow} />
+                    <div className={styles.cardImageContainer}>
+                      <img src={service.image} alt={service.title} className={styles.cardImage} />
+                      <div className={styles.cardBadge}>{service.category}</div>
+                    </div>
                     
-                    {service.status === 'active' ? (
-                      <>
-                        <div className={styles.dateRange}>
-                          <span>Start: {service.startDate}</span>
-                          <span>End: {service.endDate}</span>
+                    <div className={styles.cardContent}>
+                      <div className={styles.cardInfo}>
+                        <h3>{service.title}</h3>
+                        <div className={styles.statusRow}>
+                          <span className={`${styles.statusPill} ${styles.accepted}`}>
+                            <MdCheckCircle /> Active
+                          </span>
+                          <span className={styles.dateText}>Started: {formatDate(service.createdAt)}</span>
                         </div>
-                        
-                        <div className={styles.progressContainer}>
-                          <div className={styles.progressHeader}>
-                            <span className={styles.progressLabel}>
-                              <MdAccessTime /> Time Remaining
-                            </span>
-                            <span className={styles.progressValue}>{service.timeLeft}</span>
-                          </div>
-                          <div className={styles.progressBarBg}>
-                            <motion.div 
-                              className={styles.progressBarFill} 
-                              initial={{ width: 0 }}
-                              animate={{ width: `${service.progress}%` }}
-                              transition={{ duration: 1, delay: 0.5, ease: "easeOut" }}
-                            />
-                          </div>
-                        </div>
-                      </>
-                    ) : (
-                      <p className={styles.purchaseDate}>Purchased on {service.purchaseDate}</p>
-                    )}
-                  </div>
+                        {service.amount && (
+                          <p className={styles.amountText}>${service.amount.toLocaleString()}</p>
+                        )}
+                      </div>
 
-                  <div className={styles.cardActions}>
-                    {service.status === 'active' ? (
-                      <>
-                        <button className={styles.btnSecondary}>Extend</button>
+                      <div className={styles.cardActions}>
                         <button className={styles.btnPrimary}>Manage</button>
-                      </>
-                    ) : (
-                      <button className={styles.btnPrimary}>View Documents</button>
-                    )}
+                        <button className={styles.btnSecondary}>Documents</button>
+                      </div>
+                    </div>
+                  </motion.div>
+                ))}
+              </div>
+            )}
+          </div>
+
+          {/* Pending Applications Section */}
+          <div className={styles.sectionBlock}>
+            <div className={styles.sectionHeader}>
+              <h2>Applications History</h2>
+            </div>
+            
+            <div className={styles.applicationsList}>
+              {services.filter(s => s.status !== 'accepted').length === 0 && (
+                <p className={styles.emptyText}>No pending or past applications.</p>
+              )}
+              
+              {services.filter(s => s.status !== 'accepted').map((app) => (
+                <div key={app.id} className={styles.applicationItem}>
+                  <div className={styles.appIcon}>
+                    {app.status === 'pending' ? <MdHourglassEmpty className={styles.pendingIcon} /> : 
+                     app.status === 'rejected' ? <MdCancel className={styles.rejectedIcon} /> : null}
+                  </div>
+                  <div className={styles.appInfo}>
+                    <h4>{app.title}</h4>
+                    <span>Applied on {formatDate(app.createdAt)}</span>
+                  </div>
+                  <div className={styles.appStatus}>
+                    <span className={`${styles.statusBadge} ${styles[app.status]}`}>
+                      {app.status.charAt(0).toUpperCase() + app.status.slice(1)}
+                    </span>
                   </div>
                 </div>
-              </motion.div>
-            ))}
+              ))}
+            </div>
           </div>
+
         </div>
 
         {/* Right Column: Sidebar Widgets */}
@@ -170,23 +295,23 @@ export default function UserDashboard() {
           >
             <h3>Quick Actions</h3>
             <div className={styles.actionGrid}>
-              <Link href="/explore?category=rent&type=house" passHref>
-                <motion.div className={styles.actionCard} whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
+              <Link href="/explore?category=rent&type=house" passHref legacyBehavior>
+                <motion.a className={styles.actionCard} whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
                   <div className={styles.actionIcon}><MdApartment /></div>
-                  <span>Book Apartment</span>
-                </motion.div>
+                  <span>Rent Home</span>
+                </motion.a>
               </Link>
-              <Link href="/explore?category=rent&type=car" passHref>
-                <motion.div className={styles.actionCard} whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
+              <Link href="/explore?category=rent&type=car" passHref legacyBehavior>
+                <motion.a className={styles.actionCard} whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
                   <div className={styles.actionIcon}><MdDirectionsCar /></div>
-                  <span>Rent a Car</span>
-                </motion.div>
+                  <span>Rent Car</span>
+                </motion.a>
               </Link>
-              <Link href="/explore?category=sale" passHref>
-                <motion.div className={`${styles.actionCard} ${styles.fullWidth}`} whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
+              <Link href="/explore?category=sale" passHref legacyBehavior>
+                <motion.a className={`${styles.actionCard} ${styles.fullWidth}`} whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
                   <div className={styles.actionIcon}><MdSell /></div>
                   <span>Browse For Sale</span>
-                </motion.div>
+                </motion.a>
               </Link>
             </div>
           </motion.div>
@@ -198,23 +323,19 @@ export default function UserDashboard() {
             animate={{ opacity: 1, x: 0 }}
             transition={{ delay: 0.3 }}
           >
-            <h3>Spending Summary</h3>
+            <h3>Total Spending</h3>
             <div className={styles.spendingCard}>
               <div className={styles.spendingRow}>
-                <span className={styles.spendingLabel}>Total Spent</span>
-                <span className={styles.spendingValue}>$12,450.75</span>
-              </div>
-              <div className={styles.spendingRow}>
-                <span className={styles.spendingLabel}>Last Month</span>
-                <span className={styles.spendingValue}>$2,100.00</span>
+                <span className={styles.spendingLabel}>Lifetime Spent</span>
+                <span className={styles.spendingValue}>${spending.total.toLocaleString()}</span>
               </div>
 
               <div className={styles.chartContainer}>
-                {spendingData.map((height, i) => (
+                {spending.monthly.map((height, i) => (
                   <div key={i} className={styles.chartColumn}>
                     <div className={styles.chartBarTrack}>
                       <motion.div 
-                        className={`${styles.chartBar} ${i === spendingData.length - 1 ? styles.activeBar : ''}`}
+                        className={styles.chartBar}
                         initial={{ height: 0 }}
                         animate={{ height: `${height}%` }}
                         transition={{ duration: 0.6, delay: 0.4 + (i * 0.1) }}
@@ -226,7 +347,7 @@ export default function UserDashboard() {
               </div>
 
               <button className={styles.btnOutline}>
-                View Full History <MdArrowForward />
+                View Wallet <MdArrowForward />
               </button>
             </div>
           </motion.div>

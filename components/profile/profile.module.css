@@ -1,0 +1,406 @@
+.container {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 2rem 1rem;
+}
+
+.loadingContainer {
+  height: 60vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.spinner {
+  width: 40px;
+  height: 40px;
+  border: 3px solid #f3f3f3;
+  border-top: 3px solid #10b981;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* Header Card */
+.headerCard {
+  background: white;
+  border-radius: 16px;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+  overflow: hidden;
+  margin-bottom: 2rem;
+  border: 1px solid #e5e7eb;
+}
+
+.coverPhoto {
+  height: 220px;
+  background: linear-gradient(120deg, #10b981, #3b82f6);
+}
+
+.headerContent {
+  padding: 0 2rem;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Avatar */
+.avatarSection {
+  margin-top: -70px;
+  margin-bottom: 1rem;
+}
+
+.avatarWrapper {
+  position: relative;
+  width: 150px;
+  height: 150px;
+}
+
+.avatar {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  border: 5px solid white;
+  object-fit: cover;
+  background: white;
+}
+
+.cameraBtn {
+  position: absolute;
+  bottom: 10px;
+  right: 10px;
+  background: #1f2937;
+  color: white;
+  border: 2px solid white;
+  border-radius: 50%;
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: transform 0.2s;
+}
+
+.cameraBtn:hover {
+  transform: scale(1.1);
+}
+
+/* Info Section */
+.infoSection {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.identityRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+.nameGroup h1 {
+  margin: 0 0 0.5rem 0;
+  font-size: 1.8rem;
+  font-weight: 800;
+  color: #111827;
+  display: flex;
+  align-items: center;
+}
+
+.editNameInput {
+  font-size: 1.8rem;
+  font-weight: 800;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  padding: 0.25rem 0.5rem;
+  width: 100%;
+}
+
+.badges {
+  display: flex;
+  gap: 0.75rem;
+}
+
+.agentBadge, .locationBadge {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  font-size: 0.85rem;
+  font-weight: 600;
+  padding: 0.25rem 0.75rem;
+  border-radius: 99px;
+}
+
+.agentBadge {
+  background: #ecfdf5;
+  color: #059669;
+}
+
+.locationBadge {
+  background: #f3f4f6;
+  color: #4b5563;
+}
+
+/* Buttons */
+.actionButtons {
+  display: flex;
+  gap: 0.75rem;
+}
+
+.btnPrimary, .btnSecondary, .btnConnected {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.6rem 1.2rem;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+  border: none;
+  font-size: 0.95rem;
+}
+
+.btnPrimary {
+  background: #10b981;
+  color: white;
+}
+
+.btnPrimary:hover {
+  background: #059669;
+}
+
+.btnSecondary {
+  background: white;
+  border: 1px solid #d1d5db;
+  color: #374151;
+}
+
+.btnSecondary:hover {
+  background: #f9fafb;
+  border-color: #9ca3af;
+}
+
+.btnConnected {
+  background: #111827;
+  color: white;
+}
+
+/* Tab Bar */
+.tabBar {
+  display: flex;
+  gap: 2rem;
+  border-bottom: 1px solid #e5e7eb;
+  margin-top: 1rem;
+}
+
+.tab {
+  background: none;
+  border: none;
+  padding: 0.75rem 0;
+  font-size: 1rem;
+  font-weight: 600;
+  color: #6b7280;
+  cursor: pointer;
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.tab:hover {
+  color: #111827;
+}
+
+.activeTab {
+  color: #10b981;
+}
+
+.activeTab::after {
+  content: '';
+  position: absolute;
+  bottom: -1px;
+  left: 0;
+  width: 100%;
+  height: 3px;
+  background: #10b981;
+  border-radius: 3px 3px 0 0;
+}
+
+/* Content Grid */
+.contentGrid {
+  display: grid;
+  grid-template-columns: 1fr 2fr;
+  gap: 2rem;
+}
+
+/* Sidebar */
+.sidebar {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.infoCard {
+  background: white;
+  border-radius: 12px;
+  padding: 1.5rem;
+  border: 1px solid #e5e7eb;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+}
+
+.infoCard h3 {
+  margin: 0 0 1rem 0;
+  font-size: 1.1rem;
+  color: #111827;
+}
+
+.bioText {
+  color: #4b5563;
+  line-height: 1.6;
+  margin-bottom: 1.5rem;
+  font-size: 0.95rem;
+}
+
+.editBioInput {
+  width: 100%;
+  padding: 0.75rem;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  margin-bottom: 1rem;
+  font-family: inherit;
+}
+
+.detailList {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.detailItem {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  color: #6b7280;
+  font-size: 0.9rem;
+}
+
+/* Listings Grid */
+.listingsGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 1.5rem;
+}
+
+.listingCard {
+  background: white;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  overflow: hidden;
+  transition: transform 0.2s;
+}
+
+.listingCard:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+}
+
+.listingCard img {
+  width: 100%;
+  height: 160px;
+  object-fit: cover;
+}
+
+.listingInfo {
+  padding: 1rem;
+}
+
+.listingInfo h4 {
+  margin: 0 0 0.5rem 0;
+  font-size: 1rem;
+  color: #111827;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.price {
+  font-weight: 700;
+  color: #10b981;
+  margin: 0 0 0.5rem 0;
+}
+
+.listingMeta {
+  display: flex;
+  gap: 0.5rem;
+  font-size: 0.8rem;
+  color: #9ca3af;
+  text-transform: capitalize;
+}
+
+/* Empty State */
+.emptyState {
+  background: #f9fafb;
+  border-radius: 12px;
+  padding: 3rem;
+  text-align: center;
+  color: #6b7280;
+}
+
+/* About Stats */
+.placeholderCard {
+  background: white;
+  border-radius: 12px;
+  padding: 1.5rem;
+  border: 1px solid #e5e7eb;
+}
+
+.statsRow {
+  display: flex;
+  gap: 2rem;
+  margin-top: 1rem;
+}
+
+.statBox {
+  display: flex;
+  flex-direction: column;
+}
+
+.statNum {
+  font-size: 1.5rem;
+  font-weight: 800;
+  color: #111827;
+}
+
+.statLabel {
+  font-size: 0.85rem;
+  color: #6b7280;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .contentGrid {
+    grid-template-columns: 1fr;
+  }
+  
+  .headerContent {
+    padding: 0 1rem;
+  }
+  
+  .identityRow {
+    flex-direction: column;
+  }
+  
+  .actionButtons {
+    width: 100%;
+  }
+  
+  .btnPrimary, .btnSecondary {
+    flex: 1;
+    justify-content: center;
+  }
+}
