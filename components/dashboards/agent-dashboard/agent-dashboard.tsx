@@ -1,286 +1,249 @@
+--- START OF FILE agent-dashboard.tsx ---
+
 'use client';
 
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
-import { useToast } from '@/components/toast/toast';
+import Link from 'next/link';
+import { 
+  MdSearch,
+  MdNotifications,
+  MdTrendingUp,
+  MdTrendingDown,
+  MdMoreHoriz,
+  MdCheck,
+  MdClose,
+  MdAdd
+} from 'react-icons/md';
+import { useAuth } from '@/lib/auth-store';
 import styles from './agent-dashboard.module.css';
 
-interface AgentStats {
-  totalRevenue: number;
-  activeListings: number;
-  totalViews: number;
-  pendingPayments: number;
-}
-
-interface Listing {
-  id: string;
-  title: string;
-  category: string;
-  price: number;
-  views: number;
-  inquiries: number;
-  status: 'active' | 'sold' | 'rented';
-}
-
-interface Transaction {
-  id: string;
-  buyer: string;
-  property: string;
-  amount: number;
-  date: string;
-  status: 'completed' | 'pending' | 'confirmed';
-}
-
-const mockStats: AgentStats = {
-  totalRevenue: 52340,
-  activeListings: 18,
-  totalViews: 2150,
-  pendingPayments: 3400,
-};
-
-const mockListings: Listing[] = [
-  {
-    id: '1',
-    title: 'Luxury Penthouse Downtown',
-    category: 'House - Rent',
-    price: 5000,
-    views: 245,
-    inquiries: 12,
-    status: 'active',
-  },
-  {
-    id: '2',
-    title: 'BMW M5 Sports Car',
-    category: 'Car - Rent',
-    price: 150,
-    views: 890,
-    inquiries: 45,
-    status: 'active',
-  },
+// Mock Data
+const stats = [
+  { label: 'Active Listings', value: '12', change: '+2%', trend: 'up' },
+  { label: 'Pending Offers', value: '5', change: '-5%', trend: 'down' },
+  { label: 'Total Earnings', value: '$24,500', change: '+10%', trend: 'up' },
 ];
 
-const mockTransactions: Transaction[] = [
+const listings = [
   {
     id: '1',
-    buyer: 'John Smith',
-    property: 'BMW M5 Rental',
-    amount: 1050,
-    date: '2024-11-18',
-    status: 'completed',
+    title: 'Bright Downtown Loft',
+    location: 'New York, NY',
+    image: 'https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?q=80&w=300&auto=format&fit=crop',
+    type: 'Apartment',
+    status: 'Active',
+    price: '$3,200/mo'
   },
   {
     id: '2',
-    buyer: 'Sarah Johnson',
-    property: 'Penthouse Rent',
-    amount: 5000,
-    date: '2024-11-17',
-    status: 'pending',
+    title: 'Tesla Model 3',
+    location: '2022 Model',
+    image: 'https://images.unsplash.com/photo-1560958089-b8a1929cea89?q=80&w=300&auto=format&fit=crop',
+    type: 'Car Sale',
+    status: 'Pending',
+    price: '$45,000'
   },
+  {
+    id: '3',
+    title: 'Ford Mustang GT',
+    location: '2023 Convertible',
+    image: 'https://images.unsplash.com/photo-1580273916550-e323be2ae537?q=80&w=300&auto=format&fit=crop',
+    type: 'Car Rental',
+    status: 'Active',
+    price: '$150/day'
+  }
+];
+
+const offers = [
+  {
+    id: '1',
+    user: 'John Doe',
+    item: 'Tesla Model 3',
+    amount: '$44,500',
+    avatar: 'https://i.pravatar.cc/150?u=1'
+  }
+];
+
+const transactions = [
+  { id: '1', desc: 'Commission: Downtown Loft', date: 'Oct 28, 2023', amount: '+$800.00', type: 'credit' },
+  { id: '2', desc: 'Payout to Bank', date: 'Oct 25, 2023', amount: '-$5,000.00', type: 'debit' },
 ];
 
 export default function AgentDashboard() {
-  const toast = useToast();
-  const [activeTab, setActiveTab] = useState<'overview' | 'listings' | 'transactions'>('overview');
-
-  const handleNewListing = () => {
-    toast.success('Feature Coming Soon', 'New listing feature will be available shortly!');
-  };
-
-  const handleEditListing = (listingTitle: string) => {
-    toast.info('Edit Mode', `Editing: ${listingTitle}`);
-  };
-
-  const handleDeleteListing = (listingTitle: string) => {
-    toast.warning('Delete Listing', `Are you sure you want to delete: ${listingTitle}?`);
-  };
+  const { user } = useAuth();
+  const [activeFilter, setActiveFilter] = useState('All');
 
   return (
     <div className={styles.container}>
+      
       {/* Header */}
-      <div className={styles.header}>
-        <div className={styles.headerContent}>
-          <h1 className={styles.title}>Agent Dashboard</h1>
-          <p className={styles.subtitle}>Welcome back! Here's your business performance.</p>
-        </div>
-        <button className={styles.btnNew} onClick={handleNewListing}>+ New Listing</button>
-      </div>
+      <header className={styles.header}>
+        <motion.div 
+          className={styles.welcomeSection}
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+        >
+          <h1 className={styles.title}>
+            Welcome back, <span className={styles.highlight}>{user?.displayName || 'Havanah'}</span>!
+          </h1>
+          <p className={styles.subtitle}>Here's an overview of your business activities.</p>
+        </motion.div>
 
-      {/* Navigation Tabs */}
-      <div className={styles.tabs}>
-        {(['overview', 'listings', 'transactions'] as const).map((tab) => (
-          <button
-            key={tab}
-            className={`${styles.tab} ${activeTab === tab ? styles.active : ''}`}
-            onClick={() => setActiveTab(tab)}
-          >
-            {tab === 'overview' ? '📊 Overview' : tab === 'listings' ? '🏠 Listings' : '💳 Transactions'}
+        <div className={styles.headerActions}>
+          <div className={styles.searchBar}>
+            <MdSearch className={styles.searchIcon} />
+            <input type="text" placeholder="Search listings..." />
+          </div>
+          <button className={styles.iconBtn}>
+            <MdNotifications />
+            <div className={styles.badge} />
           </button>
+          <button className={styles.addBtn}>
+            <MdAdd /> Add Listing
+          </button>
+        </div>
+      </header>
+
+      {/* Stats Row */}
+      <div className={styles.statsGrid}>
+        {stats.map((stat, i) => (
+          <motion.div 
+            key={i}
+            className={styles.statCard}
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: i * 0.1 }}
+            whileHover={{ y: -4 }}
+          >
+            <p className={styles.statLabel}>{stat.label}</p>
+            <div className={styles.statValueRow}>
+              <span className={styles.statValue}>{stat.value}</span>
+              <span className={`${styles.statChange} ${stat.trend === 'up' ? styles.positive : styles.negative}`}>
+                {stat.trend === 'up' ? <MdTrendingUp /> : <MdTrendingDown />}
+                {stat.change}
+              </span>
+            </div>
+          </motion.div>
         ))}
       </div>
 
-      {/* Content */}
-      <div className={styles.content}>
-        {activeTab === 'overview' && (
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.3 }}
-          >
-            {/* Stats Grid */}
-            <div className={styles.statsGrid}>
-              <div className={styles.statCard}>
-                <div className={styles.statIcon}>💰</div>
-                <div className={styles.statContent}>
-                  <h3 className={styles.statLabel}>Total Revenue</h3>
-                  <p className={styles.statValue}>${mockStats.totalRevenue.toLocaleString()}</p>
-                  <span className={styles.statChange}>+12% from last month</span>
-                </div>
-              </div>
-
-              <div className={styles.statCard}>
-                <div className={styles.statIcon}>📋</div>
-                <div className={styles.statContent}>
-                  <h3 className={styles.statLabel}>Active Listings</h3>
-                  <p className={styles.statValue}>{mockStats.activeListings}</p>
-                  <span className={styles.statChange}>2 added this week</span>
-                </div>
-              </div>
-
-              <div className={styles.statCard}>
-                <div className={styles.statIcon}>👀</div>
-                <div className={styles.statContent}>
-                  <h3 className={styles.statLabel}>Total Views</h3>
-                  <p className={styles.statValue}>{mockStats.totalViews}</p>
-                  <span className={styles.statChange}>+8% engagement</span>
-                </div>
-              </div>
-
-              <div className={styles.statCard}>
-                <div className={styles.statIcon}>⏳</div>
-                <div className={styles.statContent}>
-                  <h3 className={styles.statLabel}>Pending Payments</h3>
-                  <p className={styles.statValue}>${mockStats.pendingPayments}</p>
-                  <span className={styles.statChange}>3 transactions waiting</span>
-                </div>
-              </div>
+      <div className={styles.mainGrid}>
+        {/* Left Column: Listings */}
+        <div className={styles.listingsSection}>
+          <div className={styles.sectionHeader}>
+            <h2>My Listings</h2>
+            <div className={styles.filters}>
+              {['All', 'Apartments', 'Car Rentals', 'Car Sales'].map((filter) => (
+                <button 
+                  key={filter}
+                  onClick={() => setActiveFilter(filter)}
+                  className={`${styles.filterBtn} ${activeFilter === filter ? styles.activeFilter : ''}`}
+                >
+                  {filter}
+                </button>
+              ))}
             </div>
+          </div>
 
-            {/* Chart Placeholder */}
-            <motion.div
-              className={styles.chartSection}
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ delay: 0.2 }}
-            >
-              <h3 className={styles.chartTitle}>Monthly Revenue Trend</h3>
-              <div className={styles.chart}>
-                <div className={styles.chartBars}>
-                  {[40, 65, 45, 75, 90, 55, 100].map((height, i) => (
-                    <motion.div
-                      key={i}
-                      className={styles.chartBar}
-                      style={{ height: `${height}%` }}
-                      initial={{ height: 0 }}
-                      animate={{ height: `${height}%` }}
-                      transition={{ delay: i * 0.1, duration: 0.5 }}
-                    />
-                  ))}
-                </div>
-              </div>
-            </motion.div>
-          </motion.div>
-        )}
-
-        {activeTab === 'listings' && (
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.3 }}
-          >
-            <div className={styles.listingsSection}>
-              <h3 className={styles.sectionTitle}>Your Listings</h3>
-              <div className={styles.listingsTable}>
-                <div className={styles.tableHeader}>
-                  <div className={styles.tableCell}>Property</div>
-                  <div className={styles.tableCell}>Category</div>
-                  <div className={styles.tableCell}>Price</div>
-                  <div className={styles.tableCell}>Views</div>
-                  <div className={styles.tableCell}>Inquiries</div>
-                  <div className={styles.tableCell}>Status</div>
-                  <div className={styles.tableCell}>Actions</div>
-                </div>
-
-                {mockListings.map((listing) => (
-                  <motion.div
+          <div className={styles.tableContainer}>
+            <table className={styles.table}>
+              <thead>
+                <tr>
+                  <th>Listing</th>
+                  <th>Type</th>
+                  <th>Status</th>
+                  <th>Price</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                {listings.map((listing, i) => (
+                  <motion.tr 
                     key={listing.id}
-                    className={styles.tableRow}
-                    initial={{ opacity: 0, x: -20 }}
+                    initial={{ opacity: 0, x: -10 }}
                     animate={{ opacity: 1, x: 0 }}
-                    whileHover={{ backgroundColor: 'rgba(16, 185, 129, 0.05)' }}
+                    transition={{ delay: 0.2 + (i * 0.05) }}
                   >
-                    <div className={styles.tableCell}>{listing.title}</div>
-                    <div className={styles.tableCell}>{listing.category}</div>
-                    <div className={styles.tableCell}>${listing.price}</div>
-                    <div className={styles.tableCell}>{listing.views}</div>
-                    <div className={styles.tableCell}>{listing.inquiries}</div>
-                    <div className={styles.tableCell}>
-                      <span className={`${styles.badge} ${styles[listing.status]}`}>
+                    <td>
+                      <div className={styles.listingCell}>
+                        <img src={listing.image} alt={listing.title} className={styles.listingImage} />
+                        <div>
+                          <p className={styles.listingTitle}>{listing.title}</p>
+                          <p className={styles.listingSub}>{listing.location}</p>
+                        </div>
+                      </div>
+                    </td>
+                    <td><span className={styles.typeBadge}>{listing.type}</span></td>
+                    <td>
+                      <span className={`${styles.statusBadge} ${listing.status === 'Active' ? styles.active : styles.pending}`}>
                         {listing.status}
                       </span>
-                    </div>
-                    <div className={styles.tableCell}>
-                      <div className={styles.actionButtons}>
-                        <button className={styles.btnEdit} onClick={() => handleEditListing(listing.title)}>Edit</button>
-                        <button className={styles.btnDelete} onClick={() => handleDeleteListing(listing.title)}>Delete</button>
-                      </div>
-                    </div>
-                  </motion.div>
+                    </td>
+                    <td className={styles.priceText}>{listing.price}</td>
+                    <td>
+                      <button className={styles.actionBtn}><MdMoreHoriz /></button>
+                    </td>
+                  </motion.tr>
                 ))}
-              </div>
-            </div>
-          </motion.div>
-        )}
+              </tbody>
+            </table>
+          </div>
+        </div>
 
-        {activeTab === 'transactions' && (
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.3 }}
-          >
-            <div className={styles.transactionsSection}>
-              <h3 className={styles.sectionTitle}>Recent Transactions</h3>
-              <div className={styles.transactionsList}>
-                {mockTransactions.map((transaction) => (
-                  <motion.div
-                    key={transaction.id}
-                    className={styles.transactionCard}
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    whileHover={{ y: -4 }}
-                  >
-                    <div className={styles.transactionContent}>
-                      <div className={styles.transactionInfo}>
-                        <h4 className={styles.transactionTitle}>{transaction.buyer}</h4>
-                        <p className={styles.transactionProperty}>{transaction.property}</p>
-                        <span className={styles.transactionDate}>{transaction.date}</span>
-                      </div>
-                      <div className={styles.transactionRight}>
-                        <div className={styles.transactionAmount}>
-                          ${transaction.amount.toLocaleString()}
-                        </div>
-                        <span
-                          className={`${styles.transactionStatus} ${styles[transaction.status]}`}
-                        >
-                          {transaction.status}
-                        </span>
+        {/* Right Column: Offers & Finance */}
+        <div className={styles.sideSection}>
+          
+          {/* Recent Offers */}
+          <div className={styles.card}>
+            <h3 className={styles.cardTitle}>Recent Offers</h3>
+            <div className={styles.offersList}>
+              {offers.map((offer) => (
+                <div key={offer.id} className={styles.offerItem}>
+                  <div className={styles.offerHeader}>
+                    <div className={styles.offerUser}>
+                      <img src={offer.avatar} alt={offer.user} />
+                      <div>
+                        <p className={styles.userName}>{offer.user}</p>
+                        <p className={styles.offerDetail}>Offer on {offer.item}</p>
                       </div>
                     </div>
-                  </motion.div>
-                ))}
-              </div>
+                    <span className={styles.offerAmount}>{offer.amount}</span>
+                  </div>
+                  <div className={styles.offerActions}>
+                    <button className={styles.acceptBtn}><MdCheck /> Accept</button>
+                    <button className={styles.rejectBtn}><MdClose /> Reject</button>
+                  </div>
+                </div>
+              ))}
             </div>
-          </motion.div>
-        )}
+          </div>
+
+          {/* Financial Overview */}
+          <div className={styles.card}>
+            <h3 className={styles.cardTitle}>Financial Overview</h3>
+            <div className={styles.balanceCard}>
+              <p>Account Balance</p>
+              <h2>$15,720.50</h2>
+            </div>
+            
+            <div className={styles.transactionsList}>
+              <h4>Transaction History</h4>
+              {transactions.map((t) => (
+                <div key={t.id} className={styles.transactionItem}>
+                  <div>
+                    <p className={styles.transDesc}>{t.desc}</p>
+                    <p className={styles.transDate}>{t.date}</p>
+                  </div>
+                  <span className={`${styles.transAmount} ${t.type === 'credit' ? styles.credit : styles.debit}`}>
+                    {t.amount}
+                  </span>
+                </div>
+              ))}
+            </div>
+          </div>
+
+        </div>
       </div>
     </div>
   );

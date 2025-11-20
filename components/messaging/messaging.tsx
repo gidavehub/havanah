@@ -2,294 +2,324 @@
 
 import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { useToast } from '@/components/toast/toast';
+import { 
+  MdSearch, 
+  MdSend, 
+  MdAttachFile, 
+  MdMoreVert, 
+  MdArrowBack,
+  MdImage,
+  MdInsertDriveFile,
+  MdTagFaces
+} from 'react-icons/md';
+import { useAuth } from '@/lib/auth-store';
 import styles from './messaging.module.css';
+
+// Types
+interface User {
+  id: string;
+  name: string;
+  avatar: string;
+  online: boolean;
+  lastSeen?: string;
+}
 
 interface Message {
   id: string;
-  sender: 'user' | 'agent';
+  senderId: string;
   text: string;
   timestamp: Date;
   read: boolean;
+  type: 'text' | 'image' | 'file';
+  fileUrl?: string;
 }
 
 interface Conversation {
   id: string;
-  name: string;
-  avatar: string;
+  participant: User;
   lastMessage: string;
   timestamp: Date;
-  unread: number;
-  online: boolean;
+  unreadCount: number;
+  typing?: boolean;
 }
 
-const mockConversations: Conversation[] = [
+// Mock Data
+const MOCK_CONVERSATIONS: Conversation[] = [
   {
     id: '1',
-    name: 'John Dealer',
-    avatar: 'JD',
-    lastMessage: 'The car is ready for pickup!',
-    timestamp: new Date(Date.now() - 5 * 60000),
-    unread: 2,
-    online: true,
+    participant: {
+      id: 'agent1',
+      name: 'Sarah Properties',
+      avatar: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?q=80&w=150&auto=format&fit=crop',
+      online: true,
+    },
+    lastMessage: 'The viewing is confirmed for 2 PM.',
+    timestamp: new Date(Date.now() - 1000 * 60 * 5), // 5 mins ago
+    unreadCount: 2,
   },
   {
     id: '2',
-    name: 'Sarah Properties',
-    avatar: 'SP',
-    lastMessage: 'Would you like to schedule a viewing?',
-    timestamp: new Date(Date.now() - 2 * 3600000),
-    unread: 0,
-    online: false,
+    participant: {
+      id: 'agent2',
+      name: 'John Dealer',
+      avatar: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?q=80&w=150&auto=format&fit=crop',
+      online: false,
+      lastSeen: '2h ago',
+    },
+    lastMessage: 'Did you like the BMW M5?',
+    timestamp: new Date(Date.now() - 1000 * 60 * 60 * 2), // 2 hours ago
+    unreadCount: 0,
   },
   {
     id: '3',
-    name: 'Mike Rentals',
-    avatar: 'MR',
-    lastMessage: 'Payment confirmed. Documents sent.',
-    timestamp: new Date(Date.now() - 1 * 86400000),
-    unread: 0,
-    online: true,
+    participant: {
+      id: 'support',
+      name: 'Havanah Support',
+      avatar: 'https://images.unsplash.com/photo-1599566150163-29194dcaad36?q=80&w=150&auto=format&fit=crop',
+      online: true,
+    },
+    lastMessage: 'Your document has been verified.',
+    timestamp: new Date(Date.now() - 1000 * 60 * 60 * 24), // 1 day ago
+    unreadCount: 0,
   },
 ];
 
-const mockMessages: Message[] = [
+const MOCK_MESSAGES: Message[] = [
   {
     id: '1',
-    sender: 'agent',
-    text: 'Hi! Thanks for your interest in the BMW M5. Its available next week!',
-    timestamp: new Date(Date.now() - 15 * 60000),
+    senderId: 'agent1',
+    text: 'Hi there! Thanks for your interest in the Downtown Loft.',
+    timestamp: new Date(Date.now() - 1000 * 60 * 60),
     read: true,
+    type: 'text',
   },
   {
     id: '2',
-    sender: 'user',
-    text: 'Great! What are the rental terms?',
-    timestamp: new Date(Date.now() - 12 * 60000),
+    senderId: 'me',
+    text: 'Hello! Yes, I would love to see it.',
+    timestamp: new Date(Date.now() - 1000 * 60 * 55),
     read: true,
+    type: 'text',
   },
   {
     id: '3',
-    sender: 'agent',
-    text: 'We offer daily, weekly, and monthly rates. The car is $150/day with full insurance included.',
-    timestamp: new Date(Date.now() - 10 * 60000),
+    senderId: 'agent1',
+    text: 'Great! Are you free this afternoon?',
+    timestamp: new Date(Date.now() - 1000 * 60 * 50),
     read: true,
+    type: 'text',
   },
   {
     id: '4',
-    sender: 'user',
-    text: 'Perfect! Can I book it for next weekend?',
-    timestamp: new Date(Date.now() - 8 * 60000),
+    senderId: 'me',
+    text: 'Does 2 PM work for you?',
+    timestamp: new Date(Date.now() - 1000 * 60 * 45),
     read: true,
+    type: 'text',
   },
   {
     id: '5',
-    sender: 'agent',
-    text: 'The car is ready for pickup!',
-    timestamp: new Date(Date.now() - 5 * 60000),
+    senderId: 'agent1',
+    text: 'The viewing is confirmed for 2 PM.',
+    timestamp: new Date(Date.now() - 1000 * 60 * 5),
     read: false,
+    type: 'text',
   },
 ];
 
 export default function MessagingPage() {
-  const toast = useToast();
-  const [conversations, setConversations] = useState(mockConversations);
-  const [selectedConversation, setSelectedConversation] = useState(mockConversations[0]);
-  const [messages, setMessages] = useState(mockMessages);
-  const [newMessage, setNewMessage] = useState('');
-  const [searchQuery, setSearchQuery] = useState('');
+  const { user } = useAuth();
+  const [activeConvId, setActiveConvId] = useState<string | null>(null);
+  const [messages, setMessages] = useState<Message[]>(MOCK_MESSAGES);
+  const [inputText, setInputText] = useState('');
+  const [isMobileView, setIsMobileView] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
-  const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-  };
-
+  // Responsive check
   useEffect(() => {
-    scrollToBottom();
-  }, [messages]);
+    const handleResize = () => setIsMobileView(window.innerWidth < 768);
+    handleResize();
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
+  // Auto scroll to bottom
+  useEffect(() => {
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+  }, [messages, activeConvId]);
+
+  const activeConversation = MOCK_CONVERSATIONS.find((c) => c.id === activeConvId);
 
   const handleSendMessage = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!newMessage.trim()) return;
+    if (!inputText.trim()) return;
 
-    const message: Message = {
+    const newMessage: Message = {
       id: Date.now().toString(),
-      sender: 'user',
-      text: newMessage,
+      senderId: 'me',
+      text: inputText,
       timestamp: new Date(),
-      read: true,
+      read: false,
+      type: 'text',
     };
 
-    setMessages([...messages, message]);
-    setNewMessage('');
-    toast.success('Message Sent', 'Your message has been delivered.');
-
-    // Simulate agent response
-    setTimeout(() => {
-      const response: Message = {
-        id: (Date.now() + 1).toString(),
-        sender: 'agent',
-        text: 'Thanks for your message! I will get back to you shortly.',
-        timestamp: new Date(),
-        read: false,
-      };
-      setMessages((prev) => [...prev, response]);
-      toast.info('New Message', `${selectedConversation.name} sent you a message.`);
-    }, 1500);
+    setMessages([...messages, newMessage]);
+    setInputText('');
   };
 
-  const filteredConversations = conversations.filter(
-    (conv) =>
-      conv.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      conv.lastMessage.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  const formatTime = (date: Date) => {
+    return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+  };
 
   return (
     <div className={styles.container}>
-      {/* Sidebar */}
-      <aside className={styles.sidebar}>
+      
+      {/* Sidebar List */}
+      <aside className={`${styles.sidebar} ${activeConvId && isMobileView ? styles.hiddenMobile : ''}`}>
         <div className={styles.sidebarHeader}>
-          <h1 className={styles.sidebarTitle}>Messages</h1>
-          <button className={styles.btnNew} title="New conversation">
-            ✏️
-          </button>
+          <h2>Messages</h2>
+          <div className={styles.searchBox}>
+            <MdSearch className={styles.searchIcon} />
+            <input type="text" placeholder="Search chats..." />
+          </div>
         </div>
 
-        <div className={styles.searchBox}>
-          <span className={styles.searchIcon}>🔍</span>
-          <input
-            type="text"
-            placeholder="Search conversations..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className={styles.searchInput}
-          />
-        </div>
-
-        <div className={styles.conversationsList}>
-          <AnimatePresence>
-            {filteredConversations.map((conversation) => (
-              <motion.button
-                key={conversation.id}
-                className={`${styles.conversation} ${
-                  selectedConversation.id === conversation.id ? styles.active : ''
-                }`}
-                onClick={() => setSelectedConversation(conversation)}
-                initial={{ opacity: 0, x: -20 }}
-                animate={{ opacity: 1, x: 0 }}
-                exit={{ opacity: 0, x: -20 }}
-                whileHover={{ backgroundColor: 'rgba(16, 185, 129, 0.05)' }}
-              >
-                <div className={styles.conversationAvatar}>
-                  <span className={styles.avatarEmoji}>{conversation.avatar}</span>
-                  {conversation.online && <div className={styles.onlineIndicator}></div>}
+        <div className={styles.conversationList}>
+          {MOCK_CONVERSATIONS.map((conv) => (
+            <motion.div
+              key={conv.id}
+              className={`${styles.conversationItem} ${activeConvId === conv.id ? styles.active : ''}`}
+              onClick={() => setActiveConvId(conv.id)}
+              whileHover={{ backgroundColor: 'rgba(16, 185, 129, 0.05)' }}
+              whileTap={{ scale: 0.98 }}
+            >
+              <div className={styles.avatarContainer}>
+                <img src={conv.participant.avatar} alt={conv.participant.name} className={styles.avatar} />
+                {conv.participant.online && <div className={styles.onlineBadge} />}
+              </div>
+              
+              <div className={styles.conversationInfo}>
+                <div className={styles.infoTop}>
+                  <h3 className={styles.participantName}>{conv.participant.name}</h3>
+                  <span className={styles.timestamp}>{formatTime(conv.timestamp)}</span>
                 </div>
-
-                <div className={styles.conversationContent}>
-                  <div className={styles.conversationHeader}>
-                    <h3 className={styles.conversationName}>{conversation.name}</h3>
-                    <span className={styles.conversationTime}>
-                      {conversation.timestamp.toLocaleTimeString([], {
-                        hour: '2-digit',
-                        minute: '2-digit',
-                      })}
-                    </span>
-                  </div>
-                  <p className={styles.conversationPreview}>{conversation.lastMessage}</p>
+                <div className={styles.infoBottom}>
+                  <p className={styles.previewText}>{conv.lastMessage}</p>
+                  {conv.unreadCount > 0 && (
+                    <span className={styles.unreadBadge}>{conv.unreadCount}</span>
+                  )}
                 </div>
-
-                {conversation.unread > 0 && (
-                  <div className={styles.unreadBadge}>{conversation.unread}</div>
-                )}
-              </motion.button>
-            ))}
-          </AnimatePresence>
+              </div>
+            </motion.div>
+          ))}
         </div>
       </aside>
 
       {/* Chat Area */}
-      <main className={styles.chatArea}>
-        {selectedConversation && (
+      <main className={`${styles.chatArea} ${!activeConvId && isMobileView ? styles.hiddenMobile : ''}`}>
+        {activeConversation ? (
           <>
             {/* Chat Header */}
-            <div className={styles.chatHeader}>
-              <div className={styles.chatHeaderLeft}>
-                <div className={styles.chatAvatar}>
-                  <span>{selectedConversation.avatar}</span>
-                  {selectedConversation.online && (
-                    <div className={styles.onlineIndicator}></div>
-                  )}
+            <header className={styles.chatHeader}>
+              {isMobileView && (
+                <button className={styles.backBtn} onClick={() => setActiveConvId(null)}>
+                  <MdArrowBack />
+                </button>
+              )}
+              <div className={styles.headerProfile}>
+                <div className={styles.avatarContainer}>
+                  <img 
+                    src={activeConversation.participant.avatar} 
+                    alt={activeConversation.participant.name} 
+                    className={styles.avatarSmall} 
+                  />
+                  {activeConversation.participant.online && <div className={styles.onlineBadge} />}
                 </div>
-                <div>
-                  <h2 className={styles.chatName}>{selectedConversation.name}</h2>
-                  <span className={styles.chatStatus}>
-                    {selectedConversation.online ? '🟢 Online' : '🔴 Offline'}
+                <div className={styles.headerInfo}>
+                  <h3>{activeConversation.participant.name}</h3>
+                  <span>
+                    {activeConversation.participant.online 
+                      ? 'Online' 
+                      : `Last seen ${activeConversation.participant.lastSeen}`}
                   </span>
                 </div>
               </div>
-              <button className={styles.btnOptions}>⋮</button>
-            </div>
+              <button className={styles.optionsBtn}>
+                <MdMoreVert />
+              </button>
+            </header>
 
-            {/* Messages */}
-            <div className={styles.messagesContainer}>
-              <motion.div
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ duration: 0.3 }}
-                className={styles.messagesList}
-              >
-                <AnimatePresence>
-                  {messages.map((message, index) => (
-                    <motion.div
-                      key={message.id}
-                      className={`${styles.messageWrapper} ${
-                        message.sender === 'user' ? styles.userMessage : styles.agentMessage
-                      }`}
-                      initial={{ opacity: 0, y: 10 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      transition={{ delay: index * 0.05 }}
-                    >
-                      <div className={styles.messageBubble}>
-                        <p className={styles.messageText}>{message.text}</p>
-                        <span className={styles.messageTime}>
-                          {message.timestamp.toLocaleTimeString([], {
-                            hour: '2-digit',
-                            minute: '2-digit',
-                          })}
-                          {message.sender === 'user' && message.read && ' ✓✓'}
-                        </span>
+            {/* Messages List */}
+            <div className={styles.messagesList}>
+              {messages.map((msg, index) => {
+                const isMe = msg.senderId === 'me';
+                return (
+                  <motion.div 
+                    key={msg.id}
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    className={`${styles.messageWrapper} ${isMe ? styles.myMessage : styles.theirMessage}`}
+                  >
+                    {!isMe && (
+                      <img 
+                        src={activeConversation.participant.avatar} 
+                        alt="Sender" 
+                        className={styles.messageAvatar} 
+                      />
+                    )}
+                    <div className={styles.messageBubble}>
+                      <p>{msg.text}</p>
+                      <div className={styles.messageMeta}>
+                        <span>{formatTime(msg.timestamp)}</span>
+                        {isMe && (
+                          <span className={styles.readReceipt}>
+                            {msg.read ? '✓✓' : '✓'}
+                          </span>
+                        )}
                       </div>
-                    </motion.div>
-                  ))}
-                </AnimatePresence>
-                <div ref={messagesEndRef} />
-              </motion.div>
+                    </div>
+                  </motion.div>
+                );
+              })}
+              <div ref={messagesEndRef} />
             </div>
 
             {/* Input Area */}
-            <div className={styles.inputArea}>
-              <form onSubmit={handleSendMessage} className={styles.inputForm}>
-                <button type="button" className={styles.btnAttach} title="Attach file">
-                  📎
-                </button>
-                <input
-                  type="text"
-                  placeholder="Type a message..."
-                  value={newMessage}
-                  onChange={(e) => setNewMessage(e.target.value)}
-                  className={styles.messageInput}
+            <footer className={styles.inputArea}>
+              <div className={styles.attachmentActions}>
+                <button className={styles.iconButton}><MdAdd /></button>
+              </div>
+              <form className={styles.inputForm} onSubmit={handleSendMessage}>
+                <input 
+                  type="text" 
+                  placeholder="Type a message..." 
+                  value={inputText}
+                  onChange={(e) => setInputText(e.target.value)}
                 />
-                <button
-                  type="submit"
-                  className={styles.btnSend}
-                  disabled={!newMessage.trim()}
-                  title="Send message"
+                <button 
+                  type="button" 
+                  className={styles.emojiBtn}
                 >
-                  ➤
+                  <MdTagFaces />
                 </button>
               </form>
-            </div>
+              <motion.button 
+                className={styles.sendBtn}
+                whileHover={{ scale: 1.1 }}
+                whileTap={{ scale: 0.9 }}
+                onClick={handleSendMessage}
+                disabled={!inputText.trim()}
+              >
+                <MdSend />
+              </motion.button>
+            </footer>
           </>
+        ) : (
+          <div className={styles.emptyState}>
+            <div className={styles.emptyIcon}>💬</div>
+            <h2>Your Messages</h2>
+            <p>Select a conversation to start chatting.</p>
+          </div>
         )}
       </main>
     </div>

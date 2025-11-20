@@ -1,267 +1,237 @@
 'use client';
 
-import React, { useState } from 'react';
+import React from 'react';
 import { motion } from 'framer-motion';
-import { useToast } from '@/components/toast/toast';
+import Link from 'next/link';
+import { 
+  MdApartment, 
+  MdDirectionsCar, 
+  MdSell, 
+  MdArrowForward, 
+  MdAccessTime,
+  MdNotifications
+} from 'react-icons/md';
+import { useAuth } from '@/lib/auth-store';
 import styles from './user-dashboard.module.css';
 
-interface UserActivity {
-  id: string;
-  title: string;
-  type: 'purchase' | 'rental';
-  amount: number;
-  date: string;
-  status: 'active' | 'completed' | 'cancelled';
-  daysRemaining?: number;
-}
-
-interface SpendingSummary {
-  thisMonth: number;
-  lastMonth: number;
-  total: number;
-}
-
-const mockActivities: UserActivity[] = [
+// Mock Data (In a real app, fetch this via the services hooks)
+const activeServices = [
   {
     id: '1',
-    title: 'BMW M5 Rental',
-    type: 'rental',
-    amount: 1050,
-    date: '2024-11-15',
-    status: 'active',
-    daysRemaining: 3,
+    title: 'Audi A4 Rental',
+    image: 'https://images.unsplash.com/photo-1606664515524-ed2f786a0bd6?q=80&w=1000&auto=format&fit=crop',
+    type: 'Rental',
+    startDate: 'June 1, 2024',
+    endDate: 'July 1, 2024',
+    timeLeft: '15 days',
+    progress: 50,
+    status: 'active'
   },
   {
     id: '2',
-    title: 'Modern Apartment',
-    type: 'rental',
-    amount: 2500,
-    date: '2024-11-01',
-    status: 'active',
-    daysRemaining: 18,
+    title: 'Downtown Loft',
+    image: 'https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?q=80&w=1000&auto=format&fit=crop',
+    type: 'Lease',
+    startDate: 'Jan 15, 2024',
+    endDate: 'Jan 15, 2025',
+    timeLeft: '6 months',
+    progress: 45,
+    status: 'active'
   },
   {
     id: '3',
-    title: 'Luxury Yacht Purchase',
-    type: 'purchase',
-    amount: 150000,
-    date: '2024-10-20',
-    status: 'completed',
-  },
+    title: 'Porsche 911 Carrera',
+    image: 'https://images.unsplash.com/photo-1503376763036-066120622c74?q=80&w=1000&auto=format&fit=crop',
+    type: 'Owned',
+    purchaseDate: 'March 22, 2024',
+    status: 'completed'
+  }
 ];
 
-const mockSpending: SpendingSummary = {
-  thisMonth: 3550,
-  lastMonth: 2100,
-  total: 156650,
-};
+const spendingData = [40, 65, 35, 85, 55, 90]; // Mock percentages for chart
 
 export default function UserDashboard() {
-  const toast = useToast();
-  const [activeTab, setActiveTab] = useState<'activities' | 'spending' | 'wishlist'>('activities');
-
-  const handleExploreMore = () => {
-    toast.info('Redirecting', 'Taking you to explore listings...');
-  };
-
-  const handleManageActivity = (activityTitle: string) => {
-    toast.success('Activity Details', `Managing: ${activityTitle}`);
-  };
+  const { user } = useAuth();
 
   return (
     <div className={styles.container}>
-      {/* Header */}
-      <div className={styles.header}>
-        <div className={styles.headerContent}>
-          <h1 className={styles.title}>My Dashboard</h1>
-          <p className={styles.subtitle}>Manage your purchases and rentals</p>
+      {/* Header Section */}
+      <header className={styles.header}>
+        <motion.div 
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className={styles.welcomeText}
+        >
+          <h1 className={styles.title}>
+            Welcome back, <span className={styles.userName}>{user?.displayName?.split(' ')[0] || 'Olivia'}</span>!
+          </h1>
+          <p className={styles.subtitle}>
+            You have {activeServices.filter(s => s.status === 'active').length} active rentals and 1 purchased vehicle.
+          </p>
+        </motion.div>
+        
+        <div className={styles.headerActions}>
+          <motion.button 
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+            className={styles.notificationBtn}
+          >
+            <MdNotifications className={styles.bellIcon} />
+            <span className={styles.badge}>2</span>
+          </motion.button>
         </div>
-        <button className={styles.btnExplore} onClick={handleExploreMore}>Explore More</button>
-      </div>
+      </header>
 
-      {/* Quick Stats */}
-      <div className={styles.quickStats}>
-        <motion.div
-          className={styles.quickStat}
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.1 }}
-        >
-          <div className={styles.statIcon}>🛒</div>
-          <div className={styles.statInfo}>
-            <span className={styles.statLabel}>Total Spent</span>
-            <span className={styles.statValue}>${mockSpending.total.toLocaleString()}</span>
+      {/* Main Grid */}
+      <div className={styles.dashboardGrid}>
+        
+        {/* Left Column: Services */}
+        <div className={styles.mainContent}>
+          <div className={styles.sectionHeader}>
+            <h2>My Services</h2>
           </div>
-        </motion.div>
 
-        <motion.div
-          className={styles.quickStat}
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.2 }}
-        >
-          <div className={styles.statIcon}>🔄</div>
-          <div className={styles.statInfo}>
-            <span className={styles.statLabel}>Active Rentals</span>
-            <span className={styles.statValue}>2</span>
-          </div>
-        </motion.div>
+          <div className={styles.cardsList}>
+            {activeServices.map((service, index) => (
+              <motion.div 
+                key={service.id}
+                className={styles.serviceCard}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: index * 0.1 }}
+                whileHover={{ y: -5, boxShadow: '0 12px 30px rgba(16, 185, 129, 0.1)' }}
+              >
+                {/* Card Background Glow Effect */}
+                <div className={styles.cardGlow} />
 
-        <motion.div
-          className={styles.quickStat}
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.3 }}
-        >
-          <div className={styles.statIcon}>⭐</div>
-          <div className={styles.statInfo}>
-            <span className={styles.statLabel}>Saved Items</span>
-            <span className={styles.statValue}>8</span>
-          </div>
-        </motion.div>
-      </div>
-
-      {/* Navigation Tabs */}
-      <div className={styles.tabs}>
-        {(['activities', 'spending', 'wishlist'] as const).map((tab) => (
-          <button
-            key={tab}
-            className={`${styles.tab} ${activeTab === tab ? styles.active : ''}`}
-            onClick={() => setActiveTab(tab)}
-          >
-            {tab === 'activities' ? '📋 My Rentals & Purchases' : tab === 'spending' ? '💳 Spending' : '❤️ Wishlist'}
-          </button>
-        ))}
-      </div>
-
-      {/* Content */}
-      <div className={styles.content}>
-        {activeTab === 'activities' && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ duration: 0.3 }}
-          >
-            <div className={styles.activitiesList}>
-              {mockActivities.map((activity) => (
-                <motion.div
-                  key={activity.id}
-                  className={styles.activityCard}
-                  initial={{ opacity: 0, x: -20 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  whileHover={{ x: 4, boxShadow: '0 10px 30px rgba(16, 185, 129, 0.1)' }}
-                >
-                  <div className={styles.activityType}>
-                    {activity.type === 'rental' ? '🔄' : '🏷️'}
-                  </div>
-
-                  <div className={styles.activityContent}>
-                    <h3 className={styles.activityTitle}>{activity.title}</h3>
-                    <p className={styles.activityDate}>{activity.date}</p>
-                    {activity.daysRemaining && (
-                      <div className={styles.daysRemaining}>
-                        ⏱️ {activity.daysRemaining} days remaining
-                      </div>
+                <div className={styles.cardImageContainer}>
+                  <img src={service.image} alt={service.title} className={styles.cardImage} />
+                  <div className={styles.cardBadge}>{service.type}</div>
+                </div>
+                
+                <div className={styles.cardContent}>
+                  <div className={styles.cardInfo}>
+                    <h3>{service.title}</h3>
+                    
+                    {service.status === 'active' ? (
+                      <>
+                        <div className={styles.dateRange}>
+                          <span>Start: {service.startDate}</span>
+                          <span>End: {service.endDate}</span>
+                        </div>
+                        
+                        <div className={styles.progressContainer}>
+                          <div className={styles.progressHeader}>
+                            <span className={styles.progressLabel}>
+                              <MdAccessTime /> Time Remaining
+                            </span>
+                            <span className={styles.progressValue}>{service.timeLeft}</span>
+                          </div>
+                          <div className={styles.progressBarBg}>
+                            <motion.div 
+                              className={styles.progressBarFill} 
+                              initial={{ width: 0 }}
+                              animate={{ width: `${service.progress}%` }}
+                              transition={{ duration: 1, delay: 0.5, ease: "easeOut" }}
+                            />
+                          </div>
+                        </div>
+                      </>
+                    ) : (
+                      <p className={styles.purchaseDate}>Purchased on {service.purchaseDate}</p>
                     )}
                   </div>
 
-                  <div className={styles.activityRight}>
-                    <span className={styles.activityAmount}>${activity.amount}</span>
-                    <span
-                      className={`${styles.activityStatus} ${styles[activity.status]}`}
-                    >
-                      {activity.status}
-                    </span>
-                  </div>
-
-                  <button className={styles.activityBtn} onClick={() => handleManageActivity(activity.title)}>
-                    {activity.status === 'active' ? 'Manage' : 'View Details'}
-                  </button>
-                </motion.div>
-              ))}
-            </div>
-          </motion.div>
-        )}
-
-        {activeTab === 'spending' && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ duration: 0.3 }}
-          >
-            <div className={styles.spendingSection}>
-              <div className={styles.spendingCards}>
-                <motion.div
-                  className={styles.spendingCard}
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                >
-                  <h4>This Month</h4>
-                  <p className={styles.spendingAmount}>${mockSpending.thisMonth}</p>
-                  <span className={styles.spendingChange}>+69% from last month</span>
-                </motion.div>
-
-                <motion.div
-                  className={styles.spendingCard}
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.1 }}
-                >
-                  <h4>Last Month</h4>
-                  <p className={styles.spendingAmount}>${mockSpending.lastMonth}</p>
-                  <span className={styles.spendingChange}>Previous period</span>
-                </motion.div>
-
-                <motion.div
-                  className={styles.spendingCard}
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.2 }}
-                >
-                  <h4>All Time Total</h4>
-                  <p className={styles.spendingAmount}>${mockSpending.total.toLocaleString()}</p>
-                  <span className={styles.spendingChange}>Lifetime value</span>
-                </motion.div>
-              </div>
-
-              <motion.div
-                className={styles.chartContainer}
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ delay: 0.3 }}
-              >
-                <h3>Spending Trend</h3>
-                <div className={styles.chart}>
-                  <div className={styles.chartBars}>
-                    {[30, 45, 35, 60, 55, 70, 85].map((height, i) => (
-                      <motion.div
-                        key={i}
-                        className={styles.chartBar}
-                        style={{ height: `${height}%` }}
-                        initial={{ height: 0 }}
-                        animate={{ height: `${height}%` }}
-                        transition={{ delay: i * 0.1, duration: 0.5 }}
-                      />
-                    ))}
+                  <div className={styles.cardActions}>
+                    {service.status === 'active' ? (
+                      <>
+                        <button className={styles.btnSecondary}>Extend</button>
+                        <button className={styles.btnPrimary}>Manage</button>
+                      </>
+                    ) : (
+                      <button className={styles.btnPrimary}>View Documents</button>
+                    )}
                   </div>
                 </div>
               </motion.div>
-            </div>
-          </motion.div>
-        )}
+            ))}
+          </div>
+        </div>
 
-        {activeTab === 'wishlist' && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ duration: 0.3 }}
+        {/* Right Column: Sidebar Widgets */}
+        <aside className={styles.sideWidgets}>
+          
+          {/* Quick Actions */}
+          <motion.div 
+            className={styles.widget}
+            initial={{ opacity: 0, x: 20 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ delay: 0.2 }}
           >
-            <div className={styles.wishlistSection}>
-              <p className={styles.emptyMessage}>No items in your wishlist yet.</p>
-              <button className={styles.btnBrowse}>Browse Listings</button>
+            <h3>Quick Actions</h3>
+            <div className={styles.actionGrid}>
+              <Link href="/explore?category=rent&type=house" passHref>
+                <motion.div className={styles.actionCard} whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
+                  <div className={styles.actionIcon}><MdApartment /></div>
+                  <span>Book Apartment</span>
+                </motion.div>
+              </Link>
+              <Link href="/explore?category=rent&type=car" passHref>
+                <motion.div className={styles.actionCard} whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
+                  <div className={styles.actionIcon}><MdDirectionsCar /></div>
+                  <span>Rent a Car</span>
+                </motion.div>
+              </Link>
+              <Link href="/explore?category=sale" passHref>
+                <motion.div className={`${styles.actionCard} ${styles.fullWidth}`} whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
+                  <div className={styles.actionIcon}><MdSell /></div>
+                  <span>Browse For Sale</span>
+                </motion.div>
+              </Link>
             </div>
           </motion.div>
-        )}
+
+          {/* Spending Summary */}
+          <motion.div 
+            className={styles.widget}
+            initial={{ opacity: 0, x: 20 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ delay: 0.3 }}
+          >
+            <h3>Spending Summary</h3>
+            <div className={styles.spendingCard}>
+              <div className={styles.spendingRow}>
+                <span className={styles.spendingLabel}>Total Spent</span>
+                <span className={styles.spendingValue}>$12,450.75</span>
+              </div>
+              <div className={styles.spendingRow}>
+                <span className={styles.spendingLabel}>Last Month</span>
+                <span className={styles.spendingValue}>$2,100.00</span>
+              </div>
+
+              <div className={styles.chartContainer}>
+                {spendingData.map((height, i) => (
+                  <div key={i} className={styles.chartColumn}>
+                    <div className={styles.chartBarTrack}>
+                      <motion.div 
+                        className={`${styles.chartBar} ${i === spendingData.length - 1 ? styles.activeBar : ''}`}
+                        initial={{ height: 0 }}
+                        animate={{ height: `${height}%` }}
+                        transition={{ duration: 0.6, delay: 0.4 + (i * 0.1) }}
+                      />
+                    </div>
+                    <span className={styles.chartLabel}>{['J','F','M','A','M','J'][i]}</span>
+                  </div>
+                ))}
+              </div>
+
+              <button className={styles.btnOutline}>
+                View Full History <MdArrowForward />
+              </button>
+            </div>
+          </motion.div>
+
+        </aside>
       </div>
     </div>
   );

@@ -1,436 +1,487 @@
+--- START OF FILE user-dashboard.module.css ---
+
+/* Main Container */
 .container {
+  width: 100%;
   min-height: 100vh;
-  background: linear-gradient(135deg, #ffffff 0%, #f9fafb 100%);
-  padding: 2rem;
+  background: linear-gradient(135deg, #f0fdf4 0%, #fffbeb 50%, #f0f9ff 100%);
+  background-attachment: fixed;
+  padding: 2rem 3rem 4rem; /* Left padding assumes sidebar space handled by layout wrapper */
 }
 
+/* Header Section */
 .header {
-  max-width: 1400px;
-  margin: 0 auto 2rem;
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
-  gap: 2rem;
+  margin-bottom: 2.5rem;
+  flex-wrap: wrap;
+  gap: 1rem;
 }
 
-.headerContent {
-  flex: 1;
+.welcomeText {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
 }
 
 .title {
-  font-size: 2.5rem;
+  font-size: 2.25rem;
   font-weight: 800;
   color: #111827;
-  margin-bottom: 0.5rem;
+  letter-spacing: -0.03em;
+  margin: 0;
+}
+
+.userName {
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
 }
 
 .subtitle {
   font-size: 1rem;
   color: #6b7280;
+  font-weight: 500;
+  margin: 0;
 }
 
-.btnExplore {
-  padding: 0.875rem 1.5rem;
-  background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%);
-  color: #92400e;
-  border: none;
-  border-radius: 8px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  white-space: nowrap;
-}
-
-.btnExplore:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(251, 191, 36, 0.3);
-}
-
-.quickStats {
-  max-width: 1400px;
-  margin: 0 auto 2rem;
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-  gap: 1.5rem;
-}
-
-.quickStat {
-  background: rgba(255, 255, 255, 0.8);
-  backdrop-filter: blur(10px);
-  border: 1px solid rgba(255, 255, 255, 0.3);
-  border-radius: 16px;
-  padding: 1.5rem;
+.headerActions {
   display: flex;
-  gap: 1rem;
   align-items: center;
-  transition: all 0.3s ease;
+  gap: 1rem;
 }
 
-.quickStat:hover {
-  border-color: #10b981;
-  box-shadow: 0 10px 30px rgba(16, 185, 129, 0.1);
-}
-
-.statIcon {
-  font-size: 2.5rem;
+.notificationBtn {
+  position: relative;
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.6);
+  border: 1px solid rgba(255, 255, 255, 0.8);
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 60px;
-  height: 60px;
-  background: rgba(16, 185, 129, 0.1);
-  border-radius: 12px;
-  flex-shrink: 0;
-}
-
-.statInfo {
-  display: flex;
-  flex-direction: column;
-  gap: 0.25rem;
-}
-
-.statLabel {
-  font-size: 0.875rem;
-  font-weight: 600;
-  color: #6b7280;
-}
-
-.statValue {
-  font-size: 1.75rem;
-  font-weight: 800;
-  background: linear-gradient(135deg, #10b981 0%, #fbbf24 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-}
-
-.tabs {
-  max-width: 1400px;
-  margin: 0 auto 2rem;
-  display: flex;
-  gap: 1rem;
-  border-bottom: 2px solid #e5e7eb;
-}
-
-.tab {
-  padding: 1rem 1.5rem;
-  background: transparent;
-  border: none;
-  font-size: 1rem;
-  font-weight: 600;
-  color: #6b7280;
   cursor: pointer;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03);
   transition: all 0.3s ease;
-  position: relative;
-  border-bottom: 3px solid transparent;
 }
 
-.tab:hover {
-  color: #111827;
-}
-
-.tab.active {
+.notificationBtn:hover {
+  background: white;
+  box-shadow: 0 8px 20px rgba(16, 185, 129, 0.15);
   color: #10b981;
-  border-bottom-color: #10b981;
 }
 
-.content {
-  max-width: 1400px;
-  margin: 0 auto;
+.bellIcon {
+  font-size: 1.5rem;
+  color: #4b5563;
 }
 
-/* Activities List */
-.activitiesList {
-  display: flex;
-  flex-direction: column;
-  gap: 1rem;
-}
-
-.activityCard {
-  background: rgba(255, 255, 255, 0.8);
-  backdrop-filter: blur(10px);
-  border: 1px solid rgba(255, 255, 255, 0.3);
-  border-radius: 16px;
-  padding: 1.5rem;
+.badge {
+  position: absolute;
+  top: -2px;
+  right: -2px;
+  background: #ef4444;
+  color: white;
+  font-size: 0.75rem;
+  font-weight: 700;
+  min-width: 20px;
+  height: 20px;
+  border-radius: 10px;
   display: flex;
   align-items: center;
-  gap: 1.5rem;
-  transition: all 0.3s ease;
+  justify-content: center;
+  border: 2px solid white;
 }
 
-.activityCard:hover {
-  border-color: #10b981;
+/* Dashboard Grid */
+.dashboardGrid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 2rem;
 }
 
-.activityType {
-  font-size: 2rem;
-  flex-shrink: 0;
+/* Desktop: 2/3 Services, 1/3 Widgets */
+@media (min-width: 1024px) {
+  .dashboardGrid {
+    grid-template-columns: 2fr 1fr;
+  }
 }
 
-.activityContent {
-  flex: 1;
+/* Main Content Area */
+.mainContent {
   display: flex;
   flex-direction: column;
-  gap: 0.5rem;
+  gap: 1.5rem;
 }
 
-.activityTitle {
-  font-size: 1.125rem;
+.sectionHeader h2 {
+  font-size: 1.35rem;
   font-weight: 700;
   color: #111827;
   margin: 0;
-}
-
-.activityDate {
-  font-size: 0.875rem;
-  color: #6b7280;
-  margin: 0;
-}
-
-.daysRemaining {
-  font-size: 0.875rem;
-  color: #f59e0b;
-  font-weight: 600;
-}
-
-.activityRight {
   display: flex;
-  flex-direction: column;
-  align-items: flex-end;
+  align-items: center;
   gap: 0.5rem;
 }
 
-.activityAmount {
-  font-size: 1.5rem;
-  font-weight: 800;
-  background: linear-gradient(135deg, #10b981 0%, #fbbf24 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
+/* Service Cards - Glassmorphism */
+.cardsList {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
 }
 
-.activityStatus {
-  padding: 0.25rem 0.75rem;
-  border-radius: 6px;
-  font-size: 0.75rem;
-  font-weight: 600;
-  text-transform: capitalize;
-}
-
-.activityStatus.active {
-  background: rgba(16, 185, 129, 0.15);
-  color: #10b981;
-}
-
-.activityStatus.completed {
-  background: rgba(59, 130, 246, 0.15);
-  color: #3b82f6;
-}
-
-.activityStatus.cancelled {
-  background: rgba(239, 68, 68, 0.15);
-  color: #ef4444;
-}
-
-.activityBtn {
-  padding: 0.5rem 1rem;
-  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
-  color: white;
-  border: none;
-  border-radius: 6px;
-  font-size: 0.875rem;
-  font-weight: 600;
-  cursor: pointer;
+.serviceCard {
+  position: relative;
+  background: rgba(255, 255, 255, 0.7);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.6);
+  border-radius: 20px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.02);
   transition: all 0.3s ease;
 }
 
-.activityBtn:hover {
-  transform: translateY(-2px);
+@media (min-width: 768px) {
+  .serviceCard {
+    flex-direction: row;
+    align-items: stretch;
+  }
+}
+
+.cardGlow {
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: radial-gradient(circle at center, rgba(16, 185, 129, 0.08) 0%, transparent 70%);
+  pointer-events: none;
+  z-index: 0;
+}
+
+.cardImageContainer {
+  position: relative;
+  width: 100%;
+  min-height: 200px;
+}
+
+@media (min-width: 768px) {
+  .cardImageContainer {
+    width: 280px;
+    min-height: auto;
+  }
+}
+
+.cardImage {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.cardBadge {
+  position: absolute;
+  top: 1rem;
+  left: 1rem;
+  background: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(4px);
+  color: white;
+  padding: 0.25rem 0.75rem;
+  border-radius: 8px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.cardContent {
+  flex: 1;
+  padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 1.5rem;
+  position: relative;
+  z-index: 1;
+}
+
+.cardInfo h3 {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: #111827;
+  margin: 0 0 1rem 0;
+}
+
+.dateRange {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  font-size: 0.875rem;
+  color: #6b7280;
+  margin-bottom: 1rem;
+}
+
+.progressContainer {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.progressHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.875rem;
+}
+
+.progressLabel {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  color: #6b7280;
+  font-weight: 500;
+}
+
+.progressValue {
+  font-weight: 700;
+  color: #10b981;
+}
+
+.progressBarBg {
+  width: 100%;
+  height: 8px;
+  background: #f3f4f6;
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.progressBarFill {
+  height: 100%;
+  background: linear-gradient(90deg, #10b981 0%, #34d399 100%);
+  border-radius: 4px;
+  box-shadow: 0 0 10px rgba(16, 185, 129, 0.4);
+}
+
+.purchaseDate {
+  color: #6b7280;
+  font-size: 0.9rem;
+}
+
+.cardActions {
+  display: flex;
+  gap: 0.75rem;
+  justify-content: flex-end;
+}
+
+.btnPrimary {
+  padding: 0.6rem 1.2rem;
+  background: #10b981;
+  color: white;
+  border: none;
+  border-radius: 99px;
+  font-weight: 600;
+  font-size: 0.875rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
   box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
 }
 
-/* Spending Section */
-.spendingSection {
+.btnPrimary:hover {
+  background: #059669;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(16, 185, 129, 0.4);
+}
+
+.btnSecondary {
+  padding: 0.6rem 1.2rem;
+  background: rgba(16, 185, 129, 0.1);
+  color: #059669;
+  border: none;
+  border-radius: 99px;
+  font-weight: 600;
+  font-size: 0.875rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.btnSecondary:hover {
+  background: rgba(16, 185, 129, 0.2);
+}
+
+/* Side Widgets */
+.sideWidgets {
   display: flex;
   flex-direction: column;
   gap: 2rem;
 }
 
-.spendingCards {
+.widget h3 {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: #111827;
+  margin: 0 0 1rem 0;
+}
+
+.actionGrid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+}
+
+.actionCard {
+  background: rgba(255, 255, 255, 0.6);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.6);
+  border-radius: 16px;
+  padding: 1.5rem 1rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.75rem;
+  cursor: pointer;
+  text-decoration: none;
+  transition: all 0.2s ease;
+  color: #1f2937;
+}
+
+.actionCard:hover {
+  background: white;
+  border-color: #10b981;
+  box-shadow: 0 8px 20px rgba(16, 185, 129, 0.1);
+}
+
+.fullWidth {
+  grid-column: span 2;
+  flex-direction: row;
+  justify-content: center;
+}
+
+.actionIcon {
+  font-size: 1.75rem;
+  color: #10b981;
+}
+
+.actionCard span {
+  font-size: 0.875rem;
+  font-weight: 600;
+}
+
+/* Spending Summary */
+.spendingCard {
+  background: rgba(255, 255, 255, 0.6);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.6);
+  border-radius: 16px;
+  padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
   gap: 1.5rem;
 }
 
-.spendingCard {
-  background: rgba(255, 255, 255, 0.8);
-  backdrop-filter: blur(10px);
-  border: 1px solid rgba(255, 255, 255, 0.3);
-  border-radius: 16px;
-  padding: 2rem 1.5rem;
-  text-align: center;
-  transition: all 0.3s ease;
+.spendingRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
 }
 
-.spendingCard:hover {
-  border-color: #10b981;
-  box-shadow: 0 10px 30px rgba(16, 185, 129, 0.1);
-}
-
-.spendingCard h4 {
-  font-size: 0.875rem;
-  font-weight: 600;
+.spendingLabel {
   color: #6b7280;
-  margin: 0 0 0.75rem 0;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
+  font-size: 0.9rem;
 }
 
-.spendingAmount {
-  font-size: 2rem;
+.spendingValue {
+  font-size: 1.25rem;
   font-weight: 800;
-  background: linear-gradient(135deg, #10b981 0%, #fbbf24 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-  margin: 0 0 0.5rem 0;
-}
-
-.spendingChange {
-  font-size: 0.75rem;
-  color: #9ca3af;
+  color: #111827;
 }
 
 .chartContainer {
-  background: rgba(255, 255, 255, 0.8);
-  backdrop-filter: blur(10px);
-  border: 1px solid rgba(255, 255, 255, 0.3);
-  border-radius: 16px;
-  padding: 2rem;
-}
-
-.chartContainer h3 {
-  font-size: 1.25rem;
-  font-weight: 700;
-  color: #111827;
-  margin-bottom: 1.5rem;
-}
-
-.chart {
-  height: 300px;
   display: flex;
+  justify-content: space-between;
   align-items: flex-end;
-  justify-content: space-around;
+  height: 150px;
+  padding-top: 1rem;
+  gap: 0.5rem;
 }
 
-.chartBars {
+.chartColumn {
+  flex: 1;
   display: flex;
-  gap: 1rem;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+  height: 100%;
+  justify-content: flex-end;
+}
+
+.chartBarTrack {
   width: 100%;
   height: 100%;
+  background: rgba(0, 0, 0, 0.03);
+  border-radius: 8px;
+  display: flex;
   align-items: flex-end;
+  overflow: hidden;
 }
 
 .chartBar {
-  flex: 1;
-  background: linear-gradient(180deg, #10b981 0%, #059669 100%);
+  width: 100%;
+  background: rgba(16, 185, 129, 0.3);
   border-radius: 8px 8px 0 0;
-  min-height: 20px;
-  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.2);
 }
 
-/* Wishlist Section */
-.wishlistSection {
-  background: rgba(255, 255, 255, 0.8);
-  backdrop-filter: blur(10px);
-  border: 1px solid rgba(255, 255, 255, 0.3);
-  border-radius: 16px;
-  padding: 4rem 2rem;
-  text-align: center;
+.activeBar {
+  background: #10b981;
 }
 
-.emptyMessage {
-  font-size: 1.125rem;
-  color: #6b7280;
-  margin-bottom: 2rem;
-}
-
-.btnBrowse {
-  padding: 0.875rem 2rem;
-  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
-  color: white;
-  border: none;
-  border-radius: 8px;
+.chartLabel {
+  font-size: 0.75rem;
+  color: #9ca3af;
   font-weight: 600;
+}
+
+.btnOutline {
+  width: 100%;
+  padding: 0.75rem;
+  background: transparent;
+  border: 1px solid #10b981;
+  color: #10b981;
+  border-radius: 99px;
+  font-weight: 600;
+  font-size: 0.875rem;
   cursor: pointer;
-  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  transition: all 0.2s ease;
 }
 
-.btnBrowse:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+.btnOutline:hover {
+  background: #10b981;
+  color: white;
 }
 
-/* Responsive */
-@media (max-width: 1024px) {
-  .header {
-    flex-direction: column;
-  }
-
-  .tabs {
-    flex-wrap: wrap;
-  }
-}
-
+/* Responsive Media Queries */
 @media (max-width: 768px) {
   .container {
     padding: 1rem;
   }
-
-  .header {
-    gap: 1rem;
-  }
-
+  
   .title {
     font-size: 1.75rem;
   }
 
-  .quickStats {
-    grid-template-columns: 1fr;
+  .cardActions {
+    flex-direction: column;
   }
 
-  .activityCard {
-    flex-wrap: wrap;
-    gap: 1rem;
-  }
-
-  .activityContent {
-    order: 2;
-    flex: 1;
-    min-width: 100%;
-  }
-
-  .activityType {
-    order: 1;
-  }
-
-  .activityRight {
-    order: 3;
+  .btnPrimary, .btnSecondary {
     width: 100%;
-    flex-direction: row;
-    justify-content: space-between;
-  }
-
-  .activityBtn {
-    order: 4;
-    width: 100%;
-  }
-
-  .spendingCards {
-    grid-template-columns: 1fr;
-  }
-
-  .chart {
-    height: 200px;
   }
 }
