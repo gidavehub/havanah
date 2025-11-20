@@ -5,7 +5,8 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/lib/auth-store';
 import { useToast } from '@/components/toast/toast';
-import { FaGoogle } from 'react-icons/fa';
+import { FaGoogle, FaBuilding, FaCarSide, FaComments, FaShieldAlt, FaArrowRight } from 'react-icons/fa';
+import { motion, useMotionValue, useTransform } from 'framer-motion';
 import styles from './login.module.css';
 
 export default function LoginPage() {
@@ -15,14 +16,24 @@ export default function LoginPage() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
 
+  // 3D Tilt Logic
+  const x = useMotionValue(0);
+  const y = useMotionValue(0);
+  const rotateX = useTransform(y, [-100, 100], [5, -5]);
+  const rotateY = useTransform(x, [-100, 100], [-5, 5]);
+
+  const handleMouseMove = (event: React.MouseEvent) => {
+    const rect = event.currentTarget.getBoundingClientRect();
+    x.set(event.clientX - rect.left - rect.width / 2);
+    y.set(event.clientY - rect.top - rect.height / 2);
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-
     if (!email || !password) {
       toast.warning('Incomplete Form', 'Please fill in all fields');
       return;
     }
-
     try {
       const loadingId = toast.loading('Logging in', 'Verifying your credentials...');
       await login(email, password);
@@ -30,86 +41,122 @@ export default function LoginPage() {
       toast.success('Welcome Back!', 'Login successful. Redirecting...');
       setTimeout(() => router.push('/explore'), 1000);
     } catch (err) {
-      toast.error('Login Failed', 'Invalid email or password. Please try again.');
+      toast.error('Login Failed', 'Invalid email or password.');
     }
   };
 
   const handleGoogleLogin = async () => {
+    // ... (Keep existing logic)
     try {
       const loadingId = toast.loading('Signing in with Google', 'Please wait...');
       await loginWithGoogle('user');
       toast.remove(loadingId);
-      toast.success('Welcome!', 'Google login successful. Redirecting...');
+      toast.success('Welcome!', 'Redirecting...');
       setTimeout(() => router.push('/explore'), 1000);
     } catch (err) {
-      toast.error('Google Login Failed', 'Unable to sign in with Google. Please try again.');
+      toast.error('Login Failed', 'Unable to sign in with Google.');
     }
+  };
+
+  // Animation Variants
+  const containerVariants = {
+    hidden: { opacity: 0 },
+    visible: { 
+      opacity: 1, 
+      transition: { staggerChildren: 0.15, delayChildren: 0.2 } 
+    }
+  };
+
+  const itemVariants = {
+    hidden: { y: 20, opacity: 0 },
+    visible: { y: 0, opacity: 1, transition: { type: 'spring', stiffness: 100 } }
   };
 
   return (
     <div className={styles.container}>
-      <div className={styles.leftPanel}>
-        <div className={styles.brandSection}>
-          <div className={styles.logo}>
+      <div className={styles.backgroundShapes}>
+        <motion.div 
+          animate={{ y: [0, -20, 0], rotate: [0, 5, 0] }} 
+          transition={{ duration: 6, repeat: Infinity, ease: "easeInOut" }}
+          className={styles.shape1} 
+        />
+        <motion.div 
+          animate={{ y: [0, 30, 0], rotate: [0, -5, 0] }} 
+          transition={{ duration: 8, repeat: Infinity, ease: "easeInOut" }}
+          className={styles.shape2} 
+        />
+      </div>
+
+      {/* Left Panel - Branding */}
+      <motion.div 
+        className={styles.leftPanel}
+        initial={{ opacity: 0, x: -50 }}
+        animate={{ opacity: 1, x: 0 }}
+        transition={{ duration: 0.8 }}
+      >
+        <div className={styles.brandContent}>
+          <div className={styles.logoWrapper}>
             <img src="/logo.jpg" alt="Havanah" className={styles.logoImg} />
           </div>
           <h1 className={styles.brandTitle}>Havanah</h1>
           <p className={styles.brandSubtitle}>
-            Your gateway to premium real estate and vehicle rentals
+            Experience the future of premium real estate and vehicle rentals.
           </p>
-        </div>
 
-        <div className={styles.features}>
-          <div className={styles.featureItem}>
-            <span className={styles.featureIcon}>🏠</span>
-            <p>Rent or buy properties</p>
-          </div>
-          <div className={styles.featureItem}>
-            <span className={styles.featureIcon}>🚗</span>
-            <p>Rent or buy vehicles</p>
-          </div>
-          <div className={styles.featureItem}>
-            <span className={styles.featureIcon}>💬</span>
-            <p>Direct messaging with agents</p>
-          </div>
-          <div className={styles.featureItem}>
-            <span className={styles.featureIcon}>✨</span>
-            <p>Secure transactions</p>
+          <div className={styles.features}>
+            {[
+              { icon: <FaBuilding />, text: "Premium Properties" },
+              { icon: <FaCarSide />, text: "Luxury Vehicles" },
+              { icon: <FaComments />, text: "Instant Agent Chat" },
+              { icon: <FaShieldAlt />, text: "Secure Transactions" },
+            ].map((feature, index) => (
+              <motion.div 
+                key={index}
+                className={styles.featureItem}
+                initial={{ opacity: 0, x: -20 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ delay: 0.5 + (index * 0.1) }}
+              >
+                <span className={styles.featureIcon}>{feature.icon}</span>
+                <p>{feature.text}</p>
+              </motion.div>
+            ))}
           </div>
         </div>
-      </div>
+      </motion.div>
 
-      <div className={styles.rightPanel}>
-        <div className={styles.formContainer}>
-          <h2 className={styles.title}>Welcome Back</h2>
-          <p className={styles.subtitle}>Sign in to your account</p>
+      {/* Right Panel - 3D Form */}
+      <div className={styles.rightPanel} onMouseMove={handleMouseMove} onMouseLeave={() => { x.set(0); y.set(0); }}>
+        <motion.div 
+          className={styles.formCard}
+          style={{ rotateX, rotateY, z: 100 }}
+          initial="hidden"
+          animate="visible"
+          variants={containerVariants}
+        >
+          <motion.div variants={itemVariants}>
+            <h2 className={styles.title}>Welcome Back</h2>
+            <p className={styles.subtitle}>Please enter your details.</p>
+          </motion.div>
 
           <form onSubmit={handleSubmit} className={styles.form}>
-            {error && (
-              <div className={styles.errorAlert}>
-                {error}
-              </div>
-            )}
+            {error && <motion.div variants={itemVariants} className={styles.errorAlert}>{error}</motion.div>}
 
-            <div className={styles.formGroup}>
-              <label htmlFor="email" className={styles.label}>
-                Email Address
-              </label>
+            <motion.div variants={itemVariants} className={styles.formGroup}>
+              <label htmlFor="email" className={styles.label}>Email</label>
               <input
                 id="email"
                 type="email"
                 className={styles.input}
-                placeholder="you@example.com"
+                placeholder="Enter your email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 disabled={loading}
               />
-            </div>
+            </motion.div>
 
-            <div className={styles.formGroup}>
-              <label htmlFor="password" className={styles.label}>
-                Password
-              </label>
+            <motion.div variants={itemVariants} className={styles.formGroup}>
+              <label htmlFor="password" className={styles.label}>Password</label>
               <input
                 id="password"
                 type="password"
@@ -119,33 +166,36 @@ export default function LoginPage() {
                 onChange={(e) => setPassword(e.target.value)}
                 disabled={loading}
               />
-            </div>
+            </motion.div>
 
-            <div className={styles.rememberMe}>
-              <input
-                id="remember"
-                type="checkbox"
-                className={styles.checkbox}
-              />
-              <label htmlFor="remember" className={styles.checkboxLabel}>
-                Remember me
-              </label>
-            </div>
+            <motion.div variants={itemVariants} className={styles.rememberRow}>
+              <div className={styles.rememberMe}>
+                <input id="remember" type="checkbox" className={styles.checkbox} />
+                <label htmlFor="remember">Remember me</label>
+              </div>
+              <Link href="/auth/forgot-password" className={styles.forgotLink}>Forgot password?</Link>
+            </motion.div>
 
-            <button
+            <motion.button
+              variants={itemVariants}
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
               type="submit"
               className={styles.submitBtn}
               disabled={loading}
             >
-              {loading ? 'Signing In...' : 'Sign In'}
-            </button>
+              {loading ? 'Signing In...' : <>Sign In <FaArrowRight /></>}
+            </motion.button>
           </form>
 
-          <div className={styles.divider}>
-            <span>Or continue with</span>
-          </div>
+          <motion.div variants={itemVariants} className={styles.divider}>
+            <span>or</span>
+          </motion.div>
 
-          <button
+          <motion.button
+            variants={itemVariants}
+            whileHover={{ scale: 1.02, backgroundColor: "#f8fafc" }}
+            whileTap={{ scale: 0.98 }}
             type="button"
             className={styles.googleBtn}
             onClick={handleGoogleLogin}
@@ -153,28 +203,16 @@ export default function LoginPage() {
           >
             <FaGoogle className={styles.googleIcon} />
             Sign in with Google
-          </button>
+          </motion.button>
 
-          <div className={styles.divider}>
-            <span>New to Havanah?</span>
-          </div>
-
-          <Link href="/auth/signup" className={styles.signupLink}>
-            Create an account
-          </Link>
-
-          <p className={styles.agentText}>
-            Are you an agent?{' '}
-            <Link href="/auth/agent-login" className={styles.agentLink}>
-              Sign in here
-            </Link>
-          </p>
-        </div>
-
-        <div className={styles.decoration}>
-          <div className={styles.glassOrb1}></div>
-          <div className={styles.glassOrb2}></div>
-        </div>
+          <motion.p variants={itemVariants} className={styles.footerText}>
+            Don't have an account? <Link href="/auth/signup" className={styles.link}>Sign up</Link>
+          </motion.p>
+          
+          <motion.p variants={itemVariants} className={styles.agentText}>
+            Agent Access: <Link href="/auth/agent-login" className={styles.link}>Log in here</Link>
+          </motion.p>
+        </motion.div>
       </div>
     </div>
   );
