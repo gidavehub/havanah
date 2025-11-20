@@ -1,11 +1,10 @@
-
 /* Main Container */
 .container {
   width: 100%;
   min-height: 100vh;
   background: linear-gradient(135deg, #f0fdf4 0%, #fffbeb 50%, #f0f9ff 100%);
   background-attachment: fixed;
-  padding: 2rem 3rem 4rem; /* Left padding assumes sidebar space handled by layout wrapper */
+  padding: 1.5rem 2rem 3rem; /* Reduced Padding */
 }
 
 /* Header Section */
@@ -13,33 +12,21 @@
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
-  margin-bottom: 2.5rem;
+  margin-bottom: 1.75rem;
   flex-wrap: wrap;
-  gap: 1rem;
-}
-
-.welcomeText {
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
+  gap: 0.7rem;
 }
 
 .title {
-  font-size: 2.25rem;
+  font-size: 1.6rem; /* Reduced from 2.25rem */
   font-weight: 800;
   color: #111827;
   letter-spacing: -0.03em;
   margin: 0;
 }
 
-.userName {
-  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-}
-
 .subtitle {
-  font-size: 1rem;
+  font-size: 0.75rem;
   color: #6b7280;
   font-weight: 500;
   margin: 0;
@@ -48,13 +35,13 @@
 .headerActions {
   display: flex;
   align-items: center;
-  gap: 1rem;
+  gap: 0.7rem;
 }
 
 .notificationBtn {
   position: relative;
-  width: 48px;
-  height: 48px;
+  width: 36px; /* Reduced from 48px */
+  height: 36px;
   border-radius: 50%;
   background: rgba(255, 255, 255, 0.6);
   border: 1px solid rgba(255, 255, 255, 0.8);
@@ -62,43 +49,33 @@
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03);
-  transition: all 0.3s ease;
-}
-
-.notificationBtn:hover {
-  background: white;
-  box-shadow: 0 8px 20px rgba(16, 185, 129, 0.15);
-  color: #10b981;
+  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.03);
 }
 
 .bellIcon {
-  font-size: 1.5rem;
+  font-size: 1.1rem;
   color: #4b5563;
 }
 
 .badge {
   position: absolute;
-  top: -2px;
-  right: -2px;
+  top: -1px;
+  right: -1px;
   background: #ef4444;
   color: white;
-  font-size: 0.75rem;
+  font-size: 0.6rem;
   font-weight: 700;
-  min-width: 20px;
-  height: 20px;
-  border-radius: 10px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border: 2px solid white;
+  min-width: 14px;
+  height: 14px;
+  border-radius: 7px;
+  border: 1.5px solid white;
 }
 
 /* Dashboard Grid */
 .dashboardGrid {
   display: grid;
   grid-template-columns: 1fr;
-  gap: 2rem;
+  gap: 1.5rem; /* Reduced gap */
 }
 
 /* Desktop: 2/3 Services, 1/3 Widgets */
@@ -108,28 +85,21 @@
   }
 }
 
-/* Main Content Area */
-.mainContent {
-  display: flex;
-  flex-direction: column;
-  gap: 1.5rem;
-}
-
 .sectionHeader h2 {
-  font-size: 1.35rem;
+  font-size: 1rem; /* Reduced */
   font-weight: 700;
   color: #111827;
   margin: 0;
   display: flex;
   align-items: center;
-  gap: 0.5rem;
+  gap: 0.35rem;
 }
 
-/* Service Cards - Glassmorphism */
+/* Service Cards */
 .cardsList {
   display: flex;
   flex-direction: column;
-  gap: 1.5rem;
+  gap: 1rem;
 }
 
 .serviceCard {
@@ -138,11 +108,11 @@
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
   border: 1px solid rgba(255, 255, 255, 0.6);
-  border-radius: 20px;
+  border-radius: 14px; /* Reduced Radius */
   overflow: hidden;
   display: flex;
   flex-direction: column;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.02);
+  box-shadow: 0 3px 14px rgba(0, 0, 0, 0.02);
   transition: all 0.3s ease;
 }
 
@@ -153,220 +123,153 @@
   }
 }
 
-.cardGlow {
-  position: absolute;
-  top: -50%;
-  left: -50%;
-  width: 200%;
-  height: 200%;
-  background: radial-gradient(circle at center, rgba(16, 185, 129, 0.08) 0%, transparent 70%);
-  pointer-events: none;
-  z-index: 0;
-}
-
 .cardImageContainer {
   position: relative;
   width: 100%;
-  min-height: 200px;
+  min-height: 140px; /* Reduced from 200px */
 }
 
 @media (min-width: 768px) {
   .cardImageContainer {
-    width: 280px;
+    width: 200px; /* Reduced width */
     min-height: auto;
   }
 }
 
-.cardImage {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-}
-
 .cardBadge {
   position: absolute;
-  top: 1rem;
-  left: 1rem;
-  background: rgba(0, 0, 0, 0.6);
-  backdrop-filter: blur(4px);
-  color: white;
-  padding: 0.25rem 0.75rem;
-  border-radius: 8px;
-  font-size: 0.75rem;
+  top: 0.7rem;
+  left: 0.7rem;
+  padding: 0.2rem 0.5rem;
+  border-radius: 6px;
+  font-size: 0.6rem;
   font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
 }
 
 .cardContent {
   flex: 1;
-  padding: 1.5rem;
+  padding: 1rem; /* Reduced padding */
   display: flex;
   flex-direction: column;
   justify-content: space-between;
-  gap: 1.5rem;
+  gap: 1rem;
   position: relative;
   z-index: 1;
 }
 
 .cardInfo h3 {
-  font-size: 1.25rem;
+  font-size: 0.95rem; /* Reduced from 1.25rem */
   font-weight: 700;
   color: #111827;
-  margin: 0 0 1rem 0;
+  margin: 0 0 0.7rem 0;
 }
 
 .dateRange {
   display: flex;
   flex-direction: column;
-  gap: 0.25rem;
-  font-size: 0.875rem;
+  gap: 0.2rem;
+  font-size: 0.7rem;
   color: #6b7280;
-  margin-bottom: 1rem;
+  margin-bottom: 0.7rem;
 }
 
 .progressContainer {
   display: flex;
   flex-direction: column;
-  gap: 0.5rem;
+  gap: 0.35rem;
 }
 
 .progressHeader {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  font-size: 0.875rem;
-}
-
-.progressLabel {
-  display: flex;
-  align-items: center;
-  gap: 0.4rem;
-  color: #6b7280;
-  font-weight: 500;
-}
-
-.progressValue {
-  font-weight: 700;
-  color: #10b981;
+  font-size: 0.7rem;
 }
 
 .progressBarBg {
   width: 100%;
-  height: 8px;
+  height: 6px; /* Reduced height */
   background: #f3f4f6;
-  border-radius: 4px;
+  border-radius: 3px;
   overflow: hidden;
-}
-
-.progressBarFill {
-  height: 100%;
-  background: linear-gradient(90deg, #10b981 0%, #34d399 100%);
-  border-radius: 4px;
-  box-shadow: 0 0 10px rgba(16, 185, 129, 0.4);
 }
 
 .purchaseDate {
   color: #6b7280;
-  font-size: 0.9rem;
+  font-size: 0.65rem;
 }
 
 .cardActions {
   display: flex;
-  gap: 0.75rem;
+  gap: 0.5rem;
   justify-content: flex-end;
 }
 
 .btnPrimary {
-  padding: 0.6rem 1.2rem;
+  padding: 0.45rem 1rem;
   background: #10b981;
   color: white;
   border: none;
   border-radius: 99px;
   font-weight: 600;
-  font-size: 0.875rem;
+  font-size: 0.7rem;
   cursor: pointer;
-  transition: all 0.2s ease;
-  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
-}
-
-.btnPrimary:hover {
-  background: #059669;
-  transform: translateY(-2px);
-  box-shadow: 0 6px 16px rgba(16, 185, 129, 0.4);
 }
 
 .btnSecondary {
-  padding: 0.6rem 1.2rem;
+  padding: 0.45rem 1rem;
   background: rgba(16, 185, 129, 0.1);
   color: #059669;
   border: none;
   border-radius: 99px;
   font-weight: 600;
-  font-size: 0.875rem;
+  font-size: 0.7rem;
   cursor: pointer;
-  transition: all 0.2s ease;
-}
-
-.btnSecondary:hover {
-  background: rgba(16, 185, 129, 0.2);
 }
 
 /* Side Widgets */
 .sideWidgets {
   display: flex;
   flex-direction: column;
-  gap: 2rem;
+  gap: 1.5rem;
 }
 
 .widget h3 {
-  font-size: 1.1rem;
+  font-size: 0.85rem;
   font-weight: 700;
   color: #111827;
-  margin: 0 0 1rem 0;
+  margin: 0 0 0.7rem 0;
 }
 
 .actionGrid {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 1rem;
+  gap: 0.7rem;
 }
 
 .actionCard {
   background: rgba(255, 255, 255, 0.6);
   backdrop-filter: blur(12px);
   border: 1px solid rgba(255, 255, 255, 0.6);
-  border-radius: 16px;
-  padding: 1.5rem 1rem;
+  border-radius: 12px;
+  padding: 1rem 0.7rem;
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 0.75rem;
+  gap: 0.5rem;
   cursor: pointer;
   text-decoration: none;
   transition: all 0.2s ease;
   color: #1f2937;
 }
 
-.actionCard:hover {
-  background: white;
-  border-color: #10b981;
-  box-shadow: 0 8px 20px rgba(16, 185, 129, 0.1);
-}
-
-.fullWidth {
-  grid-column: span 2;
-  flex-direction: row;
-  justify-content: center;
-}
-
 .actionIcon {
-  font-size: 1.75rem;
+  font-size: 1.25rem; /* Reduced */
   color: #10b981;
 }
 
 .actionCard span {
-  font-size: 0.875rem;
+  font-size: 0.7rem;
   font-weight: 600;
 }
 
@@ -375,26 +278,20 @@
   background: rgba(255, 255, 255, 0.6);
   backdrop-filter: blur(12px);
   border: 1px solid rgba(255, 255, 255, 0.6);
-  border-radius: 16px;
-  padding: 1.5rem;
+  border-radius: 12px;
+  padding: 1rem;
   display: flex;
   flex-direction: column;
-  gap: 1.5rem;
-}
-
-.spendingRow {
-  display: flex;
-  justify-content: space-between;
-  align-items: baseline;
+  gap: 1rem;
 }
 
 .spendingLabel {
   color: #6b7280;
-  font-size: 0.9rem;
+  font-size: 0.7rem;
 }
 
 .spendingValue {
-  font-size: 1.25rem;
+  font-size: 1rem;
   font-weight: 800;
   color: #111827;
 }
@@ -403,84 +300,39 @@
   display: flex;
   justify-content: space-between;
   align-items: flex-end;
-  height: 150px;
-  padding-top: 1rem;
-  gap: 0.5rem;
-}
-
-.chartColumn {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 0.5rem;
-  height: 100%;
-  justify-content: flex-end;
+  height: 105px; /* Reduced from 150px */
+  padding-top: 0.7rem;
+  gap: 0.35rem;
 }
 
 .chartBarTrack {
   width: 100%;
   height: 100%;
   background: rgba(0, 0, 0, 0.03);
-  border-radius: 8px;
+  border-radius: 6px;
   display: flex;
   align-items: flex-end;
   overflow: hidden;
 }
 
-.chartBar {
-  width: 100%;
-  background: rgba(16, 185, 129, 0.3);
-  border-radius: 8px 8px 0 0;
-}
-
-.activeBar {
-  background: #10b981;
-}
-
 .chartLabel {
-  font-size: 0.75rem;
+  font-size: 0.6rem;
   color: #9ca3af;
   font-weight: 600;
 }
 
 .btnOutline {
   width: 100%;
-  padding: 0.75rem;
+  padding: 0.5rem;
   background: transparent;
   border: 1px solid #10b981;
   color: #10b981;
   border-radius: 99px;
   font-weight: 600;
-  font-size: 0.875rem;
+  font-size: 0.7rem;
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 0.5rem;
-  transition: all 0.2s ease;
-}
-
-.btnOutline:hover {
-  background: #10b981;
-  color: white;
-}
-
-/* Responsive Media Queries */
-@media (max-width: 768px) {
-  .container {
-    padding: 1rem;
-  }
-  
-  .title {
-    font-size: 1.75rem;
-  }
-
-  .cardActions {
-    flex-direction: column;
-  }
-
-  .btnPrimary, .btnSecondary {
-    width: 100%;
-  }
+  gap: 0.35rem;
 }
