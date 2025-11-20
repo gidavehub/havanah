@@ -14,7 +14,6 @@ export default function LandingPage() {
         <div className={styles.navContainer}>
           <Link href="/" className={styles.logo}>
             <img src="/logo.jpg" alt="Havanah" className={styles.logoImg} />
-            <span className={styles.logoText}>Havanah</span>
           </Link>
           <div className={styles.navLinks}>
             <a href="#services" className={styles.navLink}>

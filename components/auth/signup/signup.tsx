@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/lib/auth-store';
 import { useToast } from '@/components/toast/toast';
+import { FaGoogle } from 'react-icons/fa';
 import styles from './signup.module.css';
 
 export default function SignupPage() {
@@ -225,7 +226,7 @@ export default function SignupPage() {
             onClick={handleGoogleSignup}
             disabled={loading}
           >
-            <span className={styles.googleIcon}>🔐</span>
+            <FaGoogle className={styles.googleIcon} />
             Sign up with Google
           </button>
 

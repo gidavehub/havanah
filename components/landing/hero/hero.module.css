@@ -123,100 +123,111 @@
   display: flex;
   align-items: center;
   justify-content: center;
-}
-
-.canvasWrapper {
-  position: absolute;
-  width: 100%;
-  height: 500px;
-  background: linear-gradient(135deg, rgba(16, 185, 129, 0.05) 0%, rgba(251, 191, 36, 0.05) 100%);
-  border-radius: 20px;
-  overflow: hidden;
-  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.08);
-}
-
-.canvas {
-  width: 100%;
-  height: 100%;
-  display: block;
+  perspective: 1200px;
 }
 
 /* macOS Window */
 .macWindow {
   position: relative;
   z-index: 2;
-  background: rgba(255, 255, 255, 0.8);
-  backdrop-filter: blur(15px);
-  border: 1px solid rgba(255, 255, 255, 0.3);
-  border-radius: 16px;
-  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
+  background: rgba(255, 255, 255, 0.9);
+  backdrop-filter: blur(20px);
+  border: 2px solid rgba(255, 255, 255, 0.5);
+  border-radius: 24px;
+  box-shadow: 0 40px 100px rgba(0, 0, 0, 0.2), inset 0 1px 0 rgba(255, 255, 255, 0.8);
   overflow: hidden;
-  max-width: 400px;
-  margin-top: 2rem;
+  max-width: 800px;
+  width: 100%;
+  transform-style: preserve-3d;
+  transition: all 0.3s ease;
+}
+
+.macWindow:hover {
+  box-shadow: 0 50px 120px rgba(0, 0, 0, 0.25), inset 0 1px 0 rgba(255, 255, 255, 0.8);
 }
 
 .macHeader {
   display: flex;
   align-items: center;
-  gap: 1rem;
-  padding: 1rem;
-  background: #f3f4f6;
-  border-bottom: 1px solid #e5e7eb;
+  gap: 1.5rem;
+  padding: 1.5rem;
+  background: linear-gradient(180deg, #f9fafb 0%, #f3f4f6 100%);
+  border-bottom: 2px solid #e5e7eb;
 }
 
 .macButtons {
   display: flex;
-  gap: 0.75rem;
+  gap: 1rem;
 }
 
 .macButtonRed,
 .macButtonYellow,
 .macButtonGreen {
-  width: 14px;
-  height: 14px;
+  width: 18px;
+  height: 18px;
   border-radius: 50%;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 .macButtonRed {
   background: #ef4444;
 }
 
+.macButtonRed:hover {
+  background: #dc2626;
+  box-shadow: 0 2px 8px rgba(239, 68, 68, 0.3);
+}
+
 .macButtonYellow {
   background: #fbbf24;
+}
+
+.macButtonYellow:hover {
+  background: #f59e0b;
+  box-shadow: 0 2px 8px rgba(251, 191, 36, 0.3);
 }
 
 .macButtonGreen {
   background: #10b981;
 }
 
+.macButtonGreen:hover {
+  background: #059669;
+  box-shadow: 0 2px 8px rgba(16, 185, 129, 0.3);
+}
+
 .macTitle {
-  font-size: 0.875rem;
-  font-weight: 600;
-  color: #6b7280;
+  font-size: 1rem;
+  font-weight: 700;
+  color: #374151;
   flex-grow: 1;
 }
 
 .macContent {
-  padding: 1.5rem;
+  padding: 2.5rem;
+  background: linear-gradient(135deg, #ffffff 0%, #f9fafb 100%);
 }
 
 .mockupContent {
   display: flex;
   flex-direction: column;
-  gap: 1rem;
+  gap: 1.5rem;
 }
 
 .mockupImage {
   width: 100%;
-  height: 150px;
+  height: 300px;
   background: linear-gradient(135deg, #f0fdf4 0%, #fef3c7 100%);
-  border-radius: 8px;
+  border-radius: 12px;
   display: flex;
   align-items: center;
   justify-content: center;
   color: #9ca3af;
-  font-size: 0.875rem;
+  font-size: 1rem;
   overflow: hidden;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
 }
 
 .mockupImage img {
@@ -228,17 +239,17 @@
 .mockupDetails {
   display: flex;
   flex-direction: column;
-  gap: 0.75rem;
+  gap: 1.25rem;
 }
 
 .mockupDetails h3 {
-  font-size: 1.125rem;
+  font-size: 1.5rem;
   font-weight: 700;
   color: #111827;
 }
 
 .price {
-  font-size: 1.5rem;
+  font-size: 2rem;
   font-weight: 800;
   background: linear-gradient(135deg, #10b981 0%, #fbbf24 100%);
   -webkit-background-clip: text;
@@ -247,20 +258,26 @@
 }
 
 .rentBtn {
-  padding: 0.75rem 1.5rem;
+  padding: 1rem 2rem;
   background: linear-gradient(135deg, #10b981 0%, #059669 100%);
   color: white;
-  font-weight: 600;
+  font-weight: 700;
+  font-size: 1rem;
   border: none;
-  border-radius: 8px;
+  border-radius: 10px;
   cursor: pointer;
   transition: all 0.3s ease;
   font-family: inherit;
+  box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3);
 }
 
 .rentBtn:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 25px rgba(16, 185, 129, 0.4);
+}
+
+.rentBtn:active {
   transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
 }
 
 /* Decoration */
@@ -328,7 +345,7 @@
   }
 
   .canvasWrapper {
-    height: 300px;
+    display: none;
   }
 
   .macWindow {

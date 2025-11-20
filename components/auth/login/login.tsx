@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/lib/auth-store';
 import { useToast } from '@/components/toast/toast';
+import { FaGoogle } from 'react-icons/fa';
 import styles from './login.module.css';
 
 export default function LoginPage() {
@@ -150,7 +151,7 @@ export default function LoginPage() {
             onClick={handleGoogleLogin}
             disabled={loading}
           >
-            <span className={styles.googleIcon}>🔐</span>
+            <FaGoogle className={styles.googleIcon} />
             Sign in with Google
           </button>
 
