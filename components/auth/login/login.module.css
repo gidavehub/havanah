@@ -64,20 +64,14 @@
 }
 
 .logoImg {
-  width: 60px;
-  height: 60px;
+  width: 140px;
+  height: 79px;
   object-fit: contain;
 }
 
 .brandTitle {
-  font-size: 3.5rem;
-  font-weight: 800;
-  background: linear-gradient(135deg, #10b981 0%, #fbbf24 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-  margin-bottom: 0.5rem;
-  letter-spacing: -0.02em;
+  display: none;
+}
 }
 
 .brandSubtitle {

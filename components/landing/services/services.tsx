@@ -2,13 +2,14 @@
 
 import React from 'react';
 import { motion } from 'framer-motion';
+import { MdShoppingCart, MdMail, MdAnalytics, MdPerson } from 'react-icons/md';
 import styles from './services.module.css';
 
 interface ServiceSection {
   id: string;
   title: string;
   description: string;
-  icon: string;
+  icon: React.ReactNode;
   features: string[];
   mockupType: 'checkout' | 'messaging' | 'dashboard';
 }
@@ -18,7 +19,7 @@ const services: ServiceSection[] = [
     id: 'checkout',
     title: 'Secure Checkout',
     description: 'Complete your purchases with confidence using our secure payment system powered by Monnify.',
-    icon: '🛒',
+    icon: <MdShoppingCart />,
     features: ['End-to-end encryption', 'Multiple payment methods', 'Instant confirmations'],
     mockupType: 'checkout',
   },
@@ -26,7 +27,7 @@ const services: ServiceSection[] = [
     id: 'messaging',
     title: 'Peer-to-Peer Messaging',
     description: 'Communicate directly with agents to negotiate terms and finalize deals seamlessly.',
-    icon: '💬',
+    icon: <MdMail />,
     features: ['Real-time messaging', 'File sharing', 'Conversation history'],
     mockupType: 'messaging',
   },
@@ -34,7 +35,7 @@ const services: ServiceSection[] = [
     id: 'agentdash',
     title: 'Agent Dashboard',
     description: 'Manage your listings, track payments, and grow your business with our powerful tools.',
-    icon: '📊',
+    icon: <MdAnalytics />,
     features: ['Listings management', 'Analytics & insights', 'Payment tracking'],
     mockupType: 'dashboard',
   },
@@ -42,7 +43,7 @@ const services: ServiceSection[] = [
     id: 'userdash',
     title: 'User Dashboard',
     description: 'Keep track of your purchases, rentals, and spending in one convenient place.',
-    icon: '👤',
+    icon: <MdPerson />,
     features: ['Purchase history', 'Rental management', 'Spending insights'],
     mockupType: 'dashboard',
   },

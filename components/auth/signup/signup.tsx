@@ -6,6 +6,7 @@ import { useRouter } from 'next/navigation';
 import { useAuth } from '@/lib/auth-store';
 import { useToast } from '@/components/toast/toast';
 import { FaGoogle } from 'react-icons/fa';
+import { MdPerson, MdBusinessCenter, MdArrowBack } from 'react-icons/md';
 import styles from './signup.module.css';
 
 export default function SignupPage() {
@@ -88,7 +89,7 @@ export default function SignupPage() {
               className={`${styles.typeBtn} ${userType === 'user' ? styles.active : ''}`}
               onClick={() => setUserType('user')}
             >
-              <span className={styles.typeIcon}>👤</span>
+              <MdPerson className={styles.typeIcon} />
               <span>I'm a User</span>
             </button>
             <button
@@ -96,7 +97,7 @@ export default function SignupPage() {
               className={`${styles.typeBtn} ${userType === 'agent' ? styles.active : ''}`}
               onClick={() => setUserType('agent')}
             >
-              <span className={styles.typeIcon}>🏢</span>
+              <MdBusinessCenter className={styles.typeIcon} />
               <span>I'm an Agent</span>
             </button>
           </div>
