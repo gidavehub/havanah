@@ -372,12 +372,12 @@ export default function AgentListings() {
               <div className={styles.cardHeader}>
                 <h3>{listing.title}</h3>
                 <span className={`${styles.badge} ${styles[`badge--${listing.type}`]}`}>
-                  {listing.type === 'car' ? '🚗' : '🏠'} {listing.type}
+                  {listing.type === 'car' ? 'Car' : 'Home'} • {listing.type}
                 </span>
               </div>
 
               <p className={styles.price}>${listing.price.toLocaleString()}</p>
-              <p className={styles.location}>📍 {listing.location}</p>
+              <p className={styles.location}>{listing.location}</p>
 
               {listing.type === 'house' && (
                 <div className={styles.details}>

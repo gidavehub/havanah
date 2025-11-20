@@ -313,7 +313,7 @@ export default function ExplorePage() {
                   <div className={styles.cardImage}>
                     <img src={listing.images[0]} alt={listing.title} />
                     <span className={`${styles.badge} ${styles[`badge--${listing.type}`]}`}>
-                      {listing.type === 'car' ? '🚗' : '🏠'}
+                      {listing.type === 'car' ? 'Car' : 'Home'}
                     </span>
                     <div className={styles.relevanceBadge}>
                       {Math.round(listing.relevance)}% match
@@ -323,7 +323,7 @@ export default function ExplorePage() {
 
                 <div className={styles.cardContent}>
                   <h3 className={styles.cardTitle}>{listing.title}</h3>
-                  <p className={styles.location}>📍 {listing.location}</p>
+                  <p className={styles.location}>{listing.location}</p>
 
                   <p className={styles.description}>
                     {listing.description.substring(0, 80)}...
@@ -331,16 +331,16 @@ export default function ExplorePage() {
 
                   {listing.type === 'house' && (
                     <div className={styles.details}>
-                      {listing.bedrooms && <span>🛏️ {listing.bedrooms}</span>}
-                      {listing.bathrooms && <span>🚿 {listing.bathrooms}</span>}
-                      {listing.squareFeet && <span>📐 {listing.squareFeet} sqft</span>}
+                      {listing.bedrooms && <span>{listing.bedrooms} Bed</span>}
+                      {listing.bathrooms && <span>{listing.bathrooms} Bath</span>}
+                      {listing.squareFeet && <span>{listing.squareFeet} sqft</span>}
                     </div>
                   )}
 
                   {listing.type === 'car' && (
                     <div className={styles.details}>
-                      {listing.brand && <span>🚗 {listing.brand} {listing.model}</span>}
-                      {listing.year && <span>📅 {listing.year}</span>}
+                      {listing.brand && <span>{listing.brand} {listing.model}</span>}
+                      {listing.year && <span>{listing.year}</span>}
                     </div>
                   )}
 
