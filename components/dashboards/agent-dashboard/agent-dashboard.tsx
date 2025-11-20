@@ -1,5 +1,3 @@
---- START OF FILE agent-dashboard.tsx ---
-
 'use client';
 
 import React, { useState } from 'react';
