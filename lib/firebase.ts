@@ -1,44 +1,47 @@
-'use client';
-
 import { initializeApp } from 'firebase/app';
-import { getAuth } from 'firebase/auth';
-import { getFirestore } from 'firebase/firestore';
-import { getStorage } from 'firebase/storage';
-import { getAnalytics, isSupported } from 'firebase/analytics';
+import { getAuth, Auth } from 'firebase/auth';
+import { getFirestore, Firestore } from 'firebase/firestore';
+import { getDatabase, Database } from 'firebase/database';
+import { getStorage, FirebaseStorage } from 'firebase/storage';
+import { getAnalytics, Analytics } from 'firebase/analytics';
 
-// Firebase Configuration
+// Firebase configuration
 const firebaseConfig = {
-  apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
-  authDomain: process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN,
-  projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID,
-  storageBucket: process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET,
-  messagingSenderId: process.env.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID,
-  appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID,
+  apiKey: 'AIzaSyDc1zaXU43KB94z0y9MWrU-kq7en01TwqM',
+  authDomain: 'havanah-478715.firebaseapp.com',
+  databaseURL: 'https://havanah-478715-default-rtdb.firebaseio.com',
+  projectId: 'havanah-478715',
+  storageBucket: 'havanah-478715.firebasestorage.app',
+  messagingSenderId: '473870529702',
+  appId: '1:473870529702:web:2f780b9f108bf4d2c5f067',
+  measurementId: 'G-NT7QQ7S75M',
 };
 
 // Initialize Firebase
-export const app = initializeApp(firebaseConfig);
+const app = initializeApp(firebaseConfig);
 
-// Initialize Firebase Authentication
-export const auth = getAuth(app);
-auth.useDeviceLanguage();
+// Initialize services
+let auth: Auth | null = null;
+let firestore: Firestore | null = null;
+let realtimeDatabase: Database | null = null;
+let storage: FirebaseStorage | null = null;
+let analytics: Analytics | null = null;
 
-// Initialize Firestore
-export const db = getFirestore(app);
-
-// Initialize Storage
-export const storage = getStorage(app);
-
-// Initialize Analytics (only on client-side)
-let analytics: any = null;
+// Initialize services only on client side
 if (typeof window !== 'undefined') {
-  isSupported().then((supported) => {
-    if (supported) {
-      analytics = getAnalytics(app);
-    }
-  });
+  auth = getAuth(app);
+  firestore = getFirestore(app);
+  realtimeDatabase = getDatabase(app);
+  storage = getStorage(app);
+  try {
+    analytics = getAnalytics(app);
+  } catch (e) {
+    // Analytics might not be available in all environments
+  }
 }
 
-export { analytics };
-
-export default app;
+export { app };
+export const getAuthInstance = () => auth || getAuth(app);
+export const getFirestoreInstance = () => firestore || getFirestore(app);
+export const getRealtimeDatabaseInstance = () => realtimeDatabase || getDatabase(app);
+export const getStorageInstance = () => storage || getStorage(app);

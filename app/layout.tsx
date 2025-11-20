@@ -1,59 +1,31 @@
-import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
-import "./globals.css";
-import { ThemeProvider } from "@/lib/theme-context";
-import { ToastProvider } from "@/lib/toast-context";
-import { AuthProvider } from "@/lib/auth-context";
-
-const geistSans = Geist({
-  variable: "--font-geist-sans",
-  subsets: ["latin"],
-});
-
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
-});
+import type { Metadata } from 'next';
+import './globals.css';
+import ToastProvider from '@/components/toast/toast';
 
 export const metadata: Metadata = {
-  title: "Havanah - Premium Service Marketplace",
-  description: "Havanah - Your trusted platform for premium services, rentals, and bookings",
-  icons: {
-    icon: "/logo.jpg",
+  title: 'Havanah - Premium Real Estate & Vehicle Rentals',
+  description: 'Your gateway to premium real estate and vehicle rentals. Rent or buy properties and vehicles with ease.',
+  openGraph: {
+    title: 'Havanah',
+    description: 'Premium Real Estate & Vehicle Rentals',
+    type: 'website',
   },
 };
 
-
-
 export default function RootLayout({
   children,
-}: Readonly<{
+}: {
   children: React.ReactNode;
-}>) {
+}) {
   return (
-    <html lang="en" suppressHydrationWarning>
+    <html lang="en">
       <head>
-        <link rel="icon" href="/logo.jpg" />
-        <script
-          dangerouslySetInnerHTML={{
-            __html: `
-              if (localStorage.getItem('theme') === 'dark' || 
-                  (!localStorage.getItem('theme') && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
-                document.documentElement.classList.add('dark-mode');
-                document.body.classList.add('dark-mode');
-              }
-            `,
-          }}
-        />
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
       </head>
-      <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
-        <AuthProvider>
-          <ThemeProvider>
-            <ToastProvider>
-              {children}
-            </ToastProvider>
-          </ThemeProvider>
-        </AuthProvider>
+      <body>
+        <ToastProvider>{children}</ToastProvider>
       </body>
     </html>
   );
