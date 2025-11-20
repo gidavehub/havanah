@@ -137,6 +137,109 @@ export const getAllListings = async (
 };
 
 /**
+ * Advanced search with relevance scoring
+ */
+export const advancedSearchListings = async (
+  searchQuery: string,
+  filters?: {
+    type?: 'house' | 'car';
+    category?: 'rent' | 'sale';
+    priceMin?: number;
+    priceMax?: number;
+    bedrooms?: number;
+    bathrooms?: number;
+    area?: number;
+  }
+): Promise<Array<Listing & { relevance: number }>> => {
+  try {
+    const db = getFirestoreInstance();
+    
+    // Get all active listings
+    const conditions = [where('status', '==', 'active')];
+    if (filters?.type) conditions.push(where('type', '==', filters.type));
+    if (filters?.category) conditions.push(where('category', '==', filters.category));
+    
+    const q = query(collection(db, 'listings'), ...conditions);
+    const snapshot = await getDocs(q);
+    
+    let results = snapshot.docs.map(doc => ({
+      id: doc.id,
+      ...doc.data(),
+    })) as Listing[];
+    
+    // Apply price filter
+    if (filters?.priceMin || filters?.priceMax) {
+      results = results.filter(listing => {
+        if (filters.priceMin && listing.price < filters.priceMin) return false;
+        if (filters.priceMax && listing.price > filters.priceMax) return false;
+        return true;
+      });
+    }
+    
+    // Apply bedrooms/bathrooms filters for houses
+    if (filters?.bedrooms !== undefined) {
+      results = results.filter(l => l.bedrooms === filters.bedrooms);
+    }
+    if (filters?.bathrooms !== undefined) {
+      results = results.filter(l => l.bathrooms === filters.bathrooms);
+    }
+    
+    // Apply area filter
+    if (filters?.area !== undefined) {
+      results = results.filter(l => l.squareFeet !== undefined && Math.abs(l.squareFeet - filters.area) <= filters.area * 0.2);
+    }
+    
+    // Calculate relevance scores
+    const scoredResults = results.map(listing => {
+      let relevanceScore = 0;
+      
+      if (searchQuery) {
+        const queryLower = searchQuery.toLowerCase();
+        const titleMatch = listing.title.toLowerCase().includes(queryLower) ? 10 : 0;
+        const descMatch = listing.description?.toLowerCase().includes(queryLower) ? 5 : 0;
+        const locationMatch = listing.location?.toLowerCase().includes(queryLower) ? 8 : 0;
+        
+        // Query matching: 40% weight
+        relevanceScore += (titleMatch + descMatch + locationMatch) / 3;
+      } else {
+        relevanceScore = 50; // Base score if no query
+      }
+      
+      // Type preference bonus
+      if (filters?.type && listing.type === filters.type) {
+        relevanceScore += 15;
+      }
+      
+      // Price proximity bonus (20% weight)
+      if (filters?.priceMin && filters?.priceMax) {
+        const mid = (filters.priceMin + filters.priceMax) / 2;
+        const diff = Math.abs(listing.price - mid);
+        const range = filters.priceMax - filters.priceMin;
+        const priceScore = Math.max(0, 20 - (diff / range) * 20);
+        relevanceScore += priceScore;
+      }
+      
+      // Recently updated bonus
+      if (listing.updatedAt) {
+        const daysSinceUpdate = (Date.now() - listing.updatedAt.toMillis()) / (1000 * 60 * 60 * 24);
+        if (daysSinceUpdate < 7) relevanceScore += 10;
+      }
+      
+      return {
+        ...listing,
+        relevance: Math.min(100, relevanceScore),
+      };
+    });
+    
+    // Sort by relevance
+    return scoredResults.sort((a, b) => b.relevance - a.relevance);
+  } catch (error) {
+    console.error('Error in advanced search:', error);
+    throw error;
+  }
+};
+
+/**
  * Get single listing
  */
 export const getListing = async (listingId: string): Promise<Listing | null> => {

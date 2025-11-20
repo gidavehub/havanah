@@ -50,13 +50,11 @@ export default function ExplorePage() {
 
   // Debounced search
   useEffect(() => {
-    const timer = window.setTimeout(() => {
+    const timer = setTimeout(() => {
       performSearch();
     }, 500);
 
-    return () => {
-      window.clearTimeout(timer);
-    };
+    return () => clearTimeout(timer);
   }, [filters]);
 
   const performSearch = async () => {

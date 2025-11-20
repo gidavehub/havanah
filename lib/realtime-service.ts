@@ -25,6 +25,9 @@ export interface Message {
   timestamp: number;
   read: boolean;
   type: 'text' | 'system'; // 'system' for notifications
+  edited?: boolean;
+  editedAt?: number;
+  originalText?: string; // For history
 }
 
 export interface Conversation {
@@ -199,6 +202,46 @@ export const getOrCreateConversation = async (
 };
 
 /**
+ * Edit a message
+ */
+export const editMessage = async (
+  conversationId: string,
+  messageId: string,
+  newText: string,
+  currentText: string
+): Promise<void> => {
+  try {
+    const db = getRealtimeDatabaseInstance();
+    const messageRef = ref(db, `conversations/${conversationId}/messages/${messageId}`);
+    
+    await update(messageRef, {
+      text: newText,
+      originalText: currentText,
+      edited: true,
+      editedAt: Date.now(),
+    });
+  } catch (error) {
+    console.error('Error editing message:', error);
+    throw error;
+  }
+};
+
+/**
+ * Delete a message
+ */
+export const deleteMessage = async (conversationId: string, messageId: string): Promise<void> => {
+  try {
+    const db = getRealtimeDatabaseInstance();
+    const messageRef = ref(db, `conversations/${conversationId}/messages/${messageId}`);
+    
+    await set(messageRef, null);
+  } catch (error) {
+    console.error('Error deleting message:', error);
+    throw error;
+  }
+};
+
+/**
  * Mark messages as read
  */
 export const markMessagesAsRead = async (conversationId: string, userId: string): Promise<void> => {
@@ -345,6 +388,8 @@ export default {
   listenToMessages,
   getConversations,
   getOrCreateConversation,
+  editMessage,
+  deleteMessage,
   markMessagesAsRead,
   listenToUnreadMessages,
   

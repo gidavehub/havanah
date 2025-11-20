@@ -3,6 +3,7 @@
 import { useEffect, useRef, useCallback } from 'react';
 import { useToast } from '@/components/toast/toast';
 import { listenToNotifications, listenToUnreadMessages, listenToMessages, Notification, Message } from '@/lib/realtime-service';
+import { useAuth } from '@/lib/auth-store';
 
 /**
  * Hook to listen to notifications and show toast
@@ -99,6 +100,7 @@ export const useUnreadMessagesCount = (userId?: string) => {
   }, [userId, toast]);
 };
 
+
 /**
  * Hook to listen to messages in a conversation and show toast for new messages
  */
@@ -147,20 +149,59 @@ export const useConversationMessages = (
 };
 
 /**
- * Hook to show inquiry notification
+ * Hook to show inquiry notification (watches Firestore for new inquiries)
  */
 export const useInquiryNotification = () => {
+  const { user } = useAuth();
   const toast = useToast();
+  const unsubscribeRef = useRef<(() => void) | null>(null);
+  const lastInquiryIdRef = useRef<string | null>(null);
 
-  const showInquiryNotification = useCallback((inquiryData: any) => {
-    toast.success(
-      '🎯 New Inquiry!',
-      `${inquiryData.userName} is interested in "${inquiryData.listingTitle}"`,
-      6000
-    );
-  }, [toast]);
+  useEffect(() => {
+    if (!user?.id || user.role !== 'agent') return;
 
-  return { showInquiryNotification };
+    // Import here to avoid circular dependencies
+    import('@/lib/firestore-service').then(({ getFirestoreInstance }) => {
+      import('firebase/firestore').then(({ onSnapshot, collection, query, where, orderBy }) => {
+        const db = getFirestoreInstance();
+        
+        try {
+          const q = query(
+            collection(db, 'inquiries'),
+            where('agentId', '==', user.id),
+            orderBy('createdAt', 'desc')
+          );
+
+          unsubscribeRef.current = onSnapshot(q, (snapshot) => {
+            snapshot.docChanges().forEach((change) => {
+              if (change.type === 'added') {
+                const inquiry = change.doc.data() as any;
+                
+                // Show toast only for truly new inquiries (not on first load)
+                if (lastInquiryIdRef.current && change.doc.id !== lastInquiryIdRef.current) {
+                  toast.success(
+                    '🎯 New Inquiry!',
+                    `${inquiry.userName} is interested in "${inquiry.listingTitle}"`,
+                    6000
+                  );
+                }
+                
+                lastInquiryIdRef.current = change.doc.id;
+              }
+            });
+          });
+        } catch (error) {
+          console.error('Error setting up inquiry notification:', error);
+        }
+      });
+    });
+
+    return () => {
+      if (unsubscribeRef.current) {
+        unsubscribeRef.current();
+      }
+    };
+  }, [user?.id, user?.role, toast]);
 };
 
 /**
