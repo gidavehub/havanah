@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, Suspense } from 'react';
 import { motion } from 'framer-motion';
 import { useSearchParams } from 'next/navigation';
 import { initializeModemPayPayment, generateReference } from '@/lib/modem-pay';
@@ -35,7 +35,7 @@ const mockCartItems: CartItem[] = [
   },
 ];
 
-export default function CheckoutPage() {
+function CheckoutContent() {
   const searchParams = useSearchParams();
   const toast = useToast();
   const [step, setStep] = useState<'summary' | 'payment' | 'confirmation'>('summary');
@@ -551,5 +551,13 @@ export default function CheckoutPage() {
         </div>
       </aside>
     </div>
+  );
+}
+
+export default function CheckoutPage() {
+  return (
+    <Suspense fallback={<div style={{ padding: '2rem', textAlign: 'center' }}>Loading checkout...</div>}>
+      <CheckoutContent />
+    </Suspense>
   );
 }
