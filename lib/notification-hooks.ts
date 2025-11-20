@@ -23,30 +23,21 @@ export const useNotificationListener = (userId?: string) => {
         if (!shownNotificationsRef.current.has(notification.id)) {
           shownNotificationsRef.current.add(notification.id);
 
-          const icons = {
-            inquiry: '🎯',
-            message: '💬',
-            application: '📋',
-            system: 'ℹ',
-          };
-
-          const icon = icons[notification.type] || 'ℹ';
-
           if (notification.type === 'inquiry') {
             toast.success(
-              `${icon} ${notification.title}`,
+              `New Inquiry`,
               notification.message,
               5000
             );
           } else if (notification.type === 'message') {
             toast.info(
-              `${icon} ${notification.title}`,
+              `New Message`,
               notification.message,
               5000
             );
           } else if (notification.type === 'application') {
             toast.success(
-              `${icon} ${notification.title}`,
+              `New Application`,
               notification.message,
               5000
             );

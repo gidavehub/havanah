@@ -27,7 +27,7 @@ const mockConversations: Conversation[] = [
   {
     id: '1',
     name: 'John Dealer',
-    avatar: '👤',
+    avatar: 'JD',
     lastMessage: 'The car is ready for pickup!',
     timestamp: new Date(Date.now() - 5 * 60000),
     unread: 2,
@@ -36,7 +36,7 @@ const mockConversations: Conversation[] = [
   {
     id: '2',
     name: 'Sarah Properties',
-    avatar: '👤',
+    avatar: 'SP',
     lastMessage: 'Would you like to schedule a viewing?',
     timestamp: new Date(Date.now() - 2 * 3600000),
     unread: 0,
@@ -45,7 +45,7 @@ const mockConversations: Conversation[] = [
   {
     id: '3',
     name: 'Mike Rentals',
-    avatar: '👤',
+    avatar: 'MR',
     lastMessage: 'Payment confirmed. Documents sent.',
     timestamp: new Date(Date.now() - 1 * 86400000),
     unread: 0,

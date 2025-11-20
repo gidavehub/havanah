@@ -7,6 +7,7 @@ import { useToast } from '@/components/toast/toast';
 import { advancedSearchListings, createInquiry, Listing } from '@/lib/firestore-service';
 import { useInquiryNotification } from '@/lib/notification-hooks';
 import { sendNotification } from '@/lib/realtime-service';
+import { MdSearch, MdFavoriteBorder, MdFavorite, MdExpandMore, MdCheckCircle, MdHome, MdDirectionsCar } from 'react-icons/md';
 import styles from './explore.module.css';
 
 interface SearchFilters {
@@ -151,224 +152,159 @@ export default function ExplorePage() {
 
   return (
     <div className={styles.container}>
-      {/* Search Section */}
+      {/* Page Heading */}
+      <div className={styles.pageHeader}>
+        <h1 className={styles.pageTitle}>Explore Havanah</h1>
+        <p className={styles.pageSubtitle}>Search apartments, cars, and more...</p>
+      </div>
+
+      {/* Floating Search and Filter Bar */}
       <motion.div
-        className={styles.filtersSection}
+        className={styles.filterBar}
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
       >
-        <h2 className={styles.filtersTitle}>Explore Listings</h2>
-
-        {/* Search Box */}
-        <div className={styles.searchWrapper}>
+        <div className={styles.searchContainer}>
+          {/* Search Input */}
           <div className={styles.searchBox}>
-            <span className={styles.searchIcon}>🔍</span>
+            <div className={styles.searchIconWrapper}>
+              <MdSearch className={styles.searchIcon} />
+            </div>
             <input
               type="text"
-              placeholder="Search properties, cars, locations..."
+              placeholder="Search apartments, cars, and more..."
               value={filters.query}
               onChange={handleQueryChange}
               className={styles.searchInput}
             />
           </div>
 
-          {/* Suggestions Dropdown */}
-          {showSuggestions && suggestions.length > 0 && (
-            <motion.div
-              className={styles.suggestionsDropdown}
-              initial={{ opacity: 0, y: -10 }}
-              animate={{ opacity: 1, y: 0 }}
-            >
-              {suggestions.map((suggestion, idx) => (
-                <button
-                  key={idx}
-                  className={styles.suggestionItem}
-                  onClick={() => {
-                    handleFilterChange('query', suggestion);
-                    setShowSuggestions(false);
-                  }}
-                >
-                  {suggestion}
-                </button>
-              ))}
-            </motion.div>
-          )}
+          {/* Filter Buttons */}
+          <div className={styles.filterChips}>
+            <button className={styles.filterChip}>
+              <span>Category</span>
+              <MdExpandMore />
+            </button>
+            <button className={styles.filterChip}>
+              <span>Location</span>
+              <MdExpandMore />
+            </button>
+            <button className={styles.filterChip}>
+              <span>Price</span>
+              <MdExpandMore />
+            </button>
+            <button className={styles.filterChip}>
+              <span>Brand</span>
+              <MdExpandMore />
+            </button>
+            <button className={styles.applyBtn}>Apply</button>
+          </div>
         </div>
 
-        {/* Filter Grid */}
-        <div className={styles.filterGrid}>
-          <div className={styles.filterGroup}>
-            <label>Type</label>
-            <select
-              value={filters.type || 'all'}
-              onChange={e => handleFilterChange('type', e.target.value === 'all' ? undefined : e.target.value)}
-              className={styles.filterSelect}
-            >
-              <option value="all">All Types</option>
-              <option value="house">Houses</option>
-              <option value="car">Cars</option>
-            </select>
-          </div>
-
-          <div className={styles.filterGroup}>
-            <label>Category</label>
-            <select
-              value={filters.category || 'all'}
-              onChange={e => handleFilterChange('category', e.target.value === 'all' ? undefined : e.target.value)}
-              className={styles.filterSelect}
-            >
-              <option value="all">All Categories</option>
-              <option value="rent">For Rent</option>
-              <option value="sale">For Sale</option>
-            </select>
-          </div>
-
-          <div className={styles.filterGroup}>
-            <label>Min Price</label>
-            <input
-              type="number"
-              value={filters.priceMin || ''}
-              onChange={e => handleFilterChange('priceMin', e.target.value ? parseInt(e.target.value) : undefined)}
-              placeholder="0"
-              className={styles.filterInput}
-            />
-          </div>
-
-          <div className={styles.filterGroup}>
-            <label>Max Price</label>
-            <input
-              type="number"
-              value={filters.priceMax || ''}
-              onChange={e => handleFilterChange('priceMax', e.target.value ? parseInt(e.target.value) : undefined)}
-              placeholder="1,000,000"
-              className={styles.filterInput}
-            />
-          </div>
-
-          <div className={styles.filterGroup}>
-            <label>Bedrooms</label>
-            <input
-              type="number"
-              value={filters.bedrooms || ''}
-              onChange={e => handleFilterChange('bedrooms', e.target.value ? parseInt(e.target.value) : undefined)}
-              placeholder="Any"
-              className={styles.filterInput}
-            />
-          </div>
-
-          <div className={styles.filterGroup}>
-            <label>Bathrooms</label>
-            <input
-              type="number"
-              value={filters.bathrooms || ''}
-              onChange={e => handleFilterChange('bathrooms', e.target.value ? parseInt(e.target.value) : undefined)}
-              placeholder="Any"
-              className={styles.filterInput}
-            />
-          </div>
-
-          <motion.button
-            className={styles.clearBtn}
-            onClick={handleClearFilters}
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
+        {/* Suggestions Dropdown */}
+        {showSuggestions && suggestions.length > 0 && (
+          <motion.div
+            className={styles.suggestionsDropdown}
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
           >
-            Clear Filters
-          </motion.button>
-        </div>
+            {suggestions.map((suggestion, idx) => (
+              <button
+                key={idx}
+                className={styles.suggestionItem}
+                onClick={() => {
+                  handleFilterChange('query', suggestion);
+                  setShowSuggestions(false);
+                }}
+              >
+                {suggestion}
+              </button>
+            ))}
+          </motion.div>
+        )}
       </motion.div>
 
-      {/* Results Section */}
-      <div className={styles.listingsSection}>
-        <h2 className={styles.resultCount}>
-          {loading ? 'Searching...' : `${results.length} Results Found`}
-        </h2>
+      {/* Section Header */}
+      <div className={styles.sectionHeader}>
+        <h2 className={styles.sectionTitle}>Discover Today</h2>
+      </div>
 
-        <div className={styles.grid}>
-          {loading ? (
+      {/* Results Grid */}
+      <div className={styles.grid}>
+        {loading ? (
+          <motion.div
+            className={styles.emptyState}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+          >
+            <p>Searching for listings...</p>
+          </motion.div>
+        ) : results.length === 0 ? (
+          <motion.div
+            className={styles.emptyState}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+          >
+            <p>No listings match your search criteria</p>
+          </motion.div>
+        ) : (
+          results.map((listing, index) => (
             <motion.div
-              className={styles.emptyState}
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
+              key={listing.id}
+              className={styles.card}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: index * 0.05 }}
+              whileHover={{ y: -8, boxShadow: '0 20px 40px rgba(0,0,0,0.1)' }}
             >
-              <p>Searching for listings...</p>
-            </motion.div>
-          ) : results.length === 0 ? (
-            <motion.div
-              className={styles.emptyState}
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-            >
-              <p>No listings match your search criteria</p>
-            </motion.div>
-          ) : (
-            results.map((listing, index) => (
-              <motion.div
-                key={listing.id}
-                className={styles.card}
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: index * 0.05 }}
-                whileHover={{ y: -8 }}
-              >
-                {listing.images?.[0] && (
-                  <div className={styles.cardImage}>
-                    <img src={listing.images[0]} alt={listing.title} />
-                    <span className={`${styles.badge} ${styles[`badge--${listing.type}`]}`}>
-                      {listing.type === 'car' ? '🚗' : '🏠'}
-                    </span>
-                    <div className={styles.relevanceBadge}>
-                      {Math.round(listing.relevance)}% match
-                    </div>
-                  </div>
-                )}
-
-                <div className={styles.cardContent}>
-                  <h3 className={styles.cardTitle}>{listing.title}</h3>
-                  <p className={styles.location}>📍 {listing.location}</p>
-
-                  <p className={styles.description}>
-                    {listing.description.substring(0, 80)}...
-                  </p>
-
-                  {listing.type === 'house' && (
-                    <div className={styles.details}>
-                      {listing.bedrooms && <span>🛏️ {listing.bedrooms}</span>}
-                      {listing.bathrooms && <span>🚿 {listing.bathrooms}</span>}
-                      {listing.squareFeet && <span>📐 {listing.squareFeet} sqft</span>}
-                    </div>
-                  )}
-
-                  {listing.type === 'car' && (
-                    <div className={styles.details}>
-                      {listing.brand && <span>🚗 {listing.brand} {listing.model}</span>}
-                      {listing.year && <span>📅 {listing.year}</span>}
-                    </div>
-                  )}
-
-                  <div className={styles.cardFooter}>
-                    <span className={styles.price}>${listing.price.toLocaleString()}</span>
-                    <span className={`${styles.categoryBadge} ${styles[`cat--${listing.category}`]}`}>
-                      {listing.category === 'rent' ? 'Rent' : 'Sale'}
-                    </span>
-                  </div>
-
+              {/* Card Image */}
+              {listing.images?.[0] ? (
+                <div className={styles.cardImageWrapper}>
+                  <div 
+                    className={styles.cardImage}
+                    style={{ backgroundImage: `url(${listing.images[0]})` }}
+                  />
                   <motion.button
-                    className={styles.inquireBtn}
-                    onClick={() => {
-                      setSelectedListing(listing);
-                      setShowInquiryModal(true);
-                    }}
-                    whileHover={{ scale: 1.05 }}
-                    whileTap={{ scale: 0.95 }}
+                    className={styles.favoriteBtn}
+                    whileHover={{ scale: 1.2 }}
+                    whileTap={{ scale: 0.9 }}
                   >
-                    Send Inquiry
+                    <MdFavoriteBorder />
                   </motion.button>
                 </div>
-              </motion.div>
-            ))
-          )}
-        </div>
+              ) : (
+                <div className={styles.cardImagePlaceholder} />
+              )}
+
+              {/* Card Content */}
+              <div className={styles.cardContent}>
+                <h3 className={styles.cardTitle}>{listing.title}</h3>
+                <p className={styles.cardMeta}>
+                  {listing.type === 'house' 
+                    ? `${listing.bedrooms || 0} Bed, ${listing.bathrooms || 0} Bath`
+                    : `${listing.brand || 'Vehicle'} ${listing.model || ''}`
+                  }
+                </p>
+                <p className={styles.cardPrice}>
+                  ${listing.price.toLocaleString()}
+                  {listing.category === 'rent' && <span className={styles.period}>/month</span>}
+                </p>
+
+                <motion.button
+                  className={styles.viewDetailsBtn}
+                  onClick={() => {
+                    setSelectedListing(listing);
+                    setShowInquiryModal(true);
+                  }}
+                  whileHover={{ opacity: 1 }}
+                  whileTap={{ scale: 0.95 }}
+                >
+                  View Details
+                </motion.button>
+              </div>
+            </motion.div>
+          ))
+        )}
       </div>
 
       {/* Inquiry Modal */}

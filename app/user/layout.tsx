@@ -1,0 +1,12 @@
+'use client';
+
+import React from 'react';
+import AppLayout from '@/components/layout/app-layout';
+
+export default function UserLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
+  return <AppLayout>{children}</AppLayout>;
+}
