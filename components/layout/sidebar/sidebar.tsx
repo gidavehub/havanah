@@ -3,18 +3,18 @@
 import React, { useMemo } from 'react';
 import { usePathname, useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion } from 'framer-motion';
 import { 
   MdDashboard, 
   MdExplore, 
   MdFavoriteBorder, 
   MdMail, 
-  MdPerson, 
+  MdNotifications,
   MdLogout, 
   MdSettings,
   MdSell,
-  MdDirectionsCar,
-  MdApartment
+  MdBusiness,
+  MdPerson
 } from 'react-icons/md';
 import { useAuth } from '@/lib/auth-store';
 import styles from './sidebar.module.css';
@@ -36,14 +36,19 @@ export default function Sidebar() {
     return null;
   }
 
-  // Determine navigation based on user role or default
   const navItems: NavItem[] = useMemo(() => {
     const baseItems = [
       {
         id: 'dashboard',
         label: 'Dashboard',
-        href: user?.role === 'agent' ? '/agent/dashboard' : '/user/dashboard',
+        href: user?.role === 'agent' ? '/agent/dashboard' : '/account', // User dashboard is merged into account or specific route
         icon: <MdDashboard className={styles.icon} />,
+      },
+      {
+        id: 'explore',
+        label: 'Explore',
+        href: '/explore',
+        icon: <MdExplore className={styles.icon} />,
       },
       {
         id: 'messages',
@@ -52,11 +57,11 @@ export default function Sidebar() {
         icon: <MdMail className={styles.icon} />,
       },
       {
-        id: 'explore',
-        label: 'Explore',
-        href: '/explore',
-        icon: <MdExplore className={styles.icon} />,
-      },
+        id: 'notifications',
+        label: 'Notifications',
+        href: '/notifications',
+        icon: <MdNotifications className={styles.icon} />,
+      }
     ];
 
     const userItems = [
@@ -72,7 +77,7 @@ export default function Sidebar() {
       {
         id: 'listings',
         label: 'My Listings',
-        href: '/agent/listings',
+        href: '/agent/dashboard', // Usually listing management is inside dashboard
         icon: <MdSell className={styles.icon} />,
       },
     ];
@@ -88,9 +93,9 @@ export default function Sidebar() {
     // Add Settings/Account at the end
     items.push({
       id: 'account',
-      label: 'Profile & Settings',
+      label: 'My Profile',
       href: '/account',
-      icon: <MdSettings className={styles.icon} />,
+      icon: <MdPerson className={styles.icon} />,
     });
 
     return items;
@@ -107,26 +112,67 @@ export default function Sidebar() {
     router.push('/auth/login');
   };
 
+  // Upgrade Logic
+  const renderUpgradeCTA = () => {
+    if (!user) return null;
+
+    // 1. Ordinary User -> Become Agent
+    if (user.role !== 'agent') {
+      return (
+        <motion.div className={styles.ctaCard} whileHover={{ y: -2 }}>
+          <div className={styles.ctaContent}>
+            <h4>Become an Agent</h4>
+            <p>List your property today</p>
+          </div>
+          <button 
+            className={styles.ctaButton}
+            onClick={() => router.push('/upgrade')}
+          >
+            Upgrade
+          </button>
+        </motion.div>
+      );
+    }
+
+    // 2. Agent (Not Enterprise) -> Upgrade Plan
+    // Assuming we store agentPlan in user object, defaulting to basic if undefined
+    const plan = (user as any).agentPlan || 'basic';
+    
+    if (plan !== 'enterprise') {
+      return (
+        <motion.div className={styles.ctaCard} whileHover={{ y: -2 }}>
+          <div className={styles.ctaContent}>
+            <h4>Upgrade Plan</h4>
+            <p>Get more listings & insights</p>
+          </div>
+          <button 
+            className={styles.ctaButton}
+            onClick={() => router.push('/upgrade')}
+          >
+            View Plans
+          </button>
+        </motion.div>
+      );
+    }
+
+    // 3. Enterprise Agent -> No CTA needed
+    return null;
+  };
+
   return (
     <aside className={styles.sidebar}>
       <div className={styles.glassBackground} />
       
       <div className={styles.sidebarContainer}>
-        {/* Profile Section */}
-        <div className={styles.profileSection}>
-          <div className={styles.brandHeader}>
-            <div className={styles.logoIcon}>H</div>
-            <div className={styles.brandText}>
-              <h1>Havanah</h1>
-              <span>{user?.role === 'agent' ? 'Agent Portal' : 'Rentals & Sales'}</span>
-            </div>
-          </div>
-
+        
+        {/* Profile Section (Clickable, Moved to Top) */}
+        <Link href="/account" className={styles.profileLink}>
           <motion.div 
             className={styles.userCard}
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.2 }}
+            whileHover={{ backgroundColor: 'rgba(255,255,255,0.8)' }}
           >
             <div className={styles.avatarContainer}>
               {user?.photoURL ? (
@@ -148,11 +194,11 @@ export default function Sidebar() {
                 {user?.displayName || 'Welcome Back'}
               </h3>
               <p className={styles.userRole}>
-                {user?.email || 'Guest User'}
+                {user?.role === 'agent' ? 'Agent' : 'Member'}
               </p>
             </div>
           </motion.div>
-        </div>
+        </Link>
 
         {/* Navigation */}
         <nav className={styles.nav}>
@@ -191,18 +237,7 @@ export default function Sidebar() {
 
         {/* Footer Actions */}
         <div className={styles.footer}>
-          {user?.role === 'user' && (
-            <motion.div 
-              className={styles.ctaCard}
-              whileHover={{ y: -2 }}
-            >
-              <div className={styles.ctaContent}>
-                <h4>Become an Agent</h4>
-                <p>List your property today</p>
-              </div>
-              <button className={styles.ctaButton}>Upgrade</button>
-            </motion.div>
-          )}
+          {renderUpgradeCTA()}
 
           <motion.button 
             onClick={handleLogout} 

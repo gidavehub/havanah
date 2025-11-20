@@ -7,12 +7,10 @@ import {
   MdSearch,
   MdNotifications,
   MdTrendingUp,
-  MdTrendingDown,
   MdMoreHoriz,
   MdCheck,
   MdClose,
   MdAdd,
-  MdAttachMoney,
   MdHomeWork,
   MdDirectionsCar
 } from 'react-icons/md';
@@ -21,11 +19,8 @@ import {
   query, 
   where, 
   getDocs, 
-  orderBy, 
-  limit, 
   doc, 
   updateDoc,
-  Timestamp
 } from 'firebase/firestore';
 import { getFirestoreInstance } from '@/lib/firebase';
 import { useAuth } from '@/lib/auth-store';
@@ -42,6 +37,7 @@ interface Listing {
   status: 'active' | 'pending' | 'sold';
   price: number;
   views: number;
+  createdAt: any;
 }
 
 interface Inquiry {
@@ -53,7 +49,7 @@ interface Inquiry {
   offerAmount?: number;
   message: string;
   status: 'pending' | 'accepted' | 'rejected';
-  createdAt: Timestamp;
+  createdAt: any;
 }
 
 interface DashboardStats {
@@ -68,7 +64,6 @@ export default function AgentDashboard() {
   const router = useRouter();
   const toast = useToast();
   
-  // State
   const [stats, setStats] = useState<DashboardStats>({
     activeListings: 0,
     pendingOffers: 0,
@@ -80,27 +75,28 @@ export default function AgentDashboard() {
   const [isLoading, setIsLoading] = useState(true);
   const [activeFilter, setActiveFilter] = useState('All');
 
-  // Fetch Dashboard Data
   useEffect(() => {
     const fetchData = async () => {
-      if (!user?.id) return;
+      // Wait for auth to settle
+      if (!user?.id) {
+        if (!authLoading) setIsLoading(false);
+        return;
+      }
       
       try {
         const db = getFirestoreInstance();
         
         // 1. Fetch Listings
+        // Note: Removed orderBy('createdAt') to prevent "Missing Index" errors.
+        // Sorting is handled client-side below.
         const listingsRef = collection(db, 'listings');
-        const qListings = query(
-          listingsRef, 
-          where('agentId', '==', user.id),
-          orderBy('createdAt', 'desc')
-        );
+        const qListings = query(listingsRef, where('agentId', '==', user.id));
         const listingsSnap = await getDocs(qListings);
         
         const fetchedListings: Listing[] = [];
         let activeCount = 0;
         let totalViews = 0;
-        let earnings = 0; // In a real app, calculate from 'sold' listings
+        let earnings = 0;
 
         listingsSnap.forEach(doc => {
           const data = doc.data();
@@ -109,87 +105,87 @@ export default function AgentDashboard() {
             title: data.title,
             location: data.location || data.address || 'No location',
             images: data.images || [],
-            type: data.type, // 'house' or 'car'
+            type: data.type,
             status: data.status,
             price: data.price,
-            views: data.views || 0
+            views: data.views || 0,
+            createdAt: data.createdAt
           });
 
           if (data.status === 'active') activeCount++;
           totalViews += (data.views || 0);
-          if (data.status === 'sold') earnings += (data.commission || 0); // Assuming commission field exists
+          // Mock earnings calculation (e.g., 5% commission on sold items)
+          if (data.status === 'sold') earnings += (data.price * 0.05); 
         });
+
+        // Sort client-side (Newest first)
+        fetchedListings.sort((a, b) => 
+          (b.createdAt?.seconds || 0) - (a.createdAt?.seconds || 0)
+        );
 
         setListings(fetchedListings);
 
         // 2. Fetch Inquiries/Offers
         const inquiriesRef = collection(db, 'inquiries');
-        const qInquiries = query(
-          inquiriesRef,
-          where('agentId', '==', user.id),
-          where('status', '==', 'pending'),
-          orderBy('createdAt', 'desc'),
-          limit(5)
-        );
+        const qInquiries = query(inquiriesRef, where('agentId', '==', user.id));
         const inquiriesSnap = await getDocs(qInquiries);
         
         const fetchedInquiries: Inquiry[] = [];
         inquiriesSnap.forEach(doc => {
           const data = doc.data();
-          fetchedInquiries.push({
-            id: doc.id,
-            userName: data.userName,
-            userPhoto: data.userPhoto,
-            listingTitle: data.listingTitle,
-            listingId: data.listingId,
-            offerAmount: data.offerAmount, // If it's an offer
-            message: data.message,
-            status: data.status,
-            createdAt: data.createdAt
-          });
+          // Only show pending in the recent list
+          if (data.status === 'pending') {
+            fetchedInquiries.push({
+              id: doc.id,
+              userName: data.userName,
+              userPhoto: data.userPhoto,
+              listingTitle: data.listingTitle,
+              listingId: data.listingId,
+              offerAmount: data.offerAmount,
+              message: data.message,
+              status: data.status,
+              createdAt: data.createdAt
+            });
+          }
         });
+
+        // Sort client-side
+        fetchedInquiries.sort((a, b) => 
+          (b.createdAt?.seconds || 0) - (a.createdAt?.seconds || 0)
+        );
 
         setInquiries(fetchedInquiries);
 
-        // 3. Update Stats
         setStats({
           activeListings: activeCount,
-          pendingOffers: inquiriesSnap.size,
-          totalEarnings: earnings, // Placeholder logic
+          pendingOffers: fetchedInquiries.length,
+          totalEarnings: earnings,
           viewsTotal: totalViews
         });
 
         setIsLoading(false);
-      } catch (error) {
-        console.error("Error fetching dashboard data:", error);
-        toast.error("Data Error", "Failed to load dashboard data");
+      } catch (error: any) {
+        console.error("Dashboard Error:", error);
+        // Only show error toast if it's not a permission issue (avoids toast spam on redirect)
+        if (error.code !== 'permission-denied') {
+          toast.error("Data Error", "Failed to load dashboard data. Check console.");
+        }
         setIsLoading(false);
       }
     };
 
     if (!authLoading) {
-      if (!user || user.role !== 'agent') {
-        // Redirect if not authorized
-        // router.push('/auth/login');
-      } else {
-        fetchData();
-      }
+      fetchData();
     }
-  }, [user, authLoading, toast, router]);
+  }, [user, authLoading, toast]);
 
   // Actions
-  const handleAcceptOffer = async (inquiryId: string, listingTitle: string) => {
+  const handleAcceptOffer = async (inquiryId: string) => {
     try {
       const db = getFirestoreInstance();
-      await updateDoc(doc(db, 'inquiries', inquiryId), {
-        status: 'accepted'
-      });
-      
-      // Remove from local state
+      await updateDoc(doc(db, 'inquiries', inquiryId), { status: 'accepted' });
       setInquiries(prev => prev.filter(i => i.id !== inquiryId));
-      toast.success('Offer Accepted', `You accepted the offer for ${listingTitle}`);
-      
-      // Here you might also trigger a notification to the user
+      toast.success('Offer Accepted', `You accepted the offer`);
     } catch (error) {
       toast.error('Action Failed', 'Could not accept offer');
     }
@@ -198,10 +194,7 @@ export default function AgentDashboard() {
   const handleRejectOffer = async (inquiryId: string) => {
     try {
       const db = getFirestoreInstance();
-      await updateDoc(doc(db, 'inquiries', inquiryId), {
-        status: 'rejected'
-      });
-      
+      await updateDoc(doc(db, 'inquiries', inquiryId), { status: 'rejected' });
       setInquiries(prev => prev.filter(i => i.id !== inquiryId));
       toast.info('Offer Rejected', 'You rejected the offer');
     } catch (error) {
@@ -209,42 +202,24 @@ export default function AgentDashboard() {
     }
   };
 
-  // Filtering
   const filteredListings = activeFilter === 'All' 
     ? listings 
     : activeFilter === 'Houses'
       ? listings.filter(l => l.type === 'house')
       : listings.filter(l => l.type === 'car');
 
-  if (authLoading || isLoading) {
-    return <div className={styles.loadingScreen}>Loading Dashboard...</div>;
-  }
+  if (authLoading || isLoading) return <div className={styles.loadingScreen}>Loading Dashboard...</div>;
 
   return (
     <div className={styles.container}>
-      
-      {/* Header */}
       <header className={styles.header}>
-        <motion.div 
-          className={styles.welcomeSection}
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-        >
+        <div className={styles.welcomeSection}>
           <h1 className={styles.title}>
             Welcome back, <span className={styles.highlight}>{user?.displayName || 'Agent'}</span>!
           </h1>
-          <p className={styles.subtitle}>Here's what's happening with your listings today.</p>
-        </motion.div>
-
+          <p className={styles.subtitle}>Here's an overview of your business.</p>
+        </div>
         <div className={styles.headerActions}>
-          <div className={styles.searchBar}>
-            <MdSearch className={styles.searchIcon} />
-            <input type="text" placeholder="Search listings..." />
-          </div>
-          <button className={styles.iconBtn}>
-            <MdNotifications />
-            {stats.pendingOffers > 0 && <div className={styles.badge} />}
-          </button>
           <button 
             className={styles.addBtn}
             onClick={() => router.push('/agent/listings/add')}
@@ -254,56 +229,31 @@ export default function AgentDashboard() {
         </div>
       </header>
 
-      {/* Stats Row */}
       <div className={styles.statsGrid}>
-        <motion.div 
-          className={styles.statCard}
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.1 }}
-        >
+        <div className={styles.statCard}>
           <p className={styles.statLabel}>Active Listings</p>
           <div className={styles.statValueRow}>
             <span className={styles.statValue}>{stats.activeListings}</span>
-            <span className={`${styles.statChange} ${styles.positive}`}>
-              <MdHomeWork />
-            </span>
+            <MdHomeWork className={styles.statIcon} />
           </div>
-        </motion.div>
-
-        <motion.div 
-          className={styles.statCard}
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.2 }}
-        >
+        </div>
+        <div className={styles.statCard}>
           <p className={styles.statLabel}>Pending Inquiries</p>
           <div className={styles.statValueRow}>
             <span className={styles.statValue}>{stats.pendingOffers}</span>
-            <span className={`${styles.statChange} ${styles.warning}`}>
-              <MdTrendingUp />
-            </span>
+            <MdNotifications className={styles.statIcon} />
           </div>
-        </motion.div>
-
-        <motion.div 
-          className={styles.statCard}
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.3 }}
-        >
+        </div>
+        <div className={styles.statCard}>
           <p className={styles.statLabel}>Total Views</p>
           <div className={styles.statValueRow}>
             <span className={styles.statValue}>{stats.viewsTotal}</span>
-            <span className={`${styles.statChange} ${styles.info}`}>
-              <MdTrendingUp />
-            </span>
+            <MdTrendingUp className={styles.statIcon} />
           </div>
-        </motion.div>
+        </div>
       </div>
 
       <div className={styles.mainGrid}>
-        {/* Left Column: Listings */}
         <div className={styles.listingsSection}>
           <div className={styles.sectionHeader}>
             <h2>My Listings</h2>
@@ -334,22 +284,17 @@ export default function AgentDashboard() {
               <tbody>
                 {filteredListings.length === 0 ? (
                   <tr>
-                    <td colSpan={5} style={{textAlign: 'center', padding: '2rem'}}>
-                      No listings found. Start by adding one!
+                    <td colSpan={5} className={styles.emptyCell}>
+                      No listings found.
                     </td>
                   </tr>
                 ) : (
-                  filteredListings.map((listing, i) => (
-                    <motion.tr 
-                      key={listing.id}
-                      initial={{ opacity: 0, x: -10 }}
-                      animate={{ opacity: 1, x: 0 }}
-                      transition={{ delay: 0.1 + (i * 0.05) }}
-                    >
+                  filteredListings.map((listing) => (
+                    <tr key={listing.id}>
                       <td>
                         <div className={styles.listingCell}>
                           <img 
-                            src={listing.images[0] || '/placeholder-image.jpg'} 
+                            src={listing.images[0] || 'https://via.placeholder.com/50'} 
                             alt={listing.title} 
                             className={styles.listingImage} 
                           />
@@ -359,11 +304,7 @@ export default function AgentDashboard() {
                           </div>
                         </div>
                       </td>
-                      <td>
-                        <span className={styles.typeBadge}>
-                          {listing.type === 'house' ? <MdHomeWork/> : <MdDirectionsCar/>} {listing.type}
-                        </span>
-                      </td>
+                      <td><span className={styles.typeBadge}>{listing.type}</span></td>
                       <td>
                         <span className={`${styles.statusBadge} ${styles[listing.status]}`}>
                           {listing.status}
@@ -371,9 +312,9 @@ export default function AgentDashboard() {
                       </td>
                       <td className={styles.priceText}>${listing.price.toLocaleString()}</td>
                       <td>
-                        <button className={styles.actionBtn} title="Options"><MdMoreHoriz /></button>
+                        <button className={styles.actionBtn}><MdMoreHoriz /></button>
                       </td>
-                    </motion.tr>
+                    </tr>
                   ))
                 )}
               </tbody>
@@ -381,10 +322,7 @@ export default function AgentDashboard() {
           </div>
         </div>
 
-        {/* Right Column: Offers & Finance */}
         <div className={styles.sideSection}>
-          
-          {/* Recent Offers/Inquiries */}
           <div className={styles.card}>
             <h3 className={styles.cardTitle}>Recent Inquiries</h3>
             {inquiries.length === 0 ? (
@@ -395,34 +333,19 @@ export default function AgentDashboard() {
                   <div key={offer.id} className={styles.offerItem}>
                     <div className={styles.offerHeader}>
                       <div className={styles.offerUser}>
-                        {offer.userPhoto ? (
-                          <img src={offer.userPhoto} alt={offer.userName} />
-                        ) : (
-                          <div className={styles.defaultAvatar}>{offer.userName[0]}</div>
-                        )}
+                         <div className={styles.defaultAvatar}>{offer.userName?.[0] || 'U'}</div>
                         <div>
                           <p className={styles.userName}>{offer.userName}</p>
-                          <p className={styles.offerDetail}>
-                            Interested in {offer.listingTitle}
-                          </p>
+                          <p className={styles.offerDetail}>{offer.listingTitle}</p>
                         </div>
                       </div>
-                      {offer.offerAmount && (
-                        <span className={styles.offerAmount}>${offer.offerAmount.toLocaleString()}</span>
-                      )}
                     </div>
                     <p className={styles.offerMessage}>"{offer.message}"</p>
                     <div className={styles.offerActions}>
-                      <button 
-                        className={styles.acceptBtn}
-                        onClick={() => handleAcceptOffer(offer.id, offer.listingTitle)}
-                      >
+                      <button className={styles.acceptBtn} onClick={() => handleAcceptOffer(offer.id)}>
                         <MdCheck /> Accept
                       </button>
-                      <button 
-                        className={styles.rejectBtn}
-                        onClick={() => handleRejectOffer(offer.id)}
-                      >
+                      <button className={styles.rejectBtn} onClick={() => handleRejectOffer(offer.id)}>
                         <MdClose /> Reject
                       </button>
                     </div>
@@ -431,22 +354,6 @@ export default function AgentDashboard() {
               </div>
             )}
           </div>
-
-          {/* Financial Overview (Placeholder for now) */}
-          <div className={styles.card}>
-            <h3 className={styles.cardTitle}>Financial Overview</h3>
-            <div className={styles.balanceCard}>
-              <p>Estimated Earnings</p>
-              <h2>${stats.totalEarnings.toLocaleString()}</h2>
-              <button 
-                className={styles.withdrawBtn}
-                onClick={() => router.push('/account/wallet')}
-              >
-                View Wallet
-              </button>
-            </div>
-          </div>
-
         </div>
       </div>
     </div>
