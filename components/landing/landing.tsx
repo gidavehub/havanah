@@ -4,14 +4,15 @@ import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
 import { 
-  MdVerified, 
-  MdTimer, 
-  MdStar, 
-  MdTrendingUp,
+  FaShieldAlt, 
+  FaClock, 
+  FaStar, 
+  FaArrowTrendingUp,
   MdApartment,
   MdDirectionsCar,
   MdArrowForward
-} from 'react-icons/md';
+} from 'react-icons/fa6';
+import { FaShield } from 'react-icons/fa';
 import Navbar from '@/components/layout/navbar/navbar';
 import { getAllListings } from '@/lib/firestore-service';
 import styles from './landing.module.css';
@@ -25,22 +26,22 @@ interface Feature {
 
 const features: Feature[] = [
   {
-    icon: <MdVerified className={styles.featureIconLarge} />,
+    icon: <FaShieldAlt className={styles.featureIconLarge} />,
     title: 'Verified Listings',
     description: 'All properties and vehicles are verified for your safety',
   },
   {
-    icon: <MdTimer className={styles.featureIconLarge} />,
+    icon: <FaClock className={styles.featureIconLarge} />,
     title: 'Instant Booking',
     description: 'Book apartments and cars in just a few clicks',
   },
   {
-    icon: <MdStar className={styles.featureIconLarge} />,
+    icon: <FaStar className={styles.featureIconLarge} />,
     title: 'Quality Service',
     description: 'Top-rated hosts and car owners with excellent reviews',
   },
   {
-    icon: <MdTrendingUp className={styles.featureIconLarge} />,
+    icon: <FaArrowTrendingUp className={styles.featureIconLarge} />,
     title: 'Best Prices',
     description: 'Competitive rates with transparent pricing',
   },
