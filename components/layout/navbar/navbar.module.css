@@ -6,8 +6,8 @@
   height: 80px;
   z-index: 100;
   transition: all 0.3s ease;
-  background: transparent;
-  color: white;
+  background: white;
+  color: #111827;
 }
 
 .solid {
