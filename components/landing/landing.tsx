@@ -7,7 +7,7 @@ import {
   FaShieldHalved, 
   FaClock, 
   FaStar, 
-  FaArrowTrendingUp,
+  FaTrendingUp,
 } from 'react-icons/fa6';
 import { MdApartment, MdDirectionsCar, MdArrowForward } from 'react-icons/md';
 import Navbar from '@/components/layout/navbar/navbar';
@@ -38,7 +38,7 @@ const features: Feature[] = [
     description: 'Top-rated hosts and car owners with excellent reviews',
   },
   {
-    icon: <FaArrowTrendingUp className={styles.featureIconLarge} />,
+    icon: <FaTrendingUp className={styles.featureIconLarge} />,
     title: 'Best Prices',
     description: 'Competitive rates with transparent pricing',
   },
