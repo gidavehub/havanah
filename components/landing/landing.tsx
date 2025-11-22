@@ -4,15 +4,12 @@ import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
 import { 
-  FaShieldAlt, 
+  FaShieldHalved, 
   FaClock, 
   FaStar, 
   FaArrowTrendingUp,
-  MdApartment,
-  MdDirectionsCar,
-  MdArrowForward
 } from 'react-icons/fa6';
-import { FaShield } from 'react-icons/fa';
+import { MdApartment, MdDirectionsCar, MdArrowForward } from 'react-icons/md';
 import Navbar from '@/components/layout/navbar/navbar';
 import { getAllListings } from '@/lib/firestore-service';
 import styles from './landing.module.css';
@@ -26,7 +23,7 @@ interface Feature {
 
 const features: Feature[] = [
   {
-    icon: <FaShieldAlt className={styles.featureIconLarge} />,
+    icon: <FaShieldHalved className={styles.featureIconLarge} />,
     title: 'Verified Listings',
     description: 'All properties and vehicles are verified for your safety',
   },
