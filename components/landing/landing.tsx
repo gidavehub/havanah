@@ -1,17 +1,22 @@
-'use client';
+='use client';
 
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
-// CHANGED: Switched from 'react-icons/fa6' to 'react-icons/fa'
-// CHANGED: Switched FaShieldHalved to FaShieldAlt for better compatibility
+// Importing Feather icons for the specific outlined look in the screenshot
 import { 
-  FaShieldAlt, 
-  FaClock, 
-  FaStar, 
-  FaTrendingUp,
-} from 'react-icons/fa';
-import { MdApartment, MdDirectionsCar, MdArrowForward } from 'react-icons/md';
+  FiShield, 
+  FiClock, 
+  FiStar, 
+  FiTrendingUp,
+  FiArrowRight 
+} from 'react-icons/fi';
+// Keeping these for the Hero section buttons
+import { 
+  MdApartment, 
+  MdDirectionsCar 
+} from 'react-icons/md';
+
 import Navbar from '@/components/layout/navbar/navbar';
 import { getAllListings } from '@/lib/firestore-service';
 import styles from './landing.module.css';
@@ -25,23 +30,22 @@ interface Feature {
 
 const features: Feature[] = [
   {
-    // CHANGED: Updated usage to FaShieldAlt
-    icon: <FaShieldAlt className={styles.featureIconLarge} />,
+    icon: <FiShield />, 
     title: 'Verified Listings',
     description: 'All properties and vehicles are verified for your safety',
   },
   {
-    icon: <FaClock className={styles.featureIconLarge} />,
+    icon: <FiClock />, 
     title: 'Instant Booking',
     description: 'Book apartments and cars in just a few clicks',
   },
   {
-    icon: <FaStar className={styles.featureIconLarge} />,
+    icon: <FiStar />, 
     title: 'Quality Service',
     description: 'Top-rated hosts and car owners with excellent reviews',
   },
   {
-    icon: <FaTrendingUp className={styles.featureIconLarge} />,
+    icon: <FiTrendingUp />, 
     title: 'Best Prices',
     description: 'Competitive rates with transparent pricing',
   },
@@ -109,19 +113,13 @@ export default function LandingPage() {
         </div>
       </motion.section>
 
-      {/* Features Section */}
+      {/* Features Section - Matches Screenshot */}
       <section className={styles.featuresSection}>
         <div className={styles.container}>
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8 }}
-            viewport={{ once: true }}
-            className={styles.sectionHeader}
-          >
-            <h2 className={styles.sectionTitle}>Why Choose HAVANA?</h2>
-          </motion.div>
-
+          {/* Removed section header to match screenshot simplicity, 
+              or keep it if you want text above the cards. 
+              The screenshot implies just the cards exist or are the focus. */}
+          
           <div className={styles.featuresGrid}>
             {features.map((feature, index) => (
               <motion.div
@@ -132,7 +130,8 @@ export default function LandingPage() {
                 viewport={{ once: true }}
                 className={styles.featureCard}
               >
-                <div className={styles.featureIcon}>
+                <div className={styles.featureIconWrapper}>
+                  {/* The icon is directly inside the wrapper */}
                   {feature.icon}
                 </div>
                 <h3 className={styles.featureTitle}>{feature.title}</h3>
@@ -152,7 +151,7 @@ export default function LandingPage() {
               <p className={styles.sectionSubtitle}>Discover the most popular apartment listings</p>
             </div>
             <Link href="/explore?type=house" className={styles.viewAllLink}>
-              View All <MdArrowForward className="w-4 h-4" />
+              View All <FiArrowRight className="w-4 h-4" />
             </Link>
           </div>
 
@@ -193,7 +192,7 @@ export default function LandingPage() {
               <p className={styles.sectionSubtitle}>Browse our exclusive car collection</p>
             </div>
             <Link href="/explore?type=car" className={styles.viewAllLink}>
-              View All <MdArrowForward className="w-4 h-4" />
+              View All <FiArrowRight className="w-4 h-4" />
             </Link>
           </div>
 

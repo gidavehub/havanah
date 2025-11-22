@@ -1,6 +1,7 @@
 .wrapper {
   width: 100%;
   background: white;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
 }
 
 .container {
@@ -18,8 +19,9 @@
   justify-content: center;
   overflow: hidden;
   margin-top: 80px;
-  background: url('/hero-image.jpg') center/cover no-repeat;
+  background: url('/hero-image.jpg') center/cover no-repeat; /* Ensure you have this image or change color */
   background-attachment: fixed;
+  background-color: #111827; /* Fallback */
   color: white;
 }
 
@@ -47,14 +49,15 @@
   font-weight: 800;
   margin-bottom: 1.5rem;
   letter-spacing: -0.02em;
+  line-height: 1.1;
 }
 
 .heroSubtitle {
   font-size: clamp(1.125rem, 4vw, 1.5rem);
-  margin-bottom: 2rem;
+  margin-bottom: 2.5rem;
   opacity: 0.95;
   font-weight: 500;
-  color: white;
+  color: #f3f4f6;
 }
 
 .heroCTA {
@@ -70,7 +73,7 @@
   display: inline-flex;
   align-items: center;
   gap: 0.5rem;
-  padding: 0.875rem 2rem;
+  padding: 1rem 2.5rem;
   border-radius: 8px;
   font-weight: 600;
   text-decoration: none;
@@ -91,49 +94,112 @@
 }
 
 .btnPrimary {
-  background: linear-gradient(135deg, #10b981 0%, #10b981 100%);
+  background: #10b981;
   color: white;
+  border: 2px solid #10b981;
 }
 
 .btnPrimary:hover {
+  background: #059669;
+  border-color: #059669;
   transform: translateY(-2px);
-  box-shadow: 0 12px 24px rgba(16, 185, 129, 0.4);
-  background: linear-gradient(135deg, #10b981 0%, #10b981 100%);
+  box-shadow: 0 10px 20px rgba(16, 185, 129, 0.3);
 }
 
 .btnSecondary {
-  background: white;
-  color: #10b981;
-  border: none;
+  background: transparent;
+  color: white;
+  border: 2px solid white;
+  backdrop-filter: blur(4px);
 }
 
 .btnSecondary:hover {
   background: white;
+  color: #111827;
   transform: translateY(-2px);
-  box-shadow: 0 12px 24px rgba(0, 0, 0, 0.2);
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
 }
 
 
-/* ============ FEATURES SECTION ============ */
+/* ============ FEATURES SECTION (Exact Match) ============ */
 .featuresSection {
   padding: 5rem 0;
   background: white;
 }
 
-.sectionHeader {
-  text-align: center;
-  margin-bottom: 4rem;
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
+.featuresGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 2rem;
 }
 
-.sectionHeader > div:first-child {
-  margin: 0 auto;
+.featureCard {
+  background: white;
+  padding: 3rem 2rem; /* Generous padding like the screenshot */
+  border-radius: 12px; /* Soft rounded corners */
+  text-align: center;
+  border: 1px solid #e5e7eb; /* Subtle grey border */
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.featureCard:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.08);
+  border-color: #d1d5db;
+}
+
+/* The circular icon container */
+.featureIconWrapper {
+  width: 80px;
+  height: 80px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  /* The Green to Gold gradient from screenshot */
+  background: linear-gradient(135deg, #22c55e 0%, #ca8a04 100%);
+  border-radius: 50%;
+  margin-bottom: 1.5rem;
+  color: white;
+  font-size: 2rem; /* Controls size of the react-icon */
+}
+
+/* Target the SVG inside to ensure it has stroke but no fill if needed */
+.featureIconWrapper svg {
+  stroke-width: 2px;
+  width: 36px;
+  height: 36px;
+}
+
+.featureTitle {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: #111827;
+  margin-bottom: 0.75rem;
+  letter-spacing: -0.01em;
+}
+
+.featureDescription {
+  font-size: 0.95rem;
+  color: #6b7280;
+  line-height: 1.6;
+  font-weight: 400;
+}
+
+/* ============ COMMON SECTION HEADERS ============ */
+.sectionHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  margin-bottom: 3rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid #f3f4f6;
 }
 
 .sectionTitle {
-  font-size: clamp(1.875rem, 5vw, 2.5rem);
+  font-size: 2rem;
   font-weight: 800;
   color: #111827;
   margin-bottom: 0.5rem;
@@ -141,91 +207,27 @@
 }
 
 .sectionSubtitle {
-  font-size: 1rem;
+  font-size: 1.05rem;
   color: #6b7280;
-  margin-top: 0.5rem;
 }
 
 .viewAllLink {
   display: inline-flex;
   align-items: center;
   gap: 0.5rem;
-  padding: 0.75rem 1.5rem;
-  border: 2px solid #10b981;
-  border-radius: 8px;
-  text-decoration: none;
   color: #10b981;
   font-weight: 600;
-  transition: all 0.3s ease;
-  white-space: nowrap;
-  background: rgba(16, 185, 129, 0.05);
+  text-decoration: none;
+  font-size: 1rem;
+  transition: color 0.2s ease;
 }
 
 .viewAllLink:hover {
-  background: rgba(16, 185, 129, 0.1);
-  border-color: #f59e0b;
-  color: #f59e0b;
+  color: #059669;
+  text-decoration: underline;
 }
 
-.featuresGrid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-  gap: 2rem;
-}
-
-.featureCard {
-  background: white;
-  padding: 2rem;
-  border-radius: 12px;
-  text-align: center;
-  border: 1px solid #f3f4f6;
-  transition: all 0.3s ease;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
-}
-
-.featureCard:hover {
-  box-shadow: 0 16px 32px rgba(16, 185, 129, 0.12);
-  transform: translateY(-8px);
-  border-color: #e5e7eb;
-}
-
-.featureIcon {
-  width: 100px;
-  height: 100px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: linear-gradient(135deg, #10b981 0%, #f59e0b 100%);
-  border-radius: 50%;
-  margin-bottom: 1.5rem;
-  box-shadow: 0 8px 20px rgba(16, 185, 129, 0.3);
-}
-
-.featureIconLarge {
-  width: 50px;
-  height: 50px;
-  color: white;
-  stroke-width: 1;
-  filter: drop-shadow(0 2px 8px rgba(0, 0, 0, 0.1));
-}
-
-.featureTitle {
-  font-size: 1.25rem;
-  font-weight: 600;
-  color: #111827;
-  margin-bottom: 0.5rem;
-}
-
-.featureDescription {
-  font-size: 0.95rem;
-  color: #6b7280;
-  line-height: 1.6;
-}
-
-/* ============ TRENDING APARTMENTS SECTION ============ */
+/* ============ LISTINGS GRID (Shared) ============ */
 .trendingSection {
   padding: 5rem 0;
   background: #f9fafb;
@@ -238,37 +240,36 @@
 
 .listingsGrid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
   gap: 2rem;
 }
 
 .skeletonCard {
   background: #e5e7eb;
   border-radius: 12px;
-  height: 350px;
+  height: 380px;
   animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
 }
 
 @keyframes pulse {
-  0%, 100% {
-    opacity: 1;
-  }
-  50% {
-    opacity: 0.5;
-  }
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
 }
 
 .emptyState {
   text-align: center;
-  padding: 3rem;
+  padding: 4rem;
+  background: white;
+  border-radius: 12px;
+  border: 1px dashed #d1d5db;
   color: #6b7280;
   font-size: 1.125rem;
 }
 
 /* ============ CTA SECTION ============ */
 .ctaSection {
-  padding: 5rem 0;
-  background: linear-gradient(135deg, #10b981 0%, #f59e0b 100%);
+  padding: 6rem 0;
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
   color: white;
 }
 
@@ -279,67 +280,65 @@
 }
 
 .ctaTitle {
-  font-size: clamp(1.875rem, 5vw, 2.5rem);
+  font-size: clamp(2rem, 5vw, 3rem);
   font-weight: 800;
   margin-bottom: 1rem;
   letter-spacing: -0.02em;
 }
 
 .ctaSubtitle {
-  font-size: 1.125rem;
-  margin-bottom: 2rem;
+  font-size: 1.25rem;
+  margin-bottom: 2.5rem;
   opacity: 0.95;
   font-weight: 500;
+  line-height: 1.5;
 }
 
 .ctaButton {
   display: inline-block;
-  padding: 0.875rem 2rem;
-  background: rgba(255, 255, 255, 0.95);
-  color: #10b981;
+  padding: 1rem 3rem;
+  background: white;
+  color: #059669;
   text-decoration: none;
   border-radius: 8px;
-  font-weight: 600;
+  font-weight: 700;
+  font-size: 1.125rem;
   transition: all 0.3s ease;
-  backdrop-filter: blur(10px);
+  box-shadow: 0 4px 6px rgba(0,0,0,0.1);
 }
 
 .ctaButton:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 12px 24px rgba(0, 0, 0, 0.15);
-  background: white;
+  transform: translateY(-3px);
+  box-shadow: 0 15px 30px rgba(0, 0, 0, 0.15);
 }
 
 /* ============ FOOTER ============ */
 .footer {
-  background: linear-gradient(135deg, #111827 0%, #1f2937 100%);
+  background: #111827;
   color: white;
-  padding: 3rem 0 1rem;
+  padding: 5rem 0 2rem;
+  border-top: 1px solid #1f2937;
 }
 
 .footerContent {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-  gap: 2rem;
-  margin-bottom: 2rem;
-}
-
-.footerSection {
-  display: flex;
-  flex-direction: column;
-  gap: 0.75rem;
+  gap: 3rem;
+  margin-bottom: 4rem;
 }
 
 .footerSection h4 {
-  font-size: 1rem;
+  font-size: 1.125rem;
   font-weight: 700;
-  margin-bottom: 0.5rem;
+  margin-bottom: 1.25rem;
+  color: #f3f4f6;
 }
 
 .footerSection p {
   font-size: 0.95rem;
   line-height: 1.6;
-  color: #d1d5db;
+  color: #9ca3af;
+  max-width: 300px;
 }
 
 .footerSection ul {
@@ -353,27 +352,28 @@
 }
 
 .footerSection a {
-  color: #d1d5db;
+  color: #9ca3af;
   text-decoration: none;
-  transition: color 0.3s ease;
+  transition: color 0.2s ease;
+  font-size: 0.95rem;
 }
 
 .footerSection a:hover {
-  color: #667eea;
+  color: #10b981;
 }
 
 .footerBottom {
   text-align: center;
-  padding-top: 1.5rem;
-  border-top: 1px solid rgba(255, 255, 255, 0.1);
-  color: #9ca3af;
-  font-size: 0.9rem;
+  padding-top: 2rem;
+  border-top: 1px solid #1f2937;
+  color: #6b7280;
+  font-size: 0.875rem;
 }
 
 /* ============ RESPONSIVE ============ */
 @media (max-width: 768px) {
   .container {
-    padding: 0 1rem;
+    padding: 0 1.5rem;
   }
 
   .heroSection {
@@ -387,34 +387,24 @@
 
   .sectionHeader {
     flex-direction: column;
-    align-items: center;
-    gap: 1.5rem;
-  }
-
-  .sectionHeader > div:first-child {
-    width: 100%;
+    align-items: flex-start;
+    gap: 1rem;
+    text-align: left;
   }
 
   .viewAllLink {
-    width: 100%;
-    justify-content: center;
+    align-self: flex-start;
   }
 
   .featuresGrid {
-    grid-template-columns: 1fr;
-    gap: 1.5rem;
+    grid-template-columns: 1fr; /* Stack on mobile */
   }
-
+  
   .listingsGrid {
     grid-template-columns: 1fr;
-    gap: 1.5rem;
-  }
-
-  .ctaContent {
-    padding: 0 1rem;
   }
 
   .footerContent {
-    grid-template-columns: 1fr;
+    gap: 2rem;
   }
 }
