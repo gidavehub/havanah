@@ -5,6 +5,9 @@ import ToastProvider from '@/components/toast/toast';
 export const metadata: Metadata = {
   title: 'Havanah - Premium Real Estate & Vehicle Rentals',
   description: 'Your gateway to premium real estate and vehicle rentals. Rent or buy properties and vehicles with ease.',
+  icons: {
+    icon: '/logo.jpg',
+  },
   openGraph: {
     title: 'Havanah',
     description: 'Premium Real Estate & Vehicle Rentals',

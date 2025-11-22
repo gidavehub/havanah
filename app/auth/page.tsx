@@ -1,12 +1,12 @@
 'use client';
 
 import React, { useState } from 'react';
-import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/lib/auth-store';
 import { useToast } from '@/components/toast/toast';
 import Navbar from '@/components/layout/navbar/navbar';
-import { FaGoogle, FaUser, FaBriefcase, FaCheck, FaArrowRight } from 'react-icons/fa';
+// Removed FaGoogle from imports
+import { FaUser, FaBriefcase, FaArrowRight } from 'react-icons/fa';
 import { motion, AnimatePresence, useMotionValue, useTransform } from 'framer-motion';
 import styles from './auth.module.css';
 
@@ -256,7 +256,8 @@ export default function AuthPage() {
                   onClick={handleGoogleAuth}
                   disabled={loading}
                 >
-                  <FaGoogle /> Sign in with Google
+                  <img src="/google.png" alt="Google" className={styles.googleIcon} />
+                  <span>Sign in with Google</span>
                 </motion.button>
               </motion.div>
             )}
@@ -405,7 +406,8 @@ export default function AuthPage() {
                   onClick={handleGoogleAuth}
                   disabled={loading}
                 >
-                  <FaGoogle /> Sign up with Google
+                  <img src="/google.png" alt="Google" className={styles.googleIcon} />
+                  <span>Sign up with Google</span>
                 </motion.button>
               </motion.div>
             )}
