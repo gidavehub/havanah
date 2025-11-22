@@ -4,9 +4,8 @@ import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { motion, useScroll, useMotionValueEvent } from 'framer-motion';
-import { MdMenu, MdClose, MdDashboard } from 'react-icons/md';
+import { MdMenu, MdClose, MdDashboard, MdApartment, MdDirectionsCar, MdExplore, MdHome } from 'react-icons/md';
 import { useAuth } from '@/lib/auth-store';
-import AuthModal from '@/components/auth/auth-modal';
 import styles from './navbar.module.css';
 
 export default function Navbar() {
@@ -15,7 +14,6 @@ export default function Navbar() {
   const pathname = usePathname();
   const [isScrolled, setIsScrolled] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const [authModalOpen, setAuthModalOpen] = useState(false);
   const { scrollY } = useScroll();
 
   useMotionValueEvent(scrollY, "change", (latest) => {
@@ -23,6 +21,13 @@ export default function Navbar() {
   });
 
   const isLanding = pathname === '/';
+
+  const navLinks = [
+    { href: '/', label: 'Home', icon: <MdHome /> },
+    { href: '/explore?type=house', label: 'Apartments', icon: <MdApartment /> },
+    { href: '/explore?type=car', label: 'Rent a Car', icon: <MdDirectionsCar /> },
+    { href: '/explore', label: 'Explore All', icon: <MdExplore /> },
+  ];
 
   return (
     <header 
@@ -36,10 +41,16 @@ export default function Navbar() {
 
         {/* Desktop Nav */}
         <nav className={styles.desktopNav}>
-          <Link href="/" className={pathname === '/' ? styles.active : ''}>Home</Link>
-          <Link href="/explore?type=house" className={pathname?.includes('house') ? styles.active : ''}>Apartments</Link>
-          <Link href="/explore?type=car" className={pathname?.includes('car') ? styles.active : ''}>Rent a Car</Link>
-          <Link href="/explore" className={pathname === '/explore' ? styles.active : ''}>Buy a Car</Link>
+          {navLinks.map((link) => (
+            <Link 
+              key={link.href}
+              href={link.href} 
+              className={pathname === link.href || (link.href.includes('?') && pathname.includes('explore')) ? styles.active : ''}
+            >
+              <span className={styles.navIcon}>{link.icon}</span>
+              {link.label}
+            </Link>
+          ))}
         </nav>
 
         {/* Auth Actions */}
@@ -52,12 +63,12 @@ export default function Navbar() {
               <MdDashboard /> Dashboard
             </button>
           ) : (
-            <button 
-              className={styles.signupBtn}
-              onClick={() => setAuthModalOpen(true)}
-            >
-              Sign In
-            </button>
+            <>
+              <Link href="/auth" className={styles.loginLink}>Log In</Link>
+              <Link href="/auth" className={styles.signupBtn}>
+                Sign Up
+              </Link>
+            </>
           )}
           
           {/* Mobile Toggle */}
@@ -77,21 +88,28 @@ export default function Navbar() {
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
         >
-          <Link href="/" onClick={() => setMobileMenuOpen(false)}>Home</Link>
-          <Link href="/explore?type=house" onClick={() => setMobileMenuOpen(false)}>Apartments</Link>
-          <Link href="/explore?type=car" onClick={() => setMobileMenuOpen(false)}>Rent a Car</Link>
-          <Link href="/explore" onClick={() => setMobileMenuOpen(false)}>Buy a Car</Link>
+          {navLinks.map((link) => (
+            <Link 
+              key={link.href}
+              href={link.href} 
+              onClick={() => setMobileMenuOpen(false)}
+              className={pathname === link.href ? styles.active : ''}
+            >
+              <span className={styles.navIcon}>{link.icon}</span>
+              {link.label}
+            </Link>
+          ))}
           <hr />
           {user ? (
             <button onClick={() => router.push(user.role === 'agent' ? '/agent/dashboard' : '/user/dashboard')}>My Dashboard</button>
           ) : (
-            <button onClick={() => { setAuthModalOpen(true); setMobileMenuOpen(false); }}>Sign In</button>
+            <>
+              <Link href="/auth" onClick={() => setMobileMenuOpen(false)}>Log In</Link>
+              <Link href="/auth" onClick={() => setMobileMenuOpen(false)}>Sign Up</Link>
+            </>
           )}
         </motion.div>
       )}
-
-      {/* Auth Modal */}
-      <AuthModal isOpen={authModalOpen} onClose={() => setAuthModalOpen(false)} />
     </header>
   );
 }

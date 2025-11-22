@@ -1,11 +1,14 @@
-'use client';
+import type { Metadata } from 'next';
 
-import PublicLayout from '@/components/layout/public-layout';
+export const metadata: Metadata = {
+  title: 'Sign In / Sign Up - HAVANA',
+  description: 'Sign in to your account or create a new one',
+};
 
 export default function AuthLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  return <PublicLayout>{children}</PublicLayout>;
+  return <>{children}</>;
 }
