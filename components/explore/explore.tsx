@@ -3,6 +3,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import Navbar from '@/components/layout/navbar/navbar';
+import CategoryDropdown from './category-dropdown';
 import { 
   MdSearch, 
   MdFilterList, 
@@ -270,16 +271,10 @@ export default function ExplorePage() {
             >
               <div className={styles.filterGrid}>
                 <div className={styles.filterGroup}>
-                  <label>Category</label>
-                  <select
+                  <CategoryDropdown
                     value={filters.category || ''}
-                    onChange={e => handleFilterChange('category', e.target.value || undefined)}
-                    className={styles.filterSelect}
-                  >
-                    <option value="">All</option>
-                    <option value="rent">For Rent</option>
-                    <option value="sale">For Sale</option>
-                  </select>
+                    onChange={(value) => handleFilterChange('category', value || undefined)}
+                  />
                 </div>
                 <div className={styles.filterGroup}>
                   <label>Min Price</label>

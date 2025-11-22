@@ -47,8 +47,8 @@ const features: Feature[] = [
 ];
 
 export default function LandingPage() {
-  const [apartments, setApartments] = useState([]);
-  const [cars, setCars] = useState([]);
+  const [apartments, setApartments] = useState<any[]>([]);
+  const [cars, setCars] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
@@ -238,7 +238,7 @@ export default function LandingPage() {
             <p className={styles.ctaSubtitle}>
               Join thousands of happy customers who found their perfect apartment or car
             </p>
-            <Link href="/auth/signup" className={styles.ctaButton}>
+            <Link href="/auth/" className={styles.ctaButton}>
               Sign Up Now
             </Link>
           </motion.div>
