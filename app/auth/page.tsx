@@ -113,7 +113,11 @@ export default function AuthPage() {
 
   const itemVariants = {
     hidden: { y: 20, opacity: 0 },
-    visible: { y: 0, opacity: 1, transition: { type: 'spring', stiffness: 100 } }
+    visible: { 
+      y: 0, 
+      opacity: 1, 
+      transition: { type: 'spring' as const, stiffness: 100 } 
+    }
   };
 
   return (
@@ -151,7 +155,6 @@ export default function AuthPage() {
             transition={{ delay: 0.1 }}
           >
             <img src="/logo.jpg" alt="HAVANA" className={styles.logo} />
-            <h1 className={styles.logoText}>HAVANA</h1>
           </motion.div>
 
           {/* Toggle Switch */}

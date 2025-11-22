@@ -25,22 +25,22 @@ interface Feature {
 
 const features: Feature[] = [
   {
-    icon: <MdVerified className="w-8 h-8 text-white" />,
+    icon: <MdVerified className={styles.featureIconLarge} />,
     title: 'Verified Listings',
     description: 'All properties and vehicles are verified for your safety',
   },
   {
-    icon: <MdTimer className="w-8 h-8 text-white" />,
+    icon: <MdTimer className={styles.featureIconLarge} />,
     title: 'Instant Booking',
     description: 'Book apartments and cars in just a few clicks',
   },
   {
-    icon: <MdStar className="w-8 h-8 text-white" />,
+    icon: <MdStar className={styles.featureIconLarge} />,
     title: 'Quality Service',
     description: 'Top-rated hosts and car owners with excellent reviews',
   },
   {
-    icon: <MdTrendingUp className="w-8 h-8 text-white" />,
+    icon: <MdTrendingUp className={styles.featureIconLarge} />,
     title: 'Best Prices',
     description: 'Competitive rates with transparent pricing',
   },
