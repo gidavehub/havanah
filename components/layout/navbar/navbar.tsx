@@ -4,8 +4,9 @@ import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { motion, useScroll, useMotionValueEvent } from 'framer-motion';
-import { MdMenu, MdClose, MdDashboard, MdLogin } from 'react-icons/md';
+import { MdMenu, MdClose, MdDashboard } from 'react-icons/md';
 import { useAuth } from '@/lib/auth-store';
+import AuthModal from '@/components/auth/auth-modal';
 import styles from './navbar.module.css';
 
 export default function Navbar() {
@@ -14,6 +15,7 @@ export default function Navbar() {
   const pathname = usePathname();
   const [isScrolled, setIsScrolled] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [authModalOpen, setAuthModalOpen] = useState(false);
   const { scrollY } = useScroll();
 
   useMotionValueEvent(scrollY, "change", (latest) => {
@@ -36,8 +38,8 @@ export default function Navbar() {
         <nav className={styles.desktopNav}>
           <Link href="/" className={pathname === '/' ? styles.active : ''}>Home</Link>
           <Link href="/explore?type=house" className={pathname?.includes('house') ? styles.active : ''}>Apartments</Link>
-          <Link href="/explore?type=car" className={pathname?.includes('car') ? styles.active : ''}>Cars</Link>
-          <Link href="/explore" className={pathname === '/explore' ? styles.active : ''}>Explore All</Link>
+          <Link href="/explore?type=car" className={pathname?.includes('car') ? styles.active : ''}>Rent a Car</Link>
+          <Link href="/explore" className={pathname === '/explore' ? styles.active : ''}>Buy a Car</Link>
         </nav>
 
         {/* Auth Actions */}
@@ -50,12 +52,12 @@ export default function Navbar() {
               <MdDashboard /> Dashboard
             </button>
           ) : (
-            <>
-              <Link href="/auth/login" className={styles.loginLink}>Log In</Link>
-              <Link href="/auth/signup" className={styles.signupBtn}>
-                Sign Up
-              </Link>
-            </>
+            <button 
+              className={styles.signupBtn}
+              onClick={() => setAuthModalOpen(true)}
+            >
+              Sign In
+            </button>
           )}
           
           {/* Mobile Toggle */}
@@ -77,19 +79,19 @@ export default function Navbar() {
         >
           <Link href="/" onClick={() => setMobileMenuOpen(false)}>Home</Link>
           <Link href="/explore?type=house" onClick={() => setMobileMenuOpen(false)}>Apartments</Link>
-          <Link href="/explore?type=car" onClick={() => setMobileMenuOpen(false)}>Cars</Link>
-          <Link href="/explore" onClick={() => setMobileMenuOpen(false)}>Explore All</Link>
+          <Link href="/explore?type=car" onClick={() => setMobileMenuOpen(false)}>Rent a Car</Link>
+          <Link href="/explore" onClick={() => setMobileMenuOpen(false)}>Buy a Car</Link>
           <hr />
           {user ? (
             <button onClick={() => router.push(user.role === 'agent' ? '/agent/dashboard' : '/user/dashboard')}>My Dashboard</button>
           ) : (
-            <>
-              <Link href="/auth/login" onClick={() => setMobileMenuOpen(false)}>Log In</Link>
-              <Link href="/auth/signup" onClick={() => setMobileMenuOpen(false)}>Sign Up</Link>
-            </>
+            <button onClick={() => { setAuthModalOpen(true); setMobileMenuOpen(false); }}>Sign In</button>
           )}
         </motion.div>
       )}
+
+      {/* Auth Modal */}
+      <AuthModal isOpen={authModalOpen} onClose={() => setAuthModalOpen(false)} />
     </header>
   );
 }

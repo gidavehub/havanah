@@ -6,23 +6,25 @@
   height: 80px;
   z-index: 100;
   transition: all 0.3s ease;
-  background: white;
+  background: rgba(255, 255, 255, 0.7);
+  backdrop-filter: blur(20px);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.3);
   color: #111827;
 }
 
 .solid {
-  background: rgba(255, 255, 255, 0.8);
+  background: rgba(255, 255, 255, 0.7);
   color: #111827;
-  border-bottom: 1px solid rgba(16, 185, 129, 0.2);
-  backdrop-filter: blur(10px);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.3);
+  backdrop-filter: blur(20px);
 }
 
 .scrolled {
-  background: rgba(255, 255, 255, 0.85);
-  backdrop-filter: blur(15px);
+  background: rgba(255, 255, 255, 0.75);
+  backdrop-filter: blur(25px);
   color: #111827;
   height: 70px;
-  box-shadow: 0 4px 20px rgba(16, 185, 129, 0.08);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
 }
 
 .container {
@@ -66,16 +68,15 @@
 
 .desktopNav a {
   text-decoration: none;
-  color: inherit;
+  color: #111827;
   font-weight: 500;
   font-size: 0.95rem;
   transition: all 0.3s ease;
-  opacity: 1;
+  opacity: 0.8;
   position: relative;
-  background: linear-gradient(135deg, #10b981 0%, #f59e0b 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
 }
 
 .desktopNav a::after {
@@ -113,48 +114,28 @@
   gap: 1.5rem;
 }
 
-.loginLink {
-  text-decoration: none;
-  color: #10b981;
-  font-weight: 600;
-  font-size: 0.95rem;
-  transition: all 0.3s ease;
-}
-
-.loginLink:hover {
-  opacity: 0.7;
-}
-
 .signupBtn {
-  text-decoration: none;
-  background: rgba(16, 185, 129, 0.2);
-  color: inherit;
-  padding: 0.6rem 1.25rem;
+  background: linear-gradient(135deg, #10b981 0%, #f59e0b 100%);
+  color: white;
+  padding: 0.7rem 1.5rem;
   border-radius: 8px;
   font-weight: 600;
   font-size: 0.95rem;
   transition: all 0.3s ease;
-  border: 1px solid rgba(16, 185, 129, 0.4);
-  backdrop-filter: blur(10px);
-}
-
-.scrolled .signupBtn, 
-.solid .signupBtn {
-  background: linear-gradient(135deg, #10b981 0%, #f59e0b 100%);
-  color: white;
   border: none;
+  cursor: pointer;
 }
 
 .signupBtn:hover {
   transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.2);
+  box-shadow: 0 8px 16px rgba(16, 185, 129, 0.3);
 }
 
 .dashboardBtn {
   display: flex;
   align-items: center;
   gap: 0.5rem;
-  padding: 0.6rem 1.25rem;
+  padding: 0.7rem 1.5rem;
   border-radius: 8px;
   border: none;
   background: linear-gradient(135deg, #10b981 0%, #f59e0b 100%);
@@ -166,7 +147,7 @@
 
 .dashboardBtn:hover {
   transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+  box-shadow: 0 8px 16px rgba(16, 185, 129, 0.3);
 }
 
 /* Mobile */
