@@ -1,12 +1,12 @@
 'use client';
 
 import React from 'react';
-import AppLayout from '@/components/layout/app-layout';
+import PublicLayout from '@/components/layout/public-layout';
 
 export default function ExploreLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  return <AppLayout>{children}</AppLayout>;
+  return <PublicLayout>{children}</PublicLayout>;
 }

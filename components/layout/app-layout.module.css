@@ -1,11 +1,12 @@
-.appWrapper {
+.dashboardWrapper {
   display: flex;
+  flex-direction: column;
   min-height: 100vh;
   position: relative;
   overflow-x: hidden;
 }
 
-.appWrapper::before {
+.dashboardWrapper::before {
   content: '';
   position: fixed;
   top: 0;
@@ -18,14 +19,14 @@
 }
 
 /* Aurora effects */
-.appWrapper::after {
+.dashboardWrapper::after {
   content: '';
   position: fixed;
   top: -25%;
   left: -25%;
   width: 50%;
   height: 50%;
-  background: radial-gradient(circle, rgba(137, 207, 240, 0.15) 0%, transparent 70%);
+  background: radial-gradient(circle, rgba(16, 185, 129, 0.1) 0%, transparent 70%);
   border-radius: 50%;
   z-index: -5;
   pointer-events: none;
@@ -39,6 +40,12 @@
   50% {
     opacity: 0.7;
   }
+}
+
+.dashboardContainer {
+  display: flex;
+  flex: 1;
+  margin-top: 80px;
 }
 
 .mainContent {

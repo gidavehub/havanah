@@ -3,7 +3,7 @@
 import React from 'react';
 import DashboardLayout from '@/components/layout/app-layout';
 
-export default function UserLayout({
+export default function NotificationsLayout({
   children,
 }: {
   children: React.ReactNode;

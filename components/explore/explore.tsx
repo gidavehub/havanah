@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import Navbar from '@/components/layout/navbar/navbar';
 import { 
   MdSearch, 
   MdFilterList, 
@@ -170,7 +171,9 @@ export default function ExplorePage() {
   };
 
   return (
-    <div className={styles.container}>
+    <>
+      <Navbar />
+      <div className={styles.container}>
       {/* Header */}
       <div className={styles.pageHeader}>
         <h1 className={styles.pageTitle}>Explore Havanah</h1>
@@ -499,6 +502,7 @@ export default function ExplorePage() {
           </motion.div>
         )}
       </AnimatePresence>
-    </div>
+      </div>
+    </>
   );
 }

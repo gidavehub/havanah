@@ -29,8 +29,7 @@ export default function Navbar() {
       <div className={styles.container}>
         {/* Logo */}
         <Link href="/" className={styles.logo}>
-          <span className={styles.logoIcon}>H</span>
-          <span className={styles.logoText}>HAVANA</span>
+          <img src="/logo.jpg" alt="HAVANA" className={styles.logoImg} />
         </Link>
 
         {/* Desktop Nav */}
@@ -46,15 +45,15 @@ export default function Navbar() {
           {user ? (
             <button 
               className={styles.dashboardBtn}
-              onClick={() => router.push(user.role === 'agent' ? '/agent/dashboard' : '/account')}
+              onClick={() => router.push(user.role === 'agent' ? '/agent/dashboard' : '/user/dashboard')}
             >
               <MdDashboard /> Dashboard
             </button>
           ) : (
             <>
               <Link href="/auth/login" className={styles.loginLink}>Log In</Link>
-              <Link href="/auth/register" className={styles.signupBtn}>
-                Get Started
+              <Link href="/auth/signup" className={styles.signupBtn}>
+                Sign Up
               </Link>
             </>
           )}
@@ -82,9 +81,12 @@ export default function Navbar() {
           <Link href="/explore" onClick={() => setMobileMenuOpen(false)}>Explore All</Link>
           <hr />
           {user ? (
-            <button onClick={() => router.push('/account')}>My Dashboard</button>
+            <button onClick={() => router.push(user.role === 'agent' ? '/agent/dashboard' : '/user/dashboard')}>My Dashboard</button>
           ) : (
-            <button onClick={() => router.push('/auth/login')}>Log In / Sign Up</button>
+            <>
+              <Link href="/auth/login" onClick={() => setMobileMenuOpen(false)}>Log In</Link>
+              <Link href="/auth/signup" onClick={() => setMobileMenuOpen(false)}>Sign Up</Link>
+            </>
           )}
         </motion.div>
       )}

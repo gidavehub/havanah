@@ -1,0 +1,9 @@
+.publicWrapper {
+  width: 100%;
+  min-height: 100vh;
+  background: white;
+}
+
+.mainContent {
+  width: 100%;
+}
