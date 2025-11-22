@@ -153,9 +153,9 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
   const addToast = useCallback((toast: Omit<ToastMessage, 'id'>) => {
     const id = Math.random().toString(36).substring(2, 9);
     const newToast: ToastMessage = {
-      id,
-      duration: toast.duration ?? 5000, // Default 5 seconds
       ...toast,
+      id,
+      duration: toast.duration !== undefined ? toast.duration : 5000, // Default 5 seconds
     };
 
     setToasts((prev) => [...prev, newToast]);
@@ -186,16 +186,16 @@ export function useToast() {
 
   return {
     success: (title: string, message?: string, duration?: number) => 
-      addToast({ type: 'success', title, message, duration }),
+      addToast({ type: 'success', title, message, duration: duration ?? 5000 }),
     
     error: (title: string, message?: string, duration?: number) => 
-      addToast({ type: 'error', title, message, duration }),
+      addToast({ type: 'error', title, message, duration: duration ?? 5000 }),
     
     warning: (title: string, message?: string, duration?: number) => 
-      addToast({ type: 'warning', title, message, duration }),
+      addToast({ type: 'warning', title, message, duration: duration ?? 5000 }),
     
     info: (title: string, message?: string, duration?: number) => 
-      addToast({ type: 'info', title, message, duration }),
+      addToast({ type: 'info', title, message, duration: duration ?? 5000 }),
     
     loading: (title: string, message?: string) => 
       addToast({ type: 'loading', title, message, duration: 0 }), // 0 duration = indeterminate
