@@ -222,7 +222,7 @@ export default function AgentDashboard() {
         <div className={styles.headerActions}>
           <button 
             className={styles.addBtn}
-            onClick={() => router.push('/agent/listings/add')}
+            onClick={() => router.push('/listings/add')}
           >
             <MdAdd /> Add Listing
           </button>
