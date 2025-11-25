@@ -105,10 +105,7 @@ export default function Sidebar() {
               />
             </motion.div>
             
-            {/* Optional Brand Name text next to logo - remove if your logo includes text */}
-            <span className="font-bold text-xl tracking-tight text-gray-800 bg-clip-text text-transparent bg-gradient-to-r from-gray-900 to-gray-600">
-              HAVANAH
-            </span>
+
           </Link>
         </div>
 
