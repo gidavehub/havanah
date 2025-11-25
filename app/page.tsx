@@ -12,7 +12,7 @@ import Head from 'next/head';
 // --- Utility Components ---
 const SectionSpacer = () => <div className="h-24 md:h-32 bg-transparent" />;
 
-// --- 1. UPDATED Hero Section (Navbar Removed) ---
+// --- 1. Hero Section ---
 const HeroSection = () => {
   const containerRef = useRef(null);
   
@@ -285,7 +285,7 @@ const HavanaExperienceBanner = () => {
     );
 };
 
-// --- 5. UPDATED Features Section (With React/Lucide Icons) ---
+// --- 5. Features Section ---
 const FeaturesSection = () => {
   return (
     <section className="py-24 bg-white">
@@ -436,7 +436,7 @@ const VerticalScroller = () => {
     );
 }
 
-// --- 7. UPDATED Pricing Section ---
+// --- 7. Pricing Section ---
 const PricingSection = () => {
   const [billingCycle, setBillingCycle] = useState('monthly'); // 'monthly' or 'yearly'
 
@@ -552,8 +552,16 @@ const PricingSection = () => {
   );
 };
 
-// --- 8. Payment Ecosystem ---
+// --- 8. Payment Ecosystem (UPDATED WITH LOGOS) ---
 const PaymentEcosystem = () => {
+    
+    // Logos mapped to local public folder paths
+    const paymentMethods = [
+      { name: 'Wave', src: '/wave.png' },
+      { name: 'Afrimoney', src: '/afrimoney.png' },
+      { name: 'QMoney', src: '/qmoney.png' }
+    ];
+
     return (
         <section className="py-24 bg-white relative overflow-hidden">
              <div className="absolute top-0 right-0 w-96 h-96 bg-amber-100/50 rounded-full blur-3xl translate-x-1/2 -translate-y-1/2"/>
@@ -573,13 +581,17 @@ const PaymentEcosystem = () => {
                      </p>
                      
                      <div className="flex gap-4">
-                        {['Wave', 'AfriMoney', 'QMoney'].map((pay) => (
+                        {paymentMethods.map((pay) => (
                              <motion.div 
-                                key={pay}
+                                key={pay.name}
                                 whileHover={{ y: -5 }}
-                                className="h-16 px-6 bg-white border border-gray-100 shadow-xl shadow-gray-100 rounded-2xl flex items-center justify-center font-bold text-gray-400 hover:text-emerald-600 hover:border-emerald-100 transition-all cursor-pointer"
+                                className="h-20 w-32 px-4 bg-white border border-gray-100 shadow-xl shadow-gray-100 rounded-2xl flex items-center justify-center hover:border-emerald-100 transition-all cursor-pointer overflow-hidden"
                              >
-                                 {pay}
+                                 <img 
+                                    src={pay.src} 
+                                    alt={pay.name} 
+                                    className="w-full h-full object-contain grayscale hover:grayscale-0 opacity-70 hover:opacity-100 transition-all duration-300"
+                                 />
                              </motion.div>
                         ))}
                      </div>
@@ -679,8 +691,6 @@ export default function HomePage() {
       <Head>
         <title>Havanah Gambia - Real Estate & Vehicle Marketplace</title>
       </Head>
-      
-      {/* Navbar Removed as requested */}
       
       <main>
         <HeroSection />
