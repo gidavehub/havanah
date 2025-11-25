@@ -6,10 +6,9 @@ import { Zap, Radio, Shield, Check, Star, Menu, X, Search, Home, Car, MapPin, Br
 import Head from 'next/head';
 
 // --- Utility Components ---
-
 const SectionSpacer = () => <div className="h-24 md:h-32 bg-transparent" />;
 
-// --- 1. Navbar (Glassmorphism, Light Theme) ---
+// --- 1. Navbar (Unchanged) ---
 const Navbar = () => {
   const [isScrolled, setIsScrolled] = useState(false);
 
@@ -48,173 +47,186 @@ const Navbar = () => {
   );
 };
 
-// --- 2. Advanced Hero Section (3D Phone + Scroll Animations) ---
+// --- 2. REVISED Hero Section ---
 const HeroSection = () => {
-  const containerRef = useRef<HTMLDivElement>(null);
+  const containerRef = useRef(null);
+  
+  // We make the section very tall (300vh) to allow scroll space for animation
   const { scrollYProgress } = useScroll({
     target: containerRef,
-    offset: ["start start", "end start"],
+    offset: ["start start", "end end"], // Animation plays throughout the scroll of this container
   });
 
-  // Phone Animations: Starts zoomed in and low, moves to center and scales down
-  const phoneScale = useTransform(scrollYProgress, [0, 0.4], [1.3, 0.9]); 
-  const phoneY = useTransform(scrollYProgress, [0, 0.4], ["30%", "0%"]);
-  
-  // Cards Fan Out Animation (Triggered after phone settles)
-  const cardSpread = useTransform(scrollYProgress, [0.3, 0.6], [0, 1]);
-  const buttonOpacity = useTransform(scrollYProgress, [0.4, 0.6], [0, 1]);
-  const buttonY = useTransform(scrollYProgress, [0.4, 0.6], [20, 0]);
+  // 1. Text Animation: Fades out quickly as we start scrolling
+  const textOpacity = useTransform(scrollYProgress, [0, 0.2], [1, 0]);
+  const textScale = useTransform(scrollYProgress, [0, 0.2], [1, 0.9]);
+  const textY = useTransform(scrollYProgress, [0, 0.2], [0, -100]); // Moves up slightly
 
-  // Smoother springs
-  const smoothSpread = useSpring(cardSpread, { stiffness: 100, damping: 20 });
+  // 2. Phone Position (Y-Axis):
+  // 0% -> 25%: Starts low (half visible) and moves to center
+  // 25% -> 75%: Stays locked in center while other things happen
+  const phoneY = useTransform(scrollYProgress, 
+    [0, 0.25, 0.75], 
+    ["35%", "0%", "0%"] 
+  );
+
+  // 3. Phone Scale:
+  // 0% -> 25%: Normal size
+  // 25% -> 50%: Shrinks slightly in place to make room for buttons
+  const phoneScale = useTransform(scrollYProgress, 
+    [0, 0.25, 0.5], 
+    [1.1, 1.1, 0.85] 
+  );
+
+  // 4. Buttons (App Store/Play Store) Animation:
+  // They are hidden behind the phone initially.
+  // 40% -> 60%: They pop out and fade in
+  const buttonsOpacity = useTransform(scrollYProgress, [0.4, 0.55], [0, 1]);
+  const buttonsScale = useTransform(scrollYProgress, [0.4, 0.55], [0.5, 1]);
+  // Move them downwards to appear below/beside the phone
+  const buttonsY = useTransform(scrollYProgress, [0.4, 0.55], [-100, 20]); 
 
   return (
-    <div ref={containerRef} className="relative h-[200vh] bg-gradient-to-b from-white via-emerald-50/30 to-white overflow-hidden">
-      {/* Background Pattern */}
-      <div className="absolute inset-0 bg-[radial-gradient(#10b981_1px,transparent_1px)] [background-size:20px_20px] opacity-[0.05]"></div>
+    <div ref={containerRef} className="relative h-[300vh] bg-white w-full">
+      {/* Background Decor */}
+      <div className="absolute inset-0 bg-[radial-gradient(#10b981_1px,transparent_1px)] [background-size:20px_20px] opacity-[0.05] pointer-events-none fixed" />
       
-      <div className="sticky top-0 h-screen flex flex-col items-center justify-center overflow-hidden">
-        {/* Text Content (Fades out as phone takes over) */}
+      {/* Sticky Container: Holds the viewport logic */}
+      <div className="sticky top-0 h-screen w-full overflow-hidden flex flex-col items-center justify-center">
+        
+        {/* TEXT LAYER */}
         <motion.div 
-          style={{ opacity: useTransform(scrollYProgress, [0, 0.2], [1, 0]), scale: useTransform(scrollYProgress, [0, 0.2], [1, 0.9]) }}
-          className="absolute top-32 text-center z-10 px-4 max-w-4xl"
+          style={{ opacity: textOpacity, scale: textScale, y: textY }}
+          className="absolute top-[15%] md:top-[18%] z-10 text-center px-4 max-w-3xl mx-auto w-full"
         >
-          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white border border-emerald-100 shadow-sm mb-6">
-            <span className="flex h-2 w-2 relative">
-              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-              <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
-            </span>
-            <span className="text-xs font-bold text-emerald-800 tracking-wide uppercase">Havanah Mobile App v2.0 Live</span>
+          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-emerald-50 border border-emerald-100 mb-6">
+             <span className="relative flex h-2 w-2">
+               <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+               <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+             </span>
+             <span className="text-xs font-bold text-emerald-800 tracking-wide uppercase">Havanah Mobile App v2.0</span>
           </div>
+          
           <h1 className="text-5xl md:text-7xl font-extrabold tracking-tight text-gray-900 mb-6 leading-tight">
-            Find Your Dream <span className="text-transparent bg-clip-text bg-gradient-to-r from-emerald-500 to-amber-400">Asset</span>
+            Find your dream car or <span className="text-transparent bg-clip-text bg-gradient-to-r from-emerald-600 to-emerald-400">home today.</span>
           </h1>
-          <p className="text-xl text-gray-500 max-w-2xl mx-auto">
-            Scroll to explore the future of Gambian commerce. Real Estate and Vehicles in one unified marketplace.
+          
+          <p className="text-lg md:text-xl text-gray-500 font-medium max-w-2xl mx-auto leading-relaxed">
+            Reimagine how you rent, buy, and sell in the Gambian unified marketplace. 
+            Connecting you to premium vehicles and properties seamlessly.
           </p>
         </motion.div>
 
-        {/* 3D Phone & Cards Container */}
-        <motion.div 
-          style={{ scale: phoneScale, y: phoneY }}
-          className="relative z-20 mt-32 md:mt-0 w-[300px] md:w-[350px] h-[700px] perspective-1000"
-        >
-          {/* Floating Cards Behind Phone */}
-          {[...Array(6)].map((_, i) => {
-            // Calculate random-ish positions for the fanned out cards
-            const rotateDeg = (i % 2 === 0 ? 1 : -1) * (15 + i * 5);
-            const xVal = (i % 2 === 0 ? 1 : -1) * (180 + i * 40);
-            const yVal = -100 + (i * 50);
+
+        {/* ANIMATION LAYER (Phone + Buttons) */}
+        <div className="relative z-20 w-full flex flex-col items-center justify-center mt-20 md:mt-32">
             
-            return (
-              <motion.div
-                key={i}
-                style={{
-                  rotate: useTransform(smoothSpread, [0, 1], [0, rotateDeg]),
-                  x: useTransform(smoothSpread, [0, 1], [0, xVal]),
-                  y: useTransform(smoothSpread, [0, 1], [0, yVal]),
-                  opacity: smoothSpread,
-                  zIndex: 10 - i // Behind phone
+            {/* Buttons Layer - Positioned absolutely to be 'behind' or relative to phone */}
+            <motion.div 
+                style={{ 
+                    opacity: buttonsOpacity, 
+                    scale: buttonsScale,
+                    y: buttonsY
                 }}
-                className="absolute top-1/4 left-0 w-64 p-4 bg-white/90 backdrop-blur-xl rounded-2xl shadow-2xl border border-white/50 flex items-center gap-3"
-              >
-                <div className={`w-12 h-12 rounded-xl flex items-center justify-center text-xl ${i % 2 === 0 ? 'bg-emerald-100 text-emerald-600' : 'bg-amber-100 text-amber-600'}`}>
-                  {i % 2 === 0 ? <Home size={20} /> : <Car size={20} />}
-                </div>
-                <div>
-                  <p className="text-[10px] text-gray-400 font-bold uppercase">{i % 2 === 0 ? 'Just Listed' : 'Sold'}</p>
-                  <p className="font-bold text-sm text-gray-800">{i % 2 === 0 ? 'Senegambia Apt.' : 'Toyota Hilux 2024'}</p>
-                  <p className="text-xs font-bold text-emerald-500">{i % 2 === 0 ? 'D4,500,000' : 'D1,200,000'}</p>
-                </div>
-              </motion.div>
-            );
-          })}
-
-          {/* The Phone Itself */}
-          <div className="relative w-full h-full bg-gray-900 rounded-[3rem] border-8 border-gray-900 shadow-2xl overflow-hidden z-20">
-            {/* Dynamic Island */}
-            <div className="absolute top-0 left-1/2 -translate-x-1/2 w-28 h-7 bg-black rounded-b-2xl z-30"></div>
-            
-            {/* App Screen (Simplified for React) */}
-            <div className="w-full h-full bg-gray-50 overflow-hidden flex flex-col">
-              {/* App Header */}
-              <div className="pt-12 px-5 pb-4 bg-white flex justify-between items-center shadow-sm">
-                 <div className="flex items-center gap-2">
-                    <div className="w-8 h-8 rounded-full bg-emerald-100 border border-emerald-200"></div>
-                    <div>
-                        <p className="text-[10px] text-gray-400 font-bold">WELCOME</p>
-                        <p className="text-xs font-bold text-gray-800">Alieu S.</p>
+                className="absolute top-full mt-4 flex flex-row gap-4 z-10"
+            >
+                <button className="bg-gray-900 text-white px-6 py-3 rounded-2xl flex items-center gap-3 shadow-xl hover:bg-gray-800 transition-colors">
+                    <i className="fab fa-apple text-2xl"></i> 
+                    <div className="text-left">
+                        <p className="text-[10px] uppercase text-gray-400 leading-none">Download on</p>
+                        <p className="font-bold text-sm leading-none mt-1">App Store</p>
                     </div>
-                 </div>
-                 <Menu size={20} className="text-gray-400"/>
-              </div>
-              
-              {/* App Search */}
-              <div className="px-5 mt-4">
-                  <div className="bg-gray-100 rounded-xl p-3 flex items-center gap-2 text-gray-400 text-xs">
-                      <Search size={14} />
-                      <span>Find homes, cars...</span>
-                  </div>
-              </div>
+                </button>
+                <button className="bg-white text-gray-900 border border-gray-200 px-6 py-3 rounded-2xl flex items-center gap-3 shadow-xl hover:bg-gray-50 transition-colors">
+                    <i className="fab fa-google-play text-xl text-emerald-600"></i>
+                    <div className="text-left">
+                        <p className="text-[10px] uppercase text-gray-400 leading-none">Get it on</p>
+                        <p className="font-bold text-sm leading-none mt-1">Google Play</p>
+                    </div>
+                </button>
+            </motion.div>
 
-              {/* App Content */}
-              <div className="p-5 grid gap-4 overflow-y-auto no-scrollbar pb-20">
-                  <div className="h-40 rounded-2xl bg-white shadow-sm border border-gray-100 overflow-hidden relative group">
-                      <img src="https://images.unsplash.com/photo-1600596542815-60c37c6525fa?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80" className="w-full h-24 object-cover" alt="House"/>
-                      <div className="p-3">
-                          <p className="font-bold text-xs">Brusubi Phase 2</p>
-                          <p className="text-[10px] text-emerald-500 font-bold">D8,500,000</p>
-                      </div>
-                  </div>
-                  <div className="h-40 rounded-2xl bg-white shadow-sm border border-gray-100 overflow-hidden relative">
-                      <img src="https://images.unsplash.com/photo-1533473359331-0135ef1b58bf?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80" className="w-full h-24 object-cover" alt="Car"/>
-                      <div className="p-3">
-                          <p className="font-bold text-xs">Toyota Prado</p>
-                          <p className="text-[10px] text-emerald-500 font-bold">D1,800,000</p>
-                      </div>
-                  </div>
-              </div>
+            {/* Phone Layer */}
+            <motion.div 
+                style={{ y: phoneY, scale: phoneScale }}
+                className="relative z-20 w-[280px] md:w-[320px] aspect-[9/19] shadow-2xl rounded-[3rem] border-8 border-gray-900 bg-gray-900 overflow-hidden"
+            >
+                {/* Dynamic Island */}
+                <div className="absolute top-0 left-1/2 -translate-x-1/2 w-24 h-6 bg-black rounded-b-xl z-30"></div>
+                
+                {/* Screen Content */}
+                <div className="w-full h-full bg-gray-50 flex flex-col relative">
+                     {/* Header */}
+                     <div className="pt-10 px-4 pb-2 bg-white flex justify-between items-center">
+                        <div className="flex items-center gap-2">
+                            <div className="w-8 h-8 rounded-full bg-emerald-100 flex items-center justify-center text-emerald-700 font-bold text-xs">AS</div>
+                            <div>
+                                <p className="text-[9px] text-gray-400 font-bold uppercase">Location</p>
+                                <p className="text-xs font-bold text-gray-800 flex items-center gap-1">Senegambia <span className="text-emerald-500 text-[9px]">▼</span></p>
+                            </div>
+                        </div>
+                        <div className="p-2 bg-gray-50 rounded-full">
+                            <Menu size={16} className="text-gray-600"/>
+                        </div>
+                     </div>
 
-              {/* App Tab Bar */}
-              <div className="absolute bottom-4 left-4 right-4 bg-gray-900/90 backdrop-blur text-white rounded-2xl p-4 flex justify-between items-center">
-                <Home size={18} className="text-emerald-400" />
-                <Search size={18} className="text-gray-400" />
-                <div className="w-10 h-10 bg-emerald-500 rounded-full flex items-center justify-center -mt-8 border-4 border-gray-50 shadow-lg">
-                    <span className="text-xl font-light">+</span>
+                     {/* Search */}
+                     <div className="px-4 py-3">
+                         <div className="bg-white border border-gray-100 rounded-xl p-3 flex items-center gap-2 shadow-sm">
+                             <Search size={16} className="text-gray-400"/>
+                             <span className="text-xs text-gray-400">Search "Lexus LX570"...</span>
+                         </div>
+                     </div>
+
+                     {/* Main Scroll Content */}
+                     <div className="flex-1 overflow-hidden px-4 space-y-3 pb-20">
+                         {/* Featured Card */}
+                         <div className="w-full bg-white rounded-2xl p-3 shadow-sm border border-gray-100">
+                             <div className="w-full h-28 bg-gray-200 rounded-xl mb-3 relative overflow-hidden">
+                                <img src="https://images.unsplash.com/photo-1600596542815-60c37c6525fa?auto=format&fit=crop&w=500&q=80" className="object-cover w-full h-full" alt="Home" />
+                                <div className="absolute top-2 right-2 bg-white/90 backdrop-blur px-2 py-1 rounded-lg text-[10px] font-bold text-emerald-600">D8.5M</div>
+                             </div>
+                             <div className="flex justify-between items-start">
+                                 <div>
+                                     <h3 className="font-bold text-sm text-gray-800">Brusubi Phase 2</h3>
+                                     <p className="text-[10px] text-gray-400">4 Beds • 3 Baths • Pool</p>
+                                 </div>
+                                 <div className="w-6 h-6 rounded-full bg-gray-50 flex items-center justify-center">
+                                     <Star size={12} className="text-gray-400"/>
+                                 </div>
+                             </div>
+                         </div>
+
+                         {/* Secondary Card */}
+                         <div className="w-full bg-white rounded-2xl p-3 shadow-sm border border-gray-100">
+                             <div className="w-full h-24 bg-gray-200 rounded-xl mb-3 relative overflow-hidden">
+                                <img src="https://images.unsplash.com/photo-1533473359331-0135ef1b58bf?auto=format&fit=crop&w=500&q=80" className="object-cover w-full h-full" alt="Car" />
+                                <div className="absolute top-2 right-2 bg-white/90 backdrop-blur px-2 py-1 rounded-lg text-[10px] font-bold text-emerald-600">D1.2M</div>
+                             </div>
+                             <h3 className="font-bold text-sm text-gray-800">Toyota Prado 2021</h3>
+                         </div>
+                     </div>
+                     
+                     {/* Navigation Bar */}
+                     <div className="absolute bottom-4 left-4 right-4 bg-gray-900/95 backdrop-blur-md rounded-2xl p-4 text-white flex justify-between items-center shadow-2xl">
+                         <Home size={20} className="text-emerald-400" />
+                         <Search size={20} className="text-gray-500" />
+                         <div className="w-10 h-10 bg-emerald-500 rounded-full -mt-8 border-4 border-gray-50 flex items-center justify-center shadow-lg">
+                             <span className="text-xl font-light">+</span>
+                         </div>
+                         <Briefcase size={20} className="text-gray-500" />
+                         <div className="w-6 h-6 rounded-full bg-gray-700 border border-gray-500"></div>
+                     </div>
                 </div>
-                <Star size={18} className="text-gray-400" />
-                <div className="w-5 h-5 rounded-full border border-gray-500"></div>
-              </div>
-            </div>
-          </div>
-        </motion.div>
-        
-        {/* App Store Buttons (Fade In after Zoom) */}
-        <motion.div 
-            style={{ opacity: buttonOpacity, y: buttonY }}
-            className="fixed bottom-12 z-30 flex flex-col sm:flex-row gap-4"
-        >
-             <button className="bg-gray-900 text-white px-8 py-3 rounded-full font-medium text-sm flex items-center gap-3 shadow-xl hover:bg-gray-800 transition-colors">
-                 <i className="fab fa-apple text-xl"></i> 
-                 <div className="text-left">
-                     <p className="text-[10px] uppercase text-gray-400 leading-none">Download on</p>
-                     <p className="font-bold leading-none mt-1">App Store</p>
-                 </div>
-             </button>
-             <button className="bg-white text-gray-900 border border-gray-200 px-8 py-3 rounded-full font-medium text-sm flex items-center gap-3 shadow-xl hover:bg-gray-50 transition-colors">
-                 <i className="fab fa-google-play text-xl text-emerald-600"></i>
-                 <div className="text-left">
-                     <p className="text-[10px] uppercase text-gray-400 leading-none">Get it on</p>
-                     <p className="font-bold leading-none mt-1">Google Play</p>
-                 </div>
-             </button>
-        </motion.div>
+            </motion.div>
+
+        </div>
       </div>
     </div>
   );
 };
 
-// --- 3. Infinite Scroll Marquee (Adapted) ---
+// --- 3. Infinite Scroll Marquee (Unchanged) ---
 const InfiniteScrollMarquee = () => {
     return (
         <section className="py-12 bg-white overflow-hidden relative border-y border-gray-100">
@@ -244,7 +256,7 @@ const InfiniteScrollMarquee = () => {
     )
 }
 
-// --- 4. Original Marketplace Grid (Styled) ---
+// --- 4. Original Marketplace Grid (Unchanged) ---
 const MarketplaceGrid = () => {
   const categories = [
     { title: "Residential", subtitle: "Apartments & Villas", icon: <Home className="text-white" />, img: "https://images.unsplash.com/photo-1613490493576-7fde63acd811?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80" },
@@ -280,12 +292,11 @@ const MarketplaceGrid = () => {
   );
 };
 
-// --- 5. Experience Banner ---
+// --- 5. Experience Banner (Unchanged) ---
 const HavanaExperienceBanner = () => {
     return (
         <section className="py-20 md:py-32 bg-white flex items-center justify-center overflow-hidden border-t border-gray-100">
             <div className="text-center w-full relative">
-                {/* Background glow for effect */}
                 <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-gradient-to-r from-emerald-200/30 to-amber-200/30 rounded-full blur-[100px] -z-10" />
                 
                 <h2 className="text-[12vw] font-black leading-none tracking-tighter text-gray-100 select-none">
@@ -299,7 +310,7 @@ const HavanaExperienceBanner = () => {
     );
 };
 
-// --- 6. Features Section (Original HTML converted) ---
+// --- 6. Features Section (Unchanged) ---
 const FeaturesSection = () => {
   return (
     <section className="py-24 bg-white">
@@ -309,7 +320,6 @@ const FeaturesSection = () => {
           <h2 className="text-3xl md:text-5xl font-bold mt-2 text-gray-900">Trade with absolute confidence</h2>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          {/* Feature 1 */}
           <div className="md:col-span-2 bg-emerald-50 rounded-[2.5rem] p-10 relative overflow-hidden border border-emerald-100 group">
              <div className="relative z-10 max-w-md">
                 <div className="w-14 h-14 bg-white text-emerald-600 rounded-2xl flex items-center justify-center mb-6 shadow-sm">
@@ -321,7 +331,6 @@ const FeaturesSection = () => {
              <div className="absolute right-0 top-1/2 -translate-y-1/2 w-64 h-64 bg-emerald-200 rounded-full mix-blend-multiply filter blur-3xl opacity-30 animate-blob"></div>
           </div>
 
-          {/* Feature 2 */}
           <div className="bg-amber-50 rounded-[2.5rem] p-10 relative overflow-hidden border border-amber-100">
              <div className="w-14 h-14 bg-white text-amber-500 rounded-2xl flex items-center justify-center mb-6 shadow-sm">
                  <div className="relative">
@@ -338,7 +347,7 @@ const FeaturesSection = () => {
   );
 };
 
-// --- 7. Vertical Scroller (Adapted to Light Theme) ---
+// --- 7. Vertical Scroller (Unchanged) ---
 const VerticalScroller = () => {
     const list1 = [
         { title: "Brufut Villa", price: "D7.5M", type: "Home", color: "bg-emerald-100" },
@@ -350,7 +359,6 @@ const VerticalScroller = () => {
     
     return (
         <section className="py-24 bg-white relative overflow-hidden h-[800px] flex items-center border-y border-gray-100">
-            {/* Background blobs */}
             <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-emerald-50 rounded-full blur-3xl opacity-50 translate-x-1/2"></div>
             
             <div className="container mx-auto px-6 relative z-10 grid grid-cols-1 lg:grid-cols-2 gap-12">
@@ -369,7 +377,6 @@ const VerticalScroller = () => {
                 </div>
 
                 <div className="h-[600px] relative flex gap-6 rotate-[-5deg] scale-110 md:scale-100 opacity-90">
-                     {/* Column 1 (Up) */}
                      <div className="flex flex-col gap-6 w-64 overflow-hidden relative">
                          <div className="absolute top-0 z-20 w-full h-32 bg-gradient-to-b from-white to-transparent"/>
                          <motion.div 
@@ -391,7 +398,6 @@ const VerticalScroller = () => {
                          <div className="absolute bottom-0 z-20 w-full h-32 bg-gradient-to-t from-white to-transparent"/>
                      </div>
 
-                     {/* Column 2 (Down) */}
                      <div className="flex flex-col gap-6 w-64 overflow-hidden relative mt-20">
                          <div className="absolute top-0 z-20 w-full h-32 bg-gradient-to-b from-white to-transparent"/>
                          <motion.div 
@@ -418,7 +424,7 @@ const VerticalScroller = () => {
     );
 }
 
-// --- 8. Pricing Section (Original HTML converted) ---
+// --- 8. Pricing Section (Unchanged) ---
 const PricingSection = () => {
   return (
     <section className="py-24 bg-gray-50">
@@ -428,7 +434,6 @@ const PricingSection = () => {
           <p className="text-gray-500">Buyers are always free.</p>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-5xl mx-auto items-center">
-            {/* Free */}
             <div className="bg-white p-8 rounded-[2rem] border border-gray-200 shadow-sm hover:shadow-lg transition-shadow">
                 <h3 className="font-bold text-xl text-gray-900">Individual</h3>
                 <div className="text-4xl font-bold my-6 text-gray-900">Free</div>
@@ -442,7 +447,6 @@ const PricingSection = () => {
                 <button className="w-full py-3 rounded-xl border border-gray-200 font-semibold hover:bg-gray-50 transition">Get Started</button>
             </div>
 
-            {/* Agent */}
             <div className="bg-gray-900 p-8 rounded-[2rem] shadow-2xl relative transform md:-translate-y-6">
                 <div className="absolute top-0 right-0 bg-emerald-500 text-white text-xs font-bold px-4 py-1.5 rounded-bl-xl rounded-tr-[2rem]">POPULAR</div>
                 <h3 className="font-bold text-xl text-white">Agent</h3>
@@ -457,7 +461,6 @@ const PricingSection = () => {
                 <button className="w-full py-3 rounded-xl bg-emerald-500 text-white font-semibold hover:bg-emerald-600 transition shadow-lg shadow-emerald-500/30">Start Free Trial</button>
             </div>
 
-            {/* Dealership */}
             <div className="bg-white p-8 rounded-[2rem] border border-gray-200 shadow-sm hover:shadow-lg transition-shadow">
                 <h3 className="font-bold text-xl text-gray-900">Dealership</h3>
                 <div className="text-4xl font-bold my-6 text-gray-900">$99<span className="text-lg font-normal text-gray-500">/mo</span></div>
@@ -476,11 +479,10 @@ const PricingSection = () => {
   );
 };
 
-// --- 9. Payment Ecosystem (Glass/Light Theme) ---
+// --- 9. Payment Ecosystem (Unchanged) ---
 const PaymentEcosystem = () => {
     return (
         <section className="py-24 bg-white relative overflow-hidden">
-             {/* Abstract Decorators */}
              <div className="absolute top-0 right-0 w-96 h-96 bg-amber-100/50 rounded-full blur-3xl translate-x-1/2 -translate-y-1/2"/>
              <div className="absolute bottom-0 left-0 w-96 h-96 bg-emerald-100/50 rounded-full blur-3xl -translate-x-1/2 translate-y-1/2"/>
 
@@ -511,14 +513,12 @@ const PaymentEcosystem = () => {
                  </div>
 
                  <div className="flex-1 relative h-[500px] w-full perspective-1000">
-                      {/* Floating credit card/payment abstract visual */}
                       <motion.div 
                         initial={{ rotateY: 20, rotateX: 20 }}
                         animate={{ rotateY: [20, -20, 20], rotateX: [10, 30, 10], y: [-10, 10, -10] }}
                         transition={{ duration: 12, repeat: Infinity, ease: "easeInOut" }}
                         className="absolute inset-0 top-10 left-10 md:left-20 w-[350px] h-[220px] bg-gradient-to-br from-emerald-500 to-emerald-700 rounded-[2rem] shadow-2xl shadow-emerald-200 p-8 flex flex-col justify-between text-white border-t border-white/20 overflow-hidden"
                       >
-                           {/* Shine Effect */}
                            <div className="absolute top-0 -left-1/2 w-full h-full bg-gradient-to-r from-transparent via-white/20 to-transparent skew-x-12 animate-shimmer"/>
                            
                            <div className="flex justify-between items-start">
@@ -547,7 +547,7 @@ const PaymentEcosystem = () => {
     )
 }
 
-// --- 10. Footer (Original HTML converted) ---
+// --- 10. Footer (Unchanged) ---
 const Footer = () => {
   return (
     <footer className="bg-white border-t border-gray-100 pt-16 pb-8">
@@ -562,7 +562,6 @@ const Footer = () => {
               The #1 Marketplace in Gambia for trusted Real Estate and Vehicle transactions.
             </p>
             <div className="flex gap-4">
-               {/* Using FA classes for social icons as in original, assuming FontAwesome is loaded via Head */}
                <i className="fab fa-twitter text-gray-400 hover:text-emerald-500 text-xl transition cursor-pointer"></i>
                <i className="fab fa-instagram text-gray-400 hover:text-emerald-500 text-xl transition cursor-pointer"></i>
                <i className="fab fa-facebook text-gray-400 hover:text-emerald-500 text-xl transition cursor-pointer"></i>
@@ -611,28 +610,28 @@ export default function HomePage() {
       <Navbar />
       
       <main>
-        {/* The New Hero with 3D Scroll Logic */}
+        {/* REVISED HERO: 300vh height + Phone Scroll Animation */}
         <HeroSection />
         
-        {/* Infinite Scroll Marquee (New) */}
+        {/* Infinite Scroll Marquee */}
         <InfiniteScrollMarquee />
         
-        {/* Original Marketplace Grid (Styled) */}
+        {/* Original Marketplace Grid */}
         <MarketplaceGrid />
         
-        {/* Experience Banner (New) */}
+        {/* Experience Banner */}
         <HavanaExperienceBanner />
         
-        {/* Original Features */}
+        {/* Features */}
         <FeaturesSection />
         
-        {/* Vertical Scroller (New - Light Theme) */}
+        {/* Vertical Scroller */}
         <VerticalScroller />
         
-        {/* Original Pricing */}
+        {/* Pricing */}
         <PricingSection />
         
-        {/* Payment Ecosystem (New) */}
+        {/* Payment Ecosystem */}
         <PaymentEcosystem />
       </main>
 
