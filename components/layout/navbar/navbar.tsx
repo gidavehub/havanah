@@ -86,7 +86,7 @@ export default function Navbar() {
             // LOGGED OUT VIEW
             <div className="flex items-center gap-4">
               <Link 
-                href="/auth/login" 
+                href="/auth" 
                 className="text-sm font-bold text-gray-700 hover:text-emerald-600"
               >
                 Log In
@@ -142,7 +142,7 @@ export default function Navbar() {
               </>
             ) : (
               <div className="flex flex-col gap-3">
-                <Link href="/auth/login" onClick={() => setMobileMenuOpen(false)} className="w-full py-3 text-center rounded-xl bg-gray-100 font-bold text-gray-700">
+                <Link href="/auth" onClick={() => setMobileMenuOpen(false)} className="w-full py-3 text-center rounded-xl bg-gray-100 font-bold text-gray-700">
                   Log In
                 </Link>
                 <Link href="/auth/signup" onClick={() => setMobileMenuOpen(false)} className="w-full py-3 text-center rounded-xl bg-emerald-500 text-white font-bold">

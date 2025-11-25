@@ -33,7 +33,7 @@ export default function MainLayout({ children }: MainLayoutProps) {
     if (!loading) {
       // If user tries to access a sidebar route without being logged in
       if (isSidebarRoute && !user) {
-        router.push('/auth/login?redirect=' + pathname);
+        router.push('/auth?redirect=' + pathname);
       }
       // Optional: If user is logged in and tries to access login page
       if (isAuthPage && user) {

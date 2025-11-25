@@ -71,7 +71,7 @@ export default function ListingPage() {
 
   // 2. Actions
   const handleMessageAgent = async () => {
-    if (!user) { toast.error("Auth Required", "Please log in to message."); return router.push('/auth/login'); }
+    if (!user) { toast.error("Auth Required", "Please log in to message."); return router.push('/auth'); }
     if (!agent) return;
 
     try {
@@ -83,7 +83,7 @@ export default function ListingPage() {
   };
 
   const handleStartCheckout = () => {
-    if (!user) { toast.error("Auth Required", "Please log in to book."); return router.push('/auth/login'); }
+    if (!user) { toast.error("Auth Required", "Please log in to book."); return router.push('/auth'); }
     window.scrollTo({ top: 0, behavior: 'smooth' });
     setViewMode('checkout');
   };

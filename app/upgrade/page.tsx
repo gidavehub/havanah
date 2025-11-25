@@ -102,7 +102,7 @@ export default function UpgradePage() {
   const selectPlan = (plan: Plan) => {
     if (!user) {
       toast.error("Login Required", "Please log in to upgrade your account.");
-      router.push('/auth/login?redirect=/upgrade');
+      router.push('/auth?redirect=/upgrade');
       return;
     }
     setSelectedPlan(plan);

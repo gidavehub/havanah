@@ -132,7 +132,7 @@ export default function ProfilePage() {
   const handleConnect = async () => {
     if (!user?.id || !profile) {
       toast.error("Auth Required", "Please log in to connect.");
-      router.push('/auth/login');
+      router.push('/auth');
       return;
     }
 
@@ -155,7 +155,7 @@ export default function ProfilePage() {
   const handleMessage = async () => {
     if (!user?.id || !profile) {
       toast.error("Auth Required", "Please log in to message.");
-      router.push('/auth/login');
+      router.push('/auth');
       return;
     }
     
