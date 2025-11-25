@@ -1,554 +1,596 @@
-"use client";
+'use client';
 
-import Image from "next/image";
-import Link from "next/link";
-import { useState } from "react";
+import React, { useRef, useState, useMemo } from 'react';
+import { motion, useScroll, useTransform, useSpring, useMotionValue, useMotionTemplate } from 'framer-motion';
+import { Canvas, useFrame } from '@react-three/fiber';
+import { Float, Environment, Text3D, Center, MeshDistortMaterial, Sphere } from '@react-three/drei';
 import { 
-  ChevronDown, 
-  Check, 
-  Menu, 
-  X, 
-  ArrowRight, 
-  Globe, 
-  Lock, 
-  ShoppingBag, 
-  MessageCircle, 
-  BarChart3,
-  MapPin,
-  Car,
-  Home
-} from "lucide-react";
+  Home, Car, Check, MapPin, Shield, DollarSign, Smartphone, 
+  Menu, User, Heart, Search, ArrowRight, Zap, Radio
+} from 'lucide-react';
+import { clsx } from 'clsx';
+import { twMerge } from 'tailwind-merge';
 
-// --- COMPONENTS ---
+// --- Utility: Tailwind Merger ---
+function cn(...inputs: (string | undefined | null | false)[]) {
+  return twMerge(clsx(inputs));
+}
 
-const Navbar = () => {
-  const [isOpen, setIsOpen] = useState(false);
+// --- 3D Scene Component (Hero Background) ---
+function FloatingGeometries() {
+  const ref = useRef<any>();
+  useFrame((state) => {
+    const t = state.clock.getElapsedTime();
+    if(ref.current) ref.current.rotation.x = Math.sin(t / 2);
+    if(ref.current) ref.current.rotation.y = Math.sin(t / 4);
+  });
 
   return (
-    <nav className="fixed top-0 left-0 right-0 z-50 bg-white/90 backdrop-blur-md border-b border-gray-100">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex justify-between items-center h-16">
-          {/* Logo */}
-          <div className="flex-shrink-0 flex items-center cursor-pointer">
-            <Link href="/">
-              <Image 
-                src="/logo.jpg" 
-                alt="Havana Logo" 
-                width={120} 
-                height={40} 
-                className="h-8 w-auto object-contain"
-              />
-            </Link>
-          </div>
+    <group ref={ref}>
+      <Float speed={2} rotationIntensity={1.5} floatIntensity={2}>
+        <Sphere args={[1, 32, 32]} position={[-2, 1, -2]}>
+          <MeshDistortMaterial color="#10B981" speed={2} distort={0.4} roughness={0.2} metalness={0.8} />
+        </Sphere>
+        <Sphere args={[0.8, 32, 32]} position={[2.5, -1, -1]}>
+          <MeshDistortMaterial color="#FBBF24" speed={3} distort={0.5} roughness={0.1} metalness={0.5} />
+        </Sphere>
+        <Sphere args={[0.5, 32, 32]} position={[0, 2, -3]}>
+           <MeshDistortMaterial color="#E5E7EB" speed={1.5} distort={0.6} transparent opacity={0.8} />
+        </Sphere>
+      </Float>
+    </group>
+  );
+}
 
-          {/* Desktop Nav */}
-          <div className="hidden md:flex items-center space-x-8">
-            <div className="flex items-center space-x-6 text-[15px] font-medium text-[#474747]">
-              <div className="group relative cursor-pointer flex items-center gap-1 hover:text-blue-500 transition">
-                Rentals <ChevronDown size={14} />
-              </div>
-              <div className="group relative cursor-pointer flex items-center gap-1 hover:text-blue-500 transition">
-                Sales <ChevronDown size={14} />
-              </div>
-              <Link href="#pricing" className="hover:text-blue-500 transition">Pricing</Link>
-              <Link href="#" className="hover:text-blue-500 transition">Agents</Link>
-              <div className="group relative cursor-pointer flex items-center gap-1 hover:text-blue-500 transition">
-                Support <ChevronDown size={14} />
-              </div>
-            </div>
-            <div className="flex items-center space-x-4">
-              <Link href="/auth" className="text-[14px] font-medium text-[#242930] hover:text-blue-500">
-                Log in
-              </Link>
-              <Link href="/auth" className="bg-[#181c1f] text-white text-[14px] font-medium px-4 py-2 rounded-lg hover:bg-black transition shadow-lg shadow-gray-200">
-                Join Now
-              </Link>
-            </div>
-          </div>
-
-          {/* Mobile Menu Button */}
-          <div className="md:hidden flex items-center">
-            <button onClick={() => setIsOpen(!isOpen)} className="text-gray-600">
-              {isOpen ? <X /> : <Menu />}
-            </button>
-          </div>
-        </div>
+// --- Navigation ---
+const Navbar = () => (
+  <motion.nav 
+    initial={{ y: -100 }}
+    animate={{ y: 0 }}
+    transition={{ type: "spring", stiffness: 100 }}
+    className="fixed top-0 w-full z-50 flex justify-center p-6"
+  >
+    <div className="bg-havana-glass backdrop-blur-xl border border-white/60 shadow-glass-xl px-8 py-4 rounded-full flex items-center gap-12 max-w-4xl w-full justify-between">
+      <div className="flex items-center gap-2">
+        <div className="w-10 h-10 bg-gradient-to-tr from-havana-green to-havana-greenLight rounded-xl flex items-center justify-center text-white font-bold text-xl shadow-glow-green">H</div>
+        <span className="font-bold text-gray-800 tracking-tighter text-xl">Havanah<span className="text-havana-green">.gm</span></span>
+      </div>
+      
+      <div className="hidden md:flex gap-8 text-sm font-medium text-gray-600">
+        {['Homes', 'Vehicles', 'Agents', 'Pricing'].map((item) => (
+          <a key={item} href="#" className="hover:text-havana-green transition-colors relative group">
+            {item}
+            <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-havana-yellow transition-all duration-300 group-hover:w-full" />
+          </a>
+        ))}
       </div>
 
-      {/* Mobile Menu */}
-      {isOpen && (
-        <div className="md:hidden bg-white border-t border-gray-100 px-4 pt-2 pb-6 space-y-4">
-          <div className="flex flex-col space-y-4 font-medium text-[#474747]">
-            <Link href="#" className="block py-2">Rentals</Link>
-            <Link href="#" className="block py-2">Sales</Link>
-            <Link href="#pricing" className="block py-2">Pricing</Link>
-            <Link href="#" className="block py-2">Agents</Link>
-            <div className="pt-4 flex flex-col gap-3">
-              <Link href="/auth" className="w-full text-center py-3 border rounded-lg">Log in</Link>
-              <Link href="/auth" className="w-full text-center py-3 bg-[#181c1f] text-white rounded-lg">Join Now</Link>
-            </div>
-          </div>
-        </div>
-      )}
-    </nav>
-  );
-};
+      <div className="flex gap-4">
+        <button className="bg-white/80 p-2 rounded-full hover:bg-havana-green/10 text-havana-green transition-all"><Search size={20}/></button>
+        <button className="bg-havana-green text-white px-6 py-2 rounded-full font-bold shadow-lg hover:scale-105 active:scale-95 transition-all text-sm">
+          Get App
+        </button>
+      </div>
+    </div>
+  </motion.nav>
+);
 
-const Hero = () => {
+// --- Section 1: 3D Hero ---
+const HeroSection = () => {
+  const { scrollY } = useScroll();
+  const y1 = useTransform(scrollY, [0, 500], [0, 200]);
+  const y2 = useTransform(scrollY, [0, 500], [0, -150]);
+
   return (
-    <section className="pt-32 pb-20 px-4 bg-gradient-to-b from-white via-[#f6f9ff] to-[#edf3ff]">
-      <div className="max-w-5xl mx-auto flex flex-col items-center text-center">
-        {/* Trusted Badge */}
-        <div className="relative mb-8">
-          <div className="flex items-center gap-2 bg-white/50 border border-gray-200 rounded-full px-4 py-1">
-             <div className="flex -space-x-2">
-                 <div className="h-6 w-6 rounded-full bg-blue-100 flex items-center justify-center text-[10px] font-bold">W</div>
-                 <div className="h-6 w-6 rounded-full bg-red-100 flex items-center justify-center text-[10px] font-bold">A</div>
-                 <div className="h-6 w-6 rounded-full bg-yellow-100 flex items-center justify-center text-[10px] font-bold">Q</div>
-             </div>
-             <span className="text-xs font-bold text-[#00d66b]">Trusted in The Gambia</span>
-          </div>
-        </div>
+    <section className="relative h-screen w-full overflow-hidden flex flex-col items-center justify-center">
+      {/* 3D Background */}
+      <div className="absolute inset-0 z-0">
+        <Canvas camera={{ position: [0, 0, 5], fov: 45 }}>
+          <ambientLight intensity={1} />
+          <directionalLight position={[10, 10, 5]} intensity={1.5} />
+          <Environment preset="city" />
+          <FloatingGeometries />
+        </Canvas>
+      </div>
 
-        <h1 className="text-4xl md:text-6xl lg:text-7xl font-bold tracking-tight text-[#050505] mb-6">
-          Find Your Dream<br /> Car or Home Today
+      <motion.div style={{ y: y1 }} className="relative z-10 text-center max-w-5xl px-4 mt-20">
+        <motion.div 
+          initial={{ opacity: 0, scale: 0.8 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ duration: 1 }}
+          className="inline-block px-4 py-1.5 mb-6 rounded-full border border-havana-green/30 bg-havana-green/5 text-havana-greenDark font-bold text-xs uppercase tracking-widest backdrop-blur-md"
+        >
+          Trusted in The Gambia 🇬🇲
+        </motion.div>
+        
+        <h1 className="text-6xl md:text-8xl font-black text-gray-900 leading-tight tracking-tight mb-8">
+          Find Your <span className="text-transparent bg-clip-text bg-gradient-to-r from-havana-green to-teal-400">Dream</span> <br/>
+          Home or Car <span className="text-transparent bg-clip-text bg-gradient-to-r from-havana-yellow to-orange-400">Today</span>
         </h1>
         
-        <p className="text-lg md:text-xl text-[#707c8c] max-w-2xl mb-10 leading-relaxed">
-          The ultimate marketplace for buying and renting vehicles and properties in The Gambia. <br className="hidden md:block"/>
-          Secure local payments. Verified Agents.
+        <p className="text-xl md:text-2xl text-gray-500 mb-12 max-w-2xl mx-auto font-light leading-relaxed">
+          The ultimate marketplace for Brusubi, Senegambia & Beyond. Rent, Buy, and Sell with confidence using Wave, QMoney or AfriMoney.
         </p>
 
-        <Link href="/auth" className="bg-[#050505] text-white text-lg font-medium px-8 py-4 rounded-xl hover:scale-105 transition transform shadow-xl shadow-gray-300">
-          Start Exploring
-        </Link>
+        <div className="flex flex-col sm:flex-row gap-6 justify-center">
+            <motion.button 
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                className="group relative bg-havana-green text-white px-8 py-4 rounded-2xl text-lg font-bold shadow-xl shadow-havana-green/30 overflow-hidden"
+            >
+                <div className="absolute inset-0 w-full h-full bg-gradient-to-r from-transparent via-white/30 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-700 ease-in-out"></div>
+                Start Browsing
+            </motion.button>
+            <motion.button 
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                className="bg-white text-gray-800 border-2 border-gray-100 px-8 py-4 rounded-2xl text-lg font-bold shadow-lg hover:border-havana-yellow/50 transition-colors"
+            >
+                Selling? Post Ad
+            </motion.button>
+        </div>
+      </motion.div>
+      
+      {/* Bottom fade */}
+      <div className="absolute bottom-0 w-full h-32 bg-gradient-to-t from-havana-yellow/10 to-transparent pointer-events-none" />
+    </section>
+  );
+};
 
-        {/* Hero Visual Mockup Cluster */}
-        <div className="mt-20 relative w-full max-w-4xl">
-            {/* Main Visual */}
-            <div className="relative z-10 rounded-2xl overflow-hidden shadow-2xl border-4 border-white">
-               <Image 
-                  src="https://images.unsplash.com/photo-1560518883-ce09059ee971?q=80&w=1200&auto=format&fit=crop"
-                  width={1004} height={812} 
-                  alt="Havana Dashboard showing property"
-                  className="w-full h-auto drop-shadow-2xl"
-                  priority
-               />
-               <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent">
-                  <div className="absolute bottom-6 left-6 text-white text-left">
-                     <p className="font-bold text-xl">Recent Listing: Luxury Villa</p>
-                     <p className="text-sm opacity-90">Brusubi, The Gambia</p>
-                  </div>
-               </div>
-            </div>
+// --- Section 2: Infinite Horizontal Scroller (Locations & Brands) ---
+const InfiniteScrollMarquee = () => {
+    return (
+        <section className="py-12 bg-white overflow-hidden relative">
+            <div className="absolute inset-y-0 left-0 w-32 bg-gradient-to-r from-white to-transparent z-10"/>
+            <div className="absolute inset-y-0 right-0 w-32 bg-gradient-to-l from-white to-transparent z-10"/>
             
-            {/* Floating Elements (Simulated) */}
-            <div className="absolute -left-8 md:-left-12 top-1/4 bg-white p-3 rounded-2xl shadow-lg hidden md:flex items-center gap-3 animate-bounce duration-[3000ms]">
-                 <div className="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center text-green-600">
-                    <Car size={20} />
-                 </div>
-                 <div>
-                    <p className="text-xs font-bold">Range Rover Sport</p>
-                    <p className="text-[10px] text-gray-500">Listed 2m ago</p>
-                 </div>
-            </div>
-        </div>
-      </div>
-    </section>
-  );
-};
-
-const FeatureSection1 = () => {
-  return (
-    <section className="py-24 bg-[#fbfbfc]">
-      <div className="max-w-7xl mx-auto px-6">
-        <div className="text-center mb-16">
-          <h2 className="text-3xl md:text-5xl font-bold mb-6">Simplify Renting & Buying</h2>
-        </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-12 gap-6">
-          {/* Large Left Card */}
-          <div className="md:col-span-7 bg-gradient-to-b from-[#edf3ff] to-[#d1e0ff] rounded-[32px] p-8 md:p-12 flex flex-col justify-between min-h-[400px] md:min-h-[500px] overflow-hidden relative group">
-            <div className="relative z-10">
-              <h3 className="text-2xl md:text-3xl font-bold mb-4">Direct Communication</h3>
-              <p className="text-[#707c8c] text-lg mb-6 max-w-md">
-                Chat directly with agents or sellers via our secure platform or WhatsApp to schedule viewings for apartments or test drives.
-              </p>
-              <Link href="#" className="text-[#242930] font-medium hover:text-blue-600 underline decoration-blue-400 underline-offset-4">
-                See how it works
-              </Link>
-            </div>
-            <div className="absolute bottom-0 right-0 w-3/4 translate-y-10 translate-x-10 transition group-hover:translate-y-5">
-                {/* Replaced phone with a UI Mockup containing a car listing */}
-                <Image src="https://images.unsplash.com/photo-1617788138017-80ad40651399?auto=format&fit=crop&q=80&w=600" width={585} height={747} alt="Car on Mobile" className="w-full h-auto rounded-t-3xl border-8 border-white shadow-xl" />
-            </div>
-          </div>
-
-          {/* Right Column */}
-          <div className="md:col-span-5 flex flex-col gap-6">
-            {/* Top Card */}
-            <div className="bg-gradient-to-b from-[#edf3ff] to-[#d1e0ff] rounded-[32px] p-8 flex-1 relative overflow-hidden">
-                <h3 className="text-xl font-bold mb-2">Local Payments</h3>
-                <p className="text-[#707c8c] mb-4 text-sm">Secure checkout with Wave, AfriMoney & QMoney.</p>
-                <div className="flex gap-2 mt-4">
-                   {/* Local Payment Icons placeholders */}
-                   <div className="h-8 w-16 bg-blue-500 rounded shadow-sm flex items-center justify-center text-[8px] font-bold text-white">WAVE</div>
-                   <div className="h-8 w-16 bg-purple-600 rounded shadow-sm flex items-center justify-center text-[8px] font-bold text-white">AFRI</div>
-                   <div className="h-8 w-16 bg-yellow-400 rounded shadow-sm flex items-center justify-center text-[8px] font-bold text-black">QMONEY</div>
-                </div>
-            </div>
-
-            {/* Bottom Card */}
-            <div className="bg-gradient-to-b from-[#edf3ff] to-[#d1e0ff] rounded-[32px] p-8 flex-1">
-                <h3 className="text-xl font-bold mb-6">Marketplace Features</h3>
-                <div className="grid grid-cols-2 gap-4">
-                    <div className="bg-white/50 p-3 rounded-xl flex items-center gap-2 text-sm font-medium"><ShoppingBag size={16}/> Buy/Sell</div>
-                    <div className="bg-white/50 p-3 rounded-xl flex items-center gap-2 text-sm font-medium"><BarChart3 size={16}/> Listings</div>
-                    <div className="bg-white/50 p-3 rounded-xl flex items-center gap-2 text-sm font-medium"><Lock size={16}/> Verified</div>
-                    <div className="bg-white/50 p-3 rounded-xl flex items-center gap-2 text-sm font-medium"><MessageCircle size={16}/> Booking</div>
-                </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </section>
-  );
-};
-
-const APISection = () => {
-    return (
-      <section className="py-24 bg-white">
-        <div className="max-w-7xl mx-auto px-6">
-          <div className="text-center mb-16">
-            <h2 className="text-3xl md:text-5xl font-bold mb-4">Pro Plus Tools</h2>
-            <p className="text-xl text-[#707c8c]">Advanced features for serious agents, dealerships, and property managers.</p>
-          </div>
-  
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-             {/* Card 1 */}
-             <div className="bg-gradient-to-b from-[#effaed] to-[#dbf7d7] rounded-[32px] p-8 h-[400px] flex flex-col items-center text-center relative overflow-hidden">
-                <h3 className="text-2xl font-bold mb-3">Market Outreach</h3>
-                <p className="text-[#707c8c] text-sm">Reach out to potential buyers based on user data trends.</p>
-                <div className="absolute bottom-0 w-full left-0 flex justify-center">
-                    <div className="bg-white p-4 rounded-t-xl w-3/4 shadow-lg border-t border-l border-r border-green-100">
-                        <div className="flex gap-2 items-center text-left mb-2">
-                             <div className="w-8 h-8 rounded-full bg-green-200"></div>
-                             <div>
-                                 <div className="h-2 w-24 bg-gray-200 rounded mb-1"></div>
-                                 <div className="h-2 w-16 bg-gray-100 rounded"></div>
-                             </div>
-                        </div>
-                        <div className="h-10 bg-gray-50 rounded-lg w-full"></div>
+            <motion.div 
+                className="flex gap-16 w-max"
+                animate={{ x: [0, -2000] }}
+                transition={{ repeat: Infinity, ease: "linear", duration: 25 }}
+            >
+                {[...Array(2)].map((_, i) => (
+                    <div key={i} className="flex gap-16 items-center">
+                        <span className="text-6xl font-black text-gray-100 uppercase tracking-tighter">Brusubi</span>
+                        <div className="w-4 h-4 rounded-full bg-havana-yellow"/>
+                        <span className="text-6xl font-black text-transparent bg-clip-text bg-gradient-to-r from-gray-200 to-gray-100 uppercase tracking-tighter">Senegambia</span>
+                        <div className="w-4 h-4 rounded-full bg-havana-green"/>
+                        <span className="text-6xl font-black text-gray-100 uppercase tracking-tighter">Range Rover</span>
+                        <div className="w-4 h-4 rounded-full bg-havana-yellow"/>
+                        <span className="text-6xl font-black text-transparent bg-clip-text bg-gradient-to-r from-gray-200 to-gray-100 uppercase tracking-tighter">Brufut Heights</span>
+                        <div className="w-4 h-4 rounded-full bg-havana-green"/>
+                        <span className="text-6xl font-black text-gray-100 uppercase tracking-tighter">Toyota</span>
                     </div>
-                </div>
-             </div>
-  
-             {/* Card 2 */}
-             <div className="bg-gradient-to-b from-[#effaed] to-[#dbf7d7] rounded-[32px] p-8 h-[400px] flex flex-col items-center text-center relative overflow-hidden">
-                <h3 className="text-2xl font-bold mb-3">Competitor Pricing</h3>
-                <p className="text-[#707c8c] text-sm">View real-time pricing of other cars and houses in your area.</p>
-                <div className="absolute bottom-8 w-3/4 bg-white rounded-xl shadow-lg p-4 text-left">
-                    <div className="flex justify-between items-end mb-2 h-24">
-                        <div className="w-4 h-12 bg-gray-200 rounded-t"></div>
-                        <div className="w-4 h-16 bg-gray-200 rounded-t"></div>
-                        <div className="w-4 h-24 bg-green-500 rounded-t relative"><span className="absolute -top-6 left-0 text-[10px] font-bold">You</span></div>
-                        <div className="w-4 h-20 bg-gray-200 rounded-t"></div>
-                    </div>
-                </div>
-             </div>
-  
-             {/* Card 3 */}
-             <div className="bg-gradient-to-b from-[#effaed] to-[#dbf7d7] rounded-[32px] p-8 h-[400px] flex flex-col items-center text-center relative overflow-hidden">
-                <h3 className="text-2xl font-bold mb-3">Verified Agent Badge</h3>
-                <p className="text-[#707c8c] text-sm">Gain trust with the Pro Plus verification badge on all listings.</p>
-                <div className="mt-8 flex gap-4">
-                    <div className="bg-white p-4 rounded-full shadow-lg border-2 border-green-400">
-                        <Check size={32} className="text-green-500" strokeWidth={3} />
-                    </div>
-                </div>
-                <div className="mt-4 bg-white/50 px-3 py-1 rounded-full text-xs font-bold text-green-700">OFFICIAL AGENT</div>
-             </div>
-          </div>
-        </div>
-      </section>
-    );
-};
-
-const IndustrySection = () => {
-    // Modified to be Rent/Car/House categories
-    const industries = [
-        { name: "Luxury Cars", img: "https://images.unsplash.com/photo-1552519507-da3b142c6e3d?auto=format&fit=crop&w=500&q=80" },
-        { name: "Apartments", img: "https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?auto=format&fit=crop&w=500&q=80" },
-        { name: "Family Homes", img: "https://images.unsplash.com/photo-1570129477492-45c003edd2be?auto=format&fit=crop&w=500&q=80" },
-        { name: "Land for Sale", img: "https://images.unsplash.com/photo-1500382017468-9049fed747ef?auto=format&fit=crop&w=500&q=80" },
-        { name: "Commercial", img: "https://images.unsplash.com/photo-1497366216548-37526070297c?auto=format&fit=crop&w=500&q=80" },
-        { name: "Explore All", img: "", isText: true },
-    ];
-
-    return (
-        <section className="py-24 bg-[#fbfbfc]">
-             <div className="max-w-6xl mx-auto px-6">
-                <div className="text-center mb-16">
-                    <h2 className="text-3xl md:text-5xl font-bold mb-4">Browsing Made Easy</h2>
-                    <p className="text-xl text-[#707c8c]">From rentals in Senegambia to land in Brufut.</p>
-                </div>
-
-                <div className="grid grid-cols-2 md:grid-cols-3 gap-6">
-                    {industries.map((ind, idx) => (
-                        ind.isText ? (
-                            <Link key={idx} href="#" className="bg-[#eef0f4] rounded-3xl flex items-center justify-between p-8 group hover:bg-gray-200 transition">
-                                <span className="text-xl font-semibold text-[#242930]">{ind.name}</span>
-                                <div className="bg-white p-3 rounded-full shadow-sm">
-                                    <ArrowRight size={20} />
-                                </div>
-                            </Link>
-                        ) : (
-                            <Link key={idx} href="#" className="relative h-64 rounded-3xl overflow-hidden group shadow-sm hover:shadow-md transition">
-                                <Image src={ind.img} alt={ind.name} fill className="object-cover transition duration-500 group-hover:scale-105" />
-                                <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent"></div>
-                                <div className="absolute bottom-6 left-6">
-                                    <span className="text-white text-xl font-bold">{ind.name}</span>
-                                </div>
-                            </Link>
-                        )
-                    ))}
-                </div>
-             </div>
+                ))}
+            </motion.div>
         </section>
     )
 }
 
-const AllInOneSection = () => {
+// --- Section 3: Exploding Mobile App Experience (Key Request) ---
+const PhoneExplosion = () => {
+    const targetRef = useRef(null);
+    const { scrollYProgress } = useScroll({ target: targetRef, offset: ["start end", "end start"] });
+    
+    // Transforms for flying components
+    const yNav = useTransform(scrollYProgress, [0.1, 0.4], [300, -380]);
+    const xNav = useTransform(scrollYProgress, [0.1, 0.4], [0, 250]);
+    const scaleNav = useTransform(scrollYProgress, [0.1, 0.4], [0.5, 1]);
+
+    const yCard = useTransform(scrollYProgress, [0.2, 0.5], [100, 0]);
+    const xCard = useTransform(scrollYProgress, [0.2, 0.5], [0, -300]);
+    const rotateCard = useTransform(scrollYProgress, [0.2, 0.5], [15, -5]);
+
+    const yChat = useTransform(scrollYProgress, [0.3, 0.6], [100, 150]);
+    const xChat = useTransform(scrollYProgress, [0.3, 0.6], [0, 320]);
+    
     return (
-        <section className="py-24 bg-white">
-             <div className="max-w-7xl mx-auto px-6">
-                <div className="text-center mb-16">
-                    <h2 className="text-3xl md:text-5xl font-bold mb-4">Manage Your Rental Business</h2>
-                </div>
+        <section ref={targetRef} className="h-[200vh] relative bg-gradient-to-b from-gray-50 to-white flex items-center justify-center perspective-1000 overflow-hidden">
+            <div className="sticky top-[20vh] h-[80vh] w-full flex items-center justify-center">
                 
-                {/* Bento Grid Layout */}
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                    {/* Large Left Card */}
-                    <div className="md:col-span-2 bg-gradient-to-b from-[#f5edff] to-[#e9d6ff] rounded-[32px] p-8 min-h-[500px] relative overflow-hidden">
-                        <h3 className="text-2xl font-bold mb-2">Beautiful Inventory Display</h3>
-                        <p className="text-gray-600 mb-8">Showcase every detail of your vehicle or property.</p>
-                        <div className="absolute bottom-0 left-0 w-full h-3/4 pl-8">
-                            {/* Visual Mockup using nice car image */}
-                            <Image src="https://images.unsplash.com/photo-1549399542-7e3f8b79c341?auto=format&fit=crop&q=80&w=800" width={600} height={400} alt="Listing Dashboard" className="shadow-2xl rounded-tl-xl border-4 border-white" />
+                {/* Center Phone */}
+                <div className="relative w-[300px] h-[600px] bg-black rounded-[40px] shadow-2xl border-[8px] border-gray-900 z-20 overflow-hidden">
+                   {/* Notch */}
+                   <div className="absolute top-0 w-1/2 left-1/4 h-6 bg-black rounded-b-xl z-30"/>
+                   {/* Screen */}
+                   <div className="w-full h-full bg-gray-50 overflow-hidden relative pt-12">
+                        {/* Internal Phone Animation */}
+                        <motion.div style={{ opacity: useTransform(scrollYProgress, [0, 0.3], [1, 0])}} className="flex flex-col gap-4 p-4">
+                            <div className="h-48 bg-gray-200 rounded-xl animate-pulse"/>
+                            <div className="h-20 bg-havana-green/20 rounded-xl"/>
+                            <div className="h-20 bg-havana-yellow/20 rounded-xl"/>
+                        </motion.div>
+
+                        <motion.div 
+                          style={{ 
+                            y: useTransform(scrollYProgress, [0.1, 0.3], [600, 0]), 
+                            scale: useTransform(scrollYProgress, [0.3, 0.6], [1, 1.2]) 
+                          }}
+                          className="absolute inset-0 bg-white p-6 pt-16 flex flex-col gap-6"
+                        >
+                           <h3 className="text-2xl font-bold">New Listings</h3>
+                           <div className="aspect-video bg-blue-100 rounded-lg relative overflow-hidden">
+                                <img src="https://images.unsplash.com/photo-1600596542815-9ad4dc7553e3?auto=format&fit=crop&q=80&w=1000" className="object-cover w-full h-full" alt="house"/>
+                                <span className="absolute top-2 right-2 bg-havana-green text-white text-xs font-bold px-2 py-1 rounded">D200/mo</span>
+                           </div>
+                           <div className="aspect-video bg-orange-100 rounded-lg relative overflow-hidden">
+                                <img src="https://images.unsplash.com/photo-1549399542-7e3f8b79c341?auto=format&fit=crop&q=80&w=1000" className="object-cover w-full h-full" alt="car"/>
+                           </div>
+                        </motion.div>
+                   </div>
+                </div>
+
+                {/* Flying UI Component: Stats */}
+                <motion.div style={{ x: xNav, y: yNav, scale: scaleNav }} className="absolute z-10 w-64 p-4 bg-white/80 backdrop-blur-md rounded-2xl shadow-glass-xl border border-white">
+                     <div className="flex justify-between items-center mb-2">
+                        <span className="text-gray-500 text-xs font-bold uppercase">Analytics</span>
+                        <div className="h-2 w-2 rounded-full bg-havana-green animate-pulse"/>
+                     </div>
+                     <div className="text-3xl font-bold text-gray-800">1,402</div>
+                     <p className="text-sm text-gray-400">Profile Views</p>
+                     <div className="mt-4 flex gap-1 h-12 items-end">
+                         {[40, 70, 35, 90, 60, 80].map((h, i) => (
+                             <motion.div 
+                                key={i}
+                                animate={{ height: [`${h/2}%`, `${h}%`, `${h/2}%`] }} 
+                                transition={{ repeat: Infinity, duration: 2, delay: i * 0.1 }}
+                                className="flex-1 bg-gradient-to-t from-havana-green to-havana-greenLight rounded-t-sm opacity-80"
+                            />
+                         ))}
+                     </div>
+                </motion.div>
+
+                {/* Flying UI Component: Car Card */}
+                <motion.div style={{ x: xCard, y: yCard, rotate: rotateCard }} className="absolute z-10 w-72 bg-white rounded-3xl p-3 shadow-2xl border-4 border-white/50">
+                    <div className="h-40 rounded-2xl overflow-hidden mb-3 relative group">
+                        <img src="https://images.unsplash.com/photo-1606611013016-969c412e4f04?auto=format&fit=crop&q=80&w=500" alt="luxury car" className="w-full h-full object-cover"/>
+                        <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                            <span className="text-white font-bold bg-havana-yellow px-4 py-2 rounded-full">Reserve Now</span>
                         </div>
                     </div>
-
-                    {/* Right Column Stack */}
-                    <div className="flex flex-col gap-6">
-                        {/* Domain Card */}
-                        <div className="bg-gradient-to-b from-[#f5edff] to-[#e9d6ff] rounded-[32px] p-8 flex-1 flex flex-col items-center justify-center text-center">
-                            <h3 className="text-xl font-bold mb-4">Branded Profile</h3>
-                            <div className="bg-white rounded-full py-2 px-6 flex items-center gap-2 shadow-sm">
-                                <Lock size={14} className="text-gray-400"/>
-                                <span className="font-mono text-sm text-gray-600">havana.gm/brand</span>
-                            </div>
+                    <div className="flex justify-between items-end px-2 pb-2">
+                        <div>
+                            <h4 className="font-bold text-lg leading-none">Range Rover</h4>
+                            <p className="text-xs text-gray-400 mt-1">Brusubi Garage</p>
                         </div>
+                        <span className="text-havana-green font-bold text-xl">D2,500<span className="text-xs text-gray-400 font-normal">/day</span></span>
+                    </div>
+                </motion.div>
 
-                         {/* Analytics Card */}
-                         <div className="bg-gradient-to-b from-[#f5edff] to-[#e9d6ff] rounded-[32px] p-8 flex-1 flex flex-col items-center justify-center text-center relative overflow-hidden">
-                            <h3 className="text-xl font-bold mb-4 z-10 relative">Customer Insights</h3>
-                            <div className="absolute bottom-0 w-full opacity-50 flex justify-center">
-                                {/* Simple Chart simulation */}
-                                <div className="flex items-end gap-1 h-24">
-                                   <div className="w-4 h-8 bg-purple-300"></div>
-                                   <div className="w-4 h-12 bg-purple-400"></div>
-                                   <div className="w-4 h-16 bg-purple-500"></div>
-                                   <div className="w-4 h-10 bg-purple-300"></div>
+                {/* Flying UI Component: Chat */}
+                <motion.div style={{ x: xChat, y: yChat }} className="absolute z-30 w-80 bg-white rounded-2xl shadow-xl p-4 flex flex-col gap-3">
+                    <div className="flex items-center gap-3 border-b border-gray-100 pb-3">
+                        <div className="w-10 h-10 rounded-full bg-blue-100 overflow-hidden"><img src="https://api.dicebear.com/7.x/avataaars/svg?seed=Felix" alt="avatar"/></div>
+                        <div>
+                            <div className="font-bold text-sm">Agent Modou</div>
+                            <div className="text-xs text-green-500 flex items-center gap-1"><span className="w-1 h-1 rounded-full bg-green-500"/> Online</div>
+                        </div>
+                    </div>
+                    <div className="bg-gray-100 p-3 rounded-tr-xl rounded-bl-xl rounded-br-xl text-xs text-gray-700">Is the Land Cruiser still available?</div>
+                    <div className="bg-havana-green text-white p-3 rounded-tl-xl rounded-bl-xl rounded-br-xl text-xs self-end">Yes! Can we meet at Traffic Lights?</div>
+                    <div className="bg-gray-100 p-3 rounded-tr-xl rounded-bl-xl rounded-br-xl text-xs text-gray-700">Perfect, I'll pay via Wave.</div>
+                </motion.div>
+
+                <div className="absolute -z-10 w-[800px] h-[800px] bg-gradient-to-r from-havana-greenLight to-blue-50 opacity-50 blur-[100px] rounded-full top-0 left-1/4 animate-pulse"></div>
+
+            </div>
+            
+            <div className="absolute bottom-20 text-center w-full z-0 opacity-40">
+                <h2 className="text-[10vw] font-black leading-none tracking-tighter text-gray-200">EXPERIENCE</h2>
+                <h2 className="text-[10vw] font-black leading-none tracking-tighter text-transparent bg-clip-text bg-gradient-to-t from-gray-200 to-white">HAVANA 2.0</h2>
+            </div>
+        </section>
+    );
+};
+
+// --- Section 4: Vertical Infinite Scroller (Marketplace Preview) ---
+const VerticalScroller = () => {
+    const list1 = [
+        { title: "Brufut Villa", price: "D7.5M", type: "Home", color: "bg-blue-100" },
+        { title: "Lexus 570", price: "D3.2M", type: "Car", color: "bg-gray-200" },
+        { title: "Bijilo Land", price: "D450k", type: "Land", color: "bg-green-100" },
+        { title: "Toyota Corolla", price: "D300k", type: "Car", color: "bg-red-100" },
+        { title: "Kerr Serign Apt", price: "D25k/mo", type: "Rent", color: "bg-purple-100" },
+    ];
+    
+    return (
+        <section className="py-24 bg-gray-950 text-white relative overflow-hidden h-[800px] flex items-center">
+            <div className="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-20"/>
+            
+            <div className="container mx-auto px-6 relative z-10 grid grid-cols-1 lg:grid-cols-2 gap-12">
+                <div className="flex flex-col justify-center">
+                    <span className="text-havana-yellow font-bold tracking-widest text-sm uppercase mb-4">Live Market Activity</span>
+                    <h2 className="text-5xl md:text-6xl font-black mb-8">What's Trending in <br/><span className="text-havana-green">Real-time.</span></h2>
+                    <p className="text-gray-400 mb-8 max-w-md">Our algorithm matches buyers and sellers across The Gambia instantly. Watch transactions happen.</p>
+                    <div className="flex gap-4">
+                        <div className="flex items-center gap-2 bg-gray-900 rounded-lg px-4 py-2 border border-gray-800">
+                             <Zap className="text-havana-yellow" size={18}/> <span className="text-xs font-bold">128 Sales Today</span>
+                        </div>
+                         <div className="flex items-center gap-2 bg-gray-900 rounded-lg px-4 py-2 border border-gray-800">
+                             <Radio className="text-havana-green" size={18}/> <span className="text-xs font-bold">2.4k Active Users</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div className="h-[600px] relative flex gap-6 rotate-[-5deg] scale-110 opacity-80 hover:opacity-100 transition-opacity duration-500">
+                     <div className="flex flex-col gap-6 w-64 overflow-hidden relative">
+                         <div className="absolute top-0 z-20 w-full h-32 bg-gradient-to-b from-gray-950 to-transparent"/>
+                         <motion.div 
+                            className="flex flex-col gap-6"
+                            animate={{ y: [0, -1000] }}
+                            transition={{ repeat: Infinity, duration: 20, ease: "linear" }}
+                         >
+                            {[...list1, ...list1, ...list1].map((item, idx) => (
+                                <div key={idx} className="bg-gray-900 p-4 rounded-2xl border border-gray-800 hover:border-havana-green transition-colors">
+                                    <div className={`h-32 ${item.color} rounded-xl mb-3 w-full opacity-50`}/>
+                                    <h4 className="font-bold">{item.title}</h4>
+                                    <div className="flex justify-between mt-2">
+                                        <span className="text-sm text-gray-400">{item.type}</span>
+                                        <span className="text-havana-yellow font-bold text-sm">{item.price}</span>
+                                    </div>
                                 </div>
-                            </div>
-                        </div>
-                    </div>
+                            ))}
+                         </motion.div>
+                         <div className="absolute bottom-0 z-20 w-full h-32 bg-gradient-to-t from-gray-950 to-transparent"/>
+                     </div>
 
-                     {/* Bottom Row */}
-                     <div className="bg-[#f2f3f5] rounded-[32px] p-8 h-80 flex flex-col justify-center">
-                        <h3 className="text-xl font-bold">Inventory</h3>
-                        <p className="text-gray-500 text-sm">Manage multiple houses and cars from one place</p>
-                     </div>
-                     <div className="bg-[#f2f3f5] rounded-[32px] p-8 h-80 flex flex-col justify-center">
-                        <h3 className="text-xl font-bold">Promotion</h3>
-                        <p className="text-gray-500 text-sm">Banner ads for Pro Plus members</p>
-                     </div>
-                     <div className="bg-[#f2f3f5] rounded-[32px] p-8 h-80 flex flex-col justify-center">
-                        <h3 className="text-xl font-bold">Security</h3>
-                        <p className="text-gray-500 text-sm">Vetted users and ID verification</p>
+                     <div className="flex flex-col gap-6 w-64 overflow-hidden relative mt-20">
+                         <div className="absolute top-0 z-20 w-full h-32 bg-gradient-to-b from-gray-950 to-transparent"/>
+                         <motion.div 
+                            className="flex flex-col gap-6"
+                            animate={{ y: [-1000, 0] }}
+                            transition={{ repeat: Infinity, duration: 25, ease: "linear" }}
+                         >
+                            {[...list1, ...list1, ...list1].reverse().map((item, idx) => (
+                                <div key={idx} className="bg-gray-900 p-4 rounded-2xl border border-gray-800 hover:border-havana-green transition-colors">
+                                    <div className={`h-32 ${item.color} rounded-xl mb-3 w-full opacity-50`}/>
+                                    <h4 className="font-bold">{item.title}</h4>
+                                    <div className="flex justify-between mt-2">
+                                        <span className="text-sm text-gray-400">{item.type}</span>
+                                        <span className="text-havana-yellow font-bold text-sm">{item.price}</span>
+                                    </div>
+                                </div>
+                            ))}
+                         </motion.div>
+                         <div className="absolute bottom-0 z-20 w-full h-32 bg-gradient-to-t from-gray-950 to-transparent"/>
                      </div>
                 </div>
-             </div>
+            </div>
         </section>
+    );
+}
+
+// --- Section 5: Pricing Plans (Glassmorphism & Tilt) ---
+const PricingCard = ({ plan, popular = false, delay }: { plan: any, popular?: boolean, delay: number }) => {
+    const x = useMotionValue(0);
+    const y = useMotionValue(0);
+    const rotateX = useTransform(y, [-100, 100], [30, -30]);
+    const rotateY = useTransform(x, [-100, 100], [-30, 30]);
+
+    return (
+        <motion.div 
+            initial={{ opacity: 0, y: 100 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            transition={{ delay, duration: 0.8 }}
+            style={{ x, y, rotateX, rotateY, z: 100 }}
+            onMouseMove={(e) => {
+                const rect = e.currentTarget.getBoundingClientRect();
+                x.set(e.clientX - rect.left - rect.width / 2);
+                y.set(e.clientY - rect.top - rect.height / 2);
+            }}
+            onMouseLeave={() => { x.set(0); y.set(0); }}
+            className={cn(
+                "relative group flex flex-col p-8 rounded-[2rem] border transition-all duration-300 transform-gpu preserve-3d cursor-pointer h-full",
+                popular 
+                  ? "bg-gray-900 text-white border-havana-green/50 shadow-glow-green" 
+                  : "bg-white border-gray-100 text-gray-800 hover:shadow-xl hover:border-havana-green/30"
+            )}
+        >
+            {popular && (
+                <div className="absolute -top-4 right-10 bg-havana-yellow text-black text-xs font-bold px-4 py-1.5 rounded-full z-20 uppercase tracking-widest shadow-lg transform rotate-3">
+                    Top Choice
+                </div>
+            )}
+
+            <div className="mb-8">
+                <h3 className="text-2xl font-black mb-2">{plan.name}</h3>
+                <div className="text-4xl font-bold flex items-end gap-1">
+                    {plan.price}<span className="text-base font-medium opacity-60">/{plan.period}</span>
+                </div>
+                {plan.yearly && <div className="text-xs mt-2 text-havana-green font-bold">{plan.yearly}</div>}
+            </div>
+
+            <ul className="space-y-4 mb-10 flex-1">
+                {plan.features.map((feature: string, i: number) => (
+                    <li key={i} className="flex items-start gap-3 text-sm opacity-80">
+                        <Check size={16} className={popular ? "text-havana-green" : "text-gray-400"} />
+                        {feature}
+                    </li>
+                ))}
+            </ul>
+
+            <button className={cn(
+                "w-full py-4 rounded-xl font-bold text-sm transition-all transform active:scale-95",
+                popular 
+                  ? "bg-havana-green text-white shadow-lg hover:bg-white hover:text-black" 
+                  : "bg-gray-100 text-gray-800 hover:bg-havana-yellow hover:text-black"
+            )}>
+                Select Plan
+            </button>
+        </motion.div>
     )
 }
 
 const PricingSection = () => {
-    const [isYearly, setIsYearly] = useState(true);
+    const plans = [
+        {
+            name: "Normal Plan",
+            price: "D200",
+            period: "mo",
+            yearly: "Or D2,000 / year",
+            features: ["Full Platform Access", "Rent Cars & Apts", "Contact 5 Agents/Day", "Basic Support", "Secure Wave Payments"]
+        },
+        {
+            name: "Pro Plan",
+            price: "D700",
+            period: "mo",
+            yearly: "Or D7,000 / year",
+            features: ["Unlimited Agent Contacts", "1 Free Listing Post", "Priority Listings", "Priority Support", "Everything in Normal"]
+        },
+        {
+            name: "Pro Plus (Agent)",
+            price: "D2,000",
+            period: "mo",
+            yearly: "Or D20,000 / year",
+            features: ["User Trends Data", "Competitor Price Analysis", "Verified Agent Badge", "Banner Ads Eligibility", "Dedicated CRM"]
+        }
+    ];
 
     return (
-        <section id="pricing" className="py-24 bg-gradient-to-b from-[#fbfbfc] to-[#f0f0f2]">
+        <section className="py-32 bg-gray-50 perspective-1000">
             <div className="max-w-7xl mx-auto px-6">
-                <div className="text-center mb-12">
-                    <h2 className="text-4xl font-bold mb-8">Membership Plans</h2>
-                    <div className="inline-flex bg-white p-1 rounded-xl shadow-sm border border-gray-100">
-                        <button 
-                            onClick={() => setIsYearly(true)}
-                            className={`px-6 py-2 text-sm font-medium rounded-lg transition ${isYearly ? 'bg-[#242930] text-white shadow-md' : 'text-gray-600 hover:bg-gray-50'}`}
-                        >
-                            Yearly <span className="font-normal opacity-80">(Best Value)</span>
-                        </button>
-                        <button 
-                            onClick={() => setIsYearly(false)}
-                            className={`px-6 py-2 text-sm font-medium rounded-lg transition ${!isYearly ? 'bg-[#242930] text-white shadow-md' : 'text-gray-600 hover:bg-gray-50'}`}
-                        >
-                            Monthly
-                        </button>
-                    </div>
-                </div>
+                 <motion.div 
+                    initial={{ opacity: 0 }} 
+                    whileInView={{ opacity: 1 }}
+                    className="text-center mb-20"
+                 >
+                    <h2 className="text-5xl font-black mb-4">Pricing in <span className="text-havana-green">Dalasi</span></h2>
+                    <p className="text-gray-500 text-xl">Fair prices for individuals, agents, and dealerships.</p>
+                 </motion.div>
 
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-6xl mx-auto">
-                    {/* Normal Plan */}
-                    <div className="bg-white rounded-3xl p-8 border border-gray-100 shadow-sm flex flex-col">
-                        <div className="mb-6">
-                            <h3 className="text-xl font-bold text-[#242930]">Normal</h3>
-                            <p className="text-gray-500 text-sm">Standard Access</p>
-                        </div>
-                        <div className="mb-8">
-                            <div className="flex items-baseline gap-2">
-                                <span className="text-4xl font-bold text-[#242930]">D{isYearly ? '2,000' : '200'}</span>
-                                <span className="text-gray-400 text-sm">/ {isYearly ? 'year' : 'month'}</span>
-                            </div>
-                        </div>
-                        <div className="flex-1 space-y-4 mb-8">
-                             <div className="text-sm text-gray-600 flex gap-2"><Check size={16} className="text-green-500"/> Full platform access</div>
-                             <div className="text-sm text-gray-600 flex gap-2"><Check size={16} className="text-green-500"/> Rent cars & apartments</div>
-                             <div className="text-sm text-gray-600 flex gap-2"><Check size={16} className="text-green-500"/> Contact up to 5 agents/day</div>
-                             <div className="text-sm text-gray-600 flex gap-2"><Check size={16} className="text-green-500"/> Basic support</div>
-                        </div>
-                        <Link href="/auth" className="w-full block text-center py-3 bg-[#242930] text-white rounded-xl font-medium hover:bg-black transition">Get started</Link>
-                    </div>
-
-                    {/* Pro Plan */}
-                    <div className="bg-white rounded-3xl p-8 border-2 border-blue-100 shadow-lg relative overflow-hidden flex flex-col transform md:-translate-y-4">
-                        <div className="mb-6">
-                            <h3 className="text-xl font-bold text-[#242930]">Pro</h3>
-                            <p className="text-gray-500 text-sm">For Active Users</p>
-                        </div>
-                        <div className="mb-8">
-                            <div className="flex items-baseline gap-2">
-                                <span className="text-4xl font-bold text-[#1b91f2]">D{isYearly ? '7,000' : '700'}</span>
-                                <span className="text-gray-400 text-sm">/ {isYearly ? 'year' : 'month'}</span>
-                            </div>
-                        </div>
-                        <div className="flex-1 space-y-4 mb-8">
-                             <p className="text-sm font-bold text-gray-900">Everything in Normal, plus:</p>
-                             <div className="text-sm text-gray-600 flex gap-2"><Check size={16} className="text-blue-500"/> Unlimited agent contacts</div>
-                             <div className="text-sm text-gray-600 flex gap-2"><Check size={16} className="text-blue-500"/> List 1 item for sale free</div>
-                             <div className="text-sm text-gray-600 flex gap-2"><Check size={16} className="text-blue-500"/> Priority listings</div>
-                             <div className="text-sm text-gray-600 flex gap-2"><Check size={16} className="text-blue-500"/> Priority Support</div>
-                        </div>
-                        <Link href="/auth" className="w-full block text-center py-3 bg-[#1b91f2] text-white rounded-xl font-medium hover:bg-blue-600 transition">Upgrade to Pro</Link>
-                        <p className="text-center text-xs text-gray-400 mt-3">Cancel any time</p>
-                    </div>
-
-                     {/* Pro Plus Plan */}
-                     <div className="bg-white rounded-3xl p-8 border border-gray-100 shadow-sm flex flex-col">
-                        <div className="absolute top-0 right-0 bg-purple-100 px-4 py-1 rounded-bl-xl text-purple-700 text-xs font-bold">AGENTS</div>
-                        <div className="mb-6">
-                            <h3 className="text-xl font-bold text-[#242930]">Pro Plus</h3>
-                            <p className="text-gray-500 text-sm">For Agents & Dealerships</p>
-                        </div>
-                        <div className="mb-8">
-                            <div className="flex items-baseline gap-2">
-                                <span className="text-4xl font-bold text-[#8c34eb]">D{isYearly ? '20,000' : '2,000'}</span>
-                                <span className="text-gray-400 text-sm">/ {isYearly ? 'year' : 'month'}</span>
-                            </div>
-                        </div>
-                        <div className="flex-1 space-y-4 mb-8">
-                             <p className="text-sm font-bold text-gray-900">For high volume sellers:</p>
-                             <div className="text-sm text-gray-600 flex gap-2"><Check size={16} className="text-purple-500"/> Access to User Data/Trends</div>
-                             <div className="text-sm text-gray-600 flex gap-2"><Check size={16} className="text-purple-500"/> Outreach Marketing Tools</div>
-                             <div className="text-sm text-gray-600 flex gap-2"><Check size={16} className="text-purple-500"/> Competitor Price Analysis</div>
-                             <div className="text-sm text-gray-600 flex gap-2"><Check size={16} className="text-purple-500"/> Agent Badge & Branding</div>
-                             <div className="text-sm text-gray-600 flex gap-2"><Check size={16} className="text-purple-500"/> Banner Ad Eligibility</div>
-                        </div>
-                        <Link href="/auth" className="w-full block text-center py-3 bg-[#8c34eb] text-white rounded-xl font-medium hover:bg-purple-600 transition">Get Pro Plus</Link>
-                    </div>
-                </div>
+                 <div className="grid grid-cols-1 md:grid-cols-3 gap-8 items-stretch">
+                     <PricingCard plan={plans[0]} popular={false} delay={0} />
+                     <PricingCard plan={plans[1]} popular={false} delay={0.2} />
+                     <PricingCard plan={plans[2]} popular={true} delay={0.4} />
+                 </div>
             </div>
+        </section>
+    );
+}
+
+// --- Section 6: Local Payments (New Component) ---
+const PaymentEcosystem = () => {
+    return (
+        <section className="py-24 bg-white relative overflow-hidden">
+             {/* Abstract Decorators */}
+             <div className="absolute top-0 right-0 w-64 h-64 bg-havana-yellow/10 rounded-full blur-3xl translate-x-1/2 -translate-y-1/2"/>
+             <div className="absolute bottom-0 left-0 w-96 h-96 bg-havana-green/10 rounded-full blur-3xl -translate-x-1/2 translate-y-1/2"/>
+
+             <div className="max-w-7xl mx-auto px-6 flex flex-col md:flex-row items-center gap-20">
+                 <div className="flex-1">
+                     <div className="inline-flex items-center gap-2 text-havana-yellow font-bold uppercase tracking-widest text-xs mb-6 border border-gray-100 px-4 py-2 rounded-full">
+                         <Shield size={14}/> Secure Local Transactions
+                     </div>
+                     <h2 className="text-5xl font-black leading-tight mb-8">
+                         Local Payments, <br/>
+                         Global Standard.
+                     </h2>
+                     <p className="text-gray-500 text-lg mb-8 leading-relaxed">
+                         Don't carry cash. Havanah is integrated with the payment systems you use everyday in Gambia. Verify identity and pay safely.
+                     </p>
+                     
+                     <div className="flex gap-4">
+                        {['Wave', 'AfriMoney', 'QMoney'].map((pay) => (
+                             <motion.div 
+                                key={pay}
+                                whileHover={{ y: -5 }}
+                                className="h-16 px-6 bg-white border border-gray-200 shadow-md rounded-xl flex items-center justify-center font-bold text-gray-400 grayscale hover:grayscale-0 hover:border-havana-green/30 transition-all cursor-pointer"
+                             >
+                                 {pay}
+                             </motion.div>
+                        ))}
+                     </div>
+                 </div>
+
+                 <div className="flex-1 relative h-[500px] w-full perspective-1000">
+                      {/* Floating credit card/payment abstract visual */}
+                      <motion.div 
+                        initial={{ rotateY: 20, rotateX: 20 }}
+                        animate={{ rotateY: [20, -20, 20], rotateX: [10, 30, 10], y: [-10, 10, -10] }}
+                        transition={{ duration: 10, repeat: Infinity, ease: "easeInOut" }}
+                        className="absolute inset-0 bg-gradient-to-br from-gray-900 to-black rounded-[40px] shadow-2xl p-8 flex flex-col justify-between text-white border-2 border-white/10 overflow-hidden"
+                      >
+                           {/* Shine Effect */}
+                           <div className="absolute top-0 -left-1/2 w-full h-full bg-gradient-to-r from-transparent via-white/10 to-transparent skew-x-12 animate-shimmer"/>
+                           
+                           <div className="flex justify-between items-start">
+                               <div className="w-16 h-16 rounded-full bg-white/10 backdrop-blur-md flex items-center justify-center">
+                                    <div className="w-10 h-10 bg-havana-green rounded-full opacity-80"/>
+                               </div>
+                               <Zap className="text-havana-yellow opacity-80" size={32}/>
+                           </div>
+                           
+                           <div>
+                                <div className="text-3xl font-mono tracking-widest mb-2 opacity-80">•••• •••• 4529</div>
+                                <div className="flex justify-between items-end mt-8">
+                                    <div>
+                                        <p className="text-xs uppercase opacity-60">Card Holder</p>
+                                        <p className="text-sm font-bold tracking-wider">MODOU LAMIN J.</p>
+                                    </div>
+                                    <img src="https://upload.wikimedia.org/wikipedia/commons/2/2a/Mastercard-logo.svg" className="h-8 opacity-80" alt="MC"/>
+                                </div>
+                           </div>
+                      </motion.div>
+                 </div>
+             </div>
         </section>
     )
 }
 
-const Footer = () => {
-    return (
-        <footer className="bg-[#242930] text-white pt-20 pb-10">
-            <div className="max-w-7xl mx-auto px-6">
-                <div className="flex flex-col md:flex-row justify-between items-center mb-20 border-b border-gray-700 pb-12">
-                     <div className="flex flex-col gap-4">
-                        <div className="flex items-center gap-2 text-[#00d66b] font-bold">
-                            <span className="w-2 h-2 bg-[#00d66b] rounded-full"></span> Operating in The Gambia
-                        </div>
-                        <h2 className="text-4xl font-bold">Rent, Buy, and Sell <br/> <span className="text-white/50">with Confidence.</span></h2>
-                     </div>
-                     <div className="mt-8 md:mt-0">
-                        <Link href="/auth" className="bg-[#36383b] border border-[#4e4f52] px-8 py-4 rounded-xl text-lg font-medium hover:bg-[#4e4f52] transition">
-                            Create Account
-                        </Link>
-                     </div>
+// --- Footer ---
+const Footer = () => (
+    <footer className="bg-gray-50 border-t border-gray-200 pt-20 pb-10">
+        <div className="max-w-7xl mx-auto px-6 grid grid-cols-1 md:grid-cols-4 gap-12 mb-20">
+            <div className="col-span-1 md:col-span-2">
+                <div className="flex items-center gap-2 mb-6">
+                    <div className="w-8 h-8 bg-havana-green rounded-lg flex items-center justify-center text-white font-bold">H</div>
+                    <span className="font-bold text-xl">Havanah<span className="text-gray-400">.gm</span></span>
                 </div>
-
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-10 mb-16">
-                    <div className="flex flex-col gap-4">
-                        <h3 className="font-bold text-sm text-gray-400 uppercase tracking-wider">Marketplace</h3>
-                        <Link href="#pricing" className="text-gray-300 hover:text-white">Pricing</Link>
-                        <Link href="#" className="text-gray-300 hover:text-white">Browse Cars</Link>
-                        <Link href="#" className="text-gray-300 hover:text-white">Browse Houses</Link>
-                    </div>
-                    <div className="flex flex-col gap-4">
-                        <h3 className="font-bold text-sm text-gray-400 uppercase tracking-wider">Agents</h3>
-                        <Link href="/auth" className="text-gray-300 hover:text-white">Join as Pro Plus</Link>
-                        <Link href="#" className="text-gray-300 hover:text-white">Advertising</Link>
-                        <Link href="#" className="text-gray-300 hover:text-white">Success Stories</Link>
-                    </div>
-                     <div className="flex flex-col gap-4">
-                        <h3 className="font-bold text-sm text-gray-400 uppercase tracking-wider">Company</h3>
-                        <Link href="#" className="text-gray-300 hover:text-white">About Havana</Link>
-                        <Link href="#" className="text-gray-300 hover:text-white">Terms of Service</Link>
-                        <Link href="#" className="text-gray-300 hover:text-white">Privacy Policy</Link>
-                    </div>
-                    <div className="flex flex-col gap-4">
-                        <h3 className="font-bold text-sm text-gray-400 uppercase tracking-wider">Contact</h3>
-                        <Link href="#" className="text-gray-300 hover:text-white">WhatsApp Support</Link>
-                        <Link href="#" className="text-gray-300 hover:text-white">Email Us</Link>
-                    </div>
-                </div>
-
-                <div className="flex flex-col md:flex-row justify-between items-center border-t border-gray-700 pt-8 gap-4">
-                    <div className="text-gray-500 text-sm">© 2025 Havana Gambia. All rights reserved.</div>
-                    <div className="flex items-center gap-2 bg-[#2f3338] px-3 py-2 rounded-lg text-sm text-gray-300">
-                        <Globe size={16} />
-                        <span>English</span>
-                    </div>
+                <p className="text-gray-500 max-w-sm mb-8">
+                    Reimagining how The Gambia moves and lives. <br/> The only verified marketplace for Cars & Real Estate.
+                </p>
+                <div className="flex gap-4">
+                     {[1,2,3,4].map(i => <div key={i} className="w-10 h-10 rounded-full bg-white border border-gray-200 flex items-center justify-center text-gray-400 hover:bg-havana-green hover:text-white hover:border-transparent transition-all cursor-pointer"><Heart size={16}/></div>)}
                 </div>
             </div>
-        </footer>
-    )
-}
+            
+            <div>
+                <h4 className="font-bold mb-6">Marketplace</h4>
+                <ul className="space-y-4 text-sm text-gray-500">
+                    <li className="hover:text-havana-green cursor-pointer">Cars for Rent</li>
+                    <li className="hover:text-havana-green cursor-pointer">Luxury Villas</li>
+                    <li className="hover:text-havana-green cursor-pointer">Brufut Land Sales</li>
+                    <li className="hover:text-havana-green cursor-pointer">Commercial Offices</li>
+                </ul>
+            </div>
 
-// --- MAIN PAGE COMPONENT ---
+            <div>
+                 <h4 className="font-bold mb-6">Support</h4>
+                 <ul className="space-y-4 text-sm text-gray-500">
+                    <li className="hover:text-havana-green cursor-pointer">WhatsApp Agent</li>
+                    <li className="hover:text-havana-green cursor-pointer">Privacy Policy</li>
+                    <li className="hover:text-havana-green cursor-pointer">Verification Process</li>
+                    <li className="hover:text-havana-green cursor-pointer">Terms of Service</li>
+                </ul>
+            </div>
+        </div>
+        <div className="border-t border-gray-200 pt-10 text-center text-sm text-gray-400">
+            © 2025 Havana Gambia. Operating in Brusubi, Senegambia, and Greater Banjul.
+        </div>
+    </footer>
+);
 
-export default function HomePage() {
+
+export default function Page() {
   return (
-    <main className="min-h-screen">
+    <main className="min-h-screen font-sans selection:bg-havana-green selection:text-white">
       <Navbar />
-      <Hero />
-      <FeatureSection1 />
-      <APISection />
-      <IndustrySection />
-      <AllInOneSection />
+      <HeroSection />
+      <InfiniteScrollMarquee />
+      <PhoneExplosion />
+      <VerticalScroller />
       <PricingSection />
+      <PaymentEcosystem />
       <Footer />
     </main>
   );
