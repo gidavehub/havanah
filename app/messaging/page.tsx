@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect, useRef, useCallback } from 'react';
+import React, { useState, useEffect, useRef, useCallback, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { 
   MdSearch, MdSend, MdArrowBack, MdPerson, MdImage, MdMoreVert, MdCheck
@@ -27,7 +27,7 @@ interface UserSearchResult {
   role: 'user' | 'agent'; 
 }
 
-export default function MessagingPage() {
+function MessagingPageContent() {
   const { user } = useAuth();
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -428,5 +428,13 @@ export default function MessagingPage() {
         )}
       </main>
     </div>
+  );
+}
+
+export default function MessagingPage() {
+  return (
+    <Suspense fallback={<div className="min-h-screen w-full flex items-center justify-center bg-gray-50">Loading...</div>}>
+      <MessagingPageContent />
+    </Suspense>
   );
 }
