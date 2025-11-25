@@ -1,8 +1,8 @@
 'use client';
 
 import React, { useRef, useState, useEffect } from 'react';
-import { motion, useScroll, useTransform, useSpring } from 'framer-motion';
-import { Zap, Radio, Shield, Check, Star, Menu, X, Search, Home, Car, MapPin, Briefcase } from 'lucide-react';
+import { motion, useScroll, useTransform } from 'framer-motion';
+import { Zap, Radio, Shield, Check, Star, Menu, Search, Home, Briefcase, MapPin } from 'lucide-react';
 import Head from 'next/head';
 
 // --- Utility Components ---
@@ -47,59 +47,62 @@ const Navbar = () => {
   );
 };
 
-// --- 2. REVISED Hero Section ---
+// --- 2. FIXED Hero Section ---
 const HeroSection = () => {
   const containerRef = useRef(null);
   
-  // We make the section very tall (300vh) to allow scroll space for animation
+  // Tall container for scroll space
   const { scrollYProgress } = useScroll({
     target: containerRef,
-    offset: ["start start", "end end"], // Animation plays throughout the scroll of this container
+    offset: ["start start", "end end"],
   });
 
-  // 1. Text Animation: Fades out quickly as we start scrolling
-  const textOpacity = useTransform(scrollYProgress, [0, 0.2], [1, 0]);
-  const textScale = useTransform(scrollYProgress, [0, 0.2], [1, 0.9]);
-  const textY = useTransform(scrollYProgress, [0, 0.2], [0, -100]); // Moves up slightly
+  // --- Animation Logic ---
 
-  // 2. Phone Position (Y-Axis):
-  // 0% -> 25%: Starts low (half visible) and moves to center
-  // 25% -> 75%: Stays locked in center while other things happen
+  // 1. Text: Fades out quickly (0% to 20% scroll)
+  const textOpacity = useTransform(scrollYProgress, [0, 0.2], [1, 0]);
+  const textScale = useTransform(scrollYProgress, [0, 0.2], [1, 0.8]);
+  const textY = useTransform(scrollYProgress, [0, 0.2], [0, -50]);
+
+  // 2. Phone Position (Y-Axis): 
+  // Starts 85% down (just peeking). Moves to 0% (Center) by 40% scroll.
   const phoneY = useTransform(scrollYProgress, 
-    [0, 0.25, 0.75], 
-    ["35%", "0%", "0%"] 
+    [0, 0.4, 0.8], 
+    ["85%", "0%", "0%"] 
   );
 
   // 3. Phone Scale:
-  // 0% -> 25%: Normal size
-  // 25% -> 50%: Shrinks slightly in place to make room for buttons
+  // Stays normal until it hits center, then shrinks slightly to reveal buttons
   const phoneScale = useTransform(scrollYProgress, 
-    [0, 0.25, 0.5], 
-    [1.1, 1.1, 0.85] 
+    [0.4, 0.6], 
+    [1, 0.85] 
   );
 
-  // 4. Buttons (App Store/Play Store) Animation:
-  // They are hidden behind the phone initially.
-  // 40% -> 60%: They pop out and fade in
-  const buttonsOpacity = useTransform(scrollYProgress, [0.4, 0.55], [0, 1]);
-  const buttonsScale = useTransform(scrollYProgress, [0.4, 0.55], [0.5, 1]);
-  // Move them downwards to appear below/beside the phone
-  const buttonsY = useTransform(scrollYProgress, [0.4, 0.55], [-100, 20]); 
+  // 4. Buttons (The Modals):
+  // They start centered behind the phone.
+  // When phone shrinks (0.4 to 0.6), they slide OUT to left and right.
+  const btnOpacity = useTransform(scrollYProgress, [0.45, 0.55], [0, 1]);
+  
+  // Left Button (App Store) moves Left
+  const leftBtnX = useTransform(scrollYProgress, [0.45, 0.6], [0, -180]);
+  
+  // Right Button (Play Store) moves Right
+  const rightBtnX = useTransform(scrollYProgress, [0.45, 0.6], [0, 180]);
 
   return (
     <div ref={containerRef} className="relative h-[300vh] bg-white w-full">
-      {/* Background Decor */}
-      <div className="absolute inset-0 bg-[radial-gradient(#10b981_1px,transparent_1px)] [background-size:20px_20px] opacity-[0.05] pointer-events-none fixed" />
+      {/* Background Grid */}
+      <div className="fixed inset-0 bg-[radial-gradient(#10b981_1px,transparent_1px)] [background-size:20px_20px] opacity-[0.05] pointer-events-none" />
       
-      {/* Sticky Container: Holds the viewport logic */}
+      {/* Sticky Viewport */}
       <div className="sticky top-0 h-screen w-full overflow-hidden flex flex-col items-center justify-center">
         
-        {/* TEXT LAYER */}
+        {/* --- TEXT LAYER (Top Half) --- */}
         <motion.div 
           style={{ opacity: textOpacity, scale: textScale, y: textY }}
-          className="absolute top-[15%] md:top-[18%] z-10 text-center px-4 max-w-3xl mx-auto w-full"
+          className="absolute top-[15%] z-10 text-center px-4 max-w-4xl mx-auto w-full"
         >
-          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-emerald-50 border border-emerald-100 mb-6">
+          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-emerald-50 border border-emerald-100 mb-8 shadow-sm">
              <span className="relative flex h-2 w-2">
                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
                <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
@@ -107,115 +110,118 @@ const HeroSection = () => {
              <span className="text-xs font-bold text-emerald-800 tracking-wide uppercase">Havanah Mobile App v2.0</span>
           </div>
           
-          <h1 className="text-5xl md:text-7xl font-extrabold tracking-tight text-gray-900 mb-6 leading-tight">
-            Find your dream car or <span className="text-transparent bg-clip-text bg-gradient-to-r from-emerald-600 to-emerald-400">home today.</span>
+          <h1 className="text-6xl md:text-8xl font-extrabold tracking-tight text-gray-900 mb-8 leading-[0.9]">
+            Find your dream <br />
+            <span className="text-transparent bg-clip-text bg-gradient-to-r from-emerald-600 to-emerald-400">home today.</span>
           </h1>
           
-          <p className="text-lg md:text-xl text-gray-500 font-medium max-w-2xl mx-auto leading-relaxed">
+          <p className="text-xl text-gray-500 font-medium max-w-2xl mx-auto leading-relaxed">
             Reimagine how you rent, buy, and sell in the Gambian unified marketplace. 
-            Connecting you to premium vehicles and properties seamlessly.
+            Connecting you to premium vehicles and properties.
           </p>
         </motion.div>
 
 
-        {/* ANIMATION LAYER (Phone + Buttons) */}
-        <div className="relative z-20 w-full flex flex-col items-center justify-center mt-20 md:mt-32">
+        {/* --- ANIMATION LAYER (Center) --- */}
+        <div className="relative w-full flex items-center justify-center h-full">
             
-            {/* Buttons Layer - Positioned absolutely to be 'behind' or relative to phone */}
+            {/* APP STORE BUTTON (Left) */}
             <motion.div 
-                style={{ 
-                    opacity: buttonsOpacity, 
-                    scale: buttonsScale,
-                    y: buttonsY
-                }}
-                className="absolute top-full mt-4 flex flex-row gap-4 z-10"
+                style={{ opacity: btnOpacity, x: leftBtnX }}
+                className="absolute z-10" // Behind phone (z-20)
             >
-                <button className="bg-gray-900 text-white px-6 py-3 rounded-2xl flex items-center gap-3 shadow-xl hover:bg-gray-800 transition-colors">
-                    <i className="fab fa-apple text-2xl"></i> 
-                    <div className="text-left">
-                        <p className="text-[10px] uppercase text-gray-400 leading-none">Download on</p>
-                        <p className="font-bold text-sm leading-none mt-1">App Store</p>
-                    </div>
-                </button>
-                <button className="bg-white text-gray-900 border border-gray-200 px-6 py-3 rounded-2xl flex items-center gap-3 shadow-xl hover:bg-gray-50 transition-colors">
-                    <i className="fab fa-google-play text-xl text-emerald-600"></i>
-                    <div className="text-left">
-                        <p className="text-[10px] uppercase text-gray-400 leading-none">Get it on</p>
-                        <p className="font-bold text-sm leading-none mt-1">Google Play</p>
-                    </div>
+                <button className="bg-gray-900 text-white w-40 py-3 rounded-2xl flex flex-col items-center justify-center shadow-xl hover:bg-gray-800 transition-colors border border-gray-800">
+                    <i className="fab fa-apple text-3xl mb-1"></i> 
+                    <p className="text-[10px] uppercase text-gray-400 leading-none">Download on</p>
+                    <p className="font-bold text-xs leading-none mt-1">App Store</p>
                 </button>
             </motion.div>
 
-            {/* Phone Layer */}
+            {/* GOOGLE PLAY BUTTON (Right) */}
+            <motion.div 
+                style={{ opacity: btnOpacity, x: rightBtnX }}
+                className="absolute z-10" // Behind phone (z-20)
+            >
+                <button className="bg-white text-gray-900 w-40 py-3 rounded-2xl flex flex-col items-center justify-center shadow-xl hover:bg-gray-50 transition-colors border border-gray-200">
+                    <i className="fab fa-google-play text-2xl text-emerald-600 mb-1"></i>
+                    <p className="text-[10px] uppercase text-gray-400 leading-none">Get it on</p>
+                    <p className="font-bold text-xs leading-none mt-1">Google Play</p>
+                </button>
+            </motion.div>
+
+            {/* THE PHONE */}
             <motion.div 
                 style={{ y: phoneY, scale: phoneScale }}
-                className="relative z-20 w-[280px] md:w-[320px] aspect-[9/19] shadow-2xl rounded-[3rem] border-8 border-gray-900 bg-gray-900 overflow-hidden"
+                className="relative z-20 w-[300px] h-[650px] shadow-2xl rounded-[3.5rem] border-[8px] border-gray-900 bg-gray-900 overflow-hidden"
             >
                 {/* Dynamic Island */}
-                <div className="absolute top-0 left-1/2 -translate-x-1/2 w-24 h-6 bg-black rounded-b-xl z-30"></div>
+                <div className="absolute top-0 left-1/2 -translate-x-1/2 w-28 h-7 bg-black rounded-b-2xl z-30"></div>
                 
                 {/* Screen Content */}
-                <div className="w-full h-full bg-gray-50 flex flex-col relative">
+                <div className="w-full h-full bg-gray-50 flex flex-col relative font-sans">
                      {/* Header */}
-                     <div className="pt-10 px-4 pb-2 bg-white flex justify-between items-center">
-                        <div className="flex items-center gap-2">
-                            <div className="w-8 h-8 rounded-full bg-emerald-100 flex items-center justify-center text-emerald-700 font-bold text-xs">AS</div>
+                     <div className="pt-12 px-5 pb-4 bg-white flex justify-between items-center shadow-sm z-10">
+                        <div className="flex items-center gap-3">
+                            <div className="w-9 h-9 rounded-full bg-emerald-100 flex items-center justify-center text-emerald-700 font-bold text-xs border border-emerald-200">AS</div>
                             <div>
-                                <p className="text-[9px] text-gray-400 font-bold uppercase">Location</p>
-                                <p className="text-xs font-bold text-gray-800 flex items-center gap-1">Senegambia <span className="text-emerald-500 text-[9px]">▼</span></p>
+                                <p className="text-[9px] text-gray-400 font-bold uppercase tracking-wider">Current Location</p>
+                                <p className="text-xs font-bold text-gray-900 flex items-center gap-1">Senegambia, GM <span className="text-emerald-500 text-[10px]">▼</span></p>
                             </div>
                         </div>
-                        <div className="p-2 bg-gray-50 rounded-full">
-                            <Menu size={16} className="text-gray-600"/>
+                        <div className="w-9 h-9 bg-gray-50 rounded-full flex items-center justify-center border border-gray-100">
+                            <Menu size={18} className="text-gray-600"/>
                         </div>
                      </div>
 
                      {/* Search */}
-                     <div className="px-4 py-3">
-                         <div className="bg-white border border-gray-100 rounded-xl p-3 flex items-center gap-2 shadow-sm">
-                             <Search size={16} className="text-gray-400"/>
-                             <span className="text-xs text-gray-400">Search "Lexus LX570"...</span>
+                     <div className="px-5 pt-4 pb-2">
+                         <div className="bg-white border border-gray-200 rounded-2xl p-3.5 flex items-center gap-3 shadow-sm">
+                             <Search size={18} className="text-gray-400"/>
+                             <span className="text-sm text-gray-400">Find homes, cars...</span>
                          </div>
                      </div>
 
                      {/* Main Scroll Content */}
-                     <div className="flex-1 overflow-hidden px-4 space-y-3 pb-20">
-                         {/* Featured Card */}
-                         <div className="w-full bg-white rounded-2xl p-3 shadow-sm border border-gray-100">
-                             <div className="w-full h-28 bg-gray-200 rounded-xl mb-3 relative overflow-hidden">
-                                <img src="https://images.unsplash.com/photo-1600596542815-60c37c6525fa?auto=format&fit=crop&w=500&q=80" className="object-cover w-full h-full" alt="Home" />
-                                <div className="absolute top-2 right-2 bg-white/90 backdrop-blur px-2 py-1 rounded-lg text-[10px] font-bold text-emerald-600">D8.5M</div>
+                     <div className="flex-1 overflow-hidden px-5 space-y-4 pb-24 pt-2">
+                         {/* Card 1 */}
+                         <div className="w-full bg-white rounded-3xl p-3 shadow-sm border border-gray-100 group">
+                             <div className="w-full h-32 bg-gray-100 rounded-2xl mb-3 relative overflow-hidden">
+                                <img src="https://images.unsplash.com/photo-1600596542815-60c37c6525fa?auto=format&fit=crop&w=500&q=80" className="object-cover w-full h-full group-hover:scale-105 transition-transform duration-500" alt="Home" />
+                                <div className="absolute top-3 right-3 bg-white/95 backdrop-blur px-3 py-1.5 rounded-full text-[10px] font-bold text-emerald-600 shadow-sm">D8.5M</div>
                              </div>
-                             <div className="flex justify-between items-start">
+                             <div className="flex justify-between items-start px-1">
                                  <div>
-                                     <h3 className="font-bold text-sm text-gray-800">Brusubi Phase 2</h3>
-                                     <p className="text-[10px] text-gray-400">4 Beds • 3 Baths • Pool</p>
+                                     <h3 className="font-bold text-sm text-gray-900">Brusubi Phase 2</h3>
+                                     <p className="text-[10px] text-gray-500 mt-1">4 Beds • 3 Baths • Pool</p>
                                  </div>
-                                 <div className="w-6 h-6 rounded-full bg-gray-50 flex items-center justify-center">
+                                 <div className="w-7 h-7 rounded-full bg-gray-50 flex items-center justify-center border border-gray-100">
                                      <Star size={12} className="text-gray-400"/>
                                  </div>
                              </div>
                          </div>
 
-                         {/* Secondary Card */}
-                         <div className="w-full bg-white rounded-2xl p-3 shadow-sm border border-gray-100">
-                             <div className="w-full h-24 bg-gray-200 rounded-xl mb-3 relative overflow-hidden">
+                         {/* Card 2 */}
+                         <div className="w-full bg-white rounded-3xl p-3 shadow-sm border border-gray-100">
+                             <div className="w-full h-28 bg-gray-100 rounded-2xl mb-3 relative overflow-hidden">
                                 <img src="https://images.unsplash.com/photo-1533473359331-0135ef1b58bf?auto=format&fit=crop&w=500&q=80" className="object-cover w-full h-full" alt="Car" />
-                                <div className="absolute top-2 right-2 bg-white/90 backdrop-blur px-2 py-1 rounded-lg text-[10px] font-bold text-emerald-600">D1.2M</div>
+                                <div className="absolute top-3 right-3 bg-white/95 backdrop-blur px-3 py-1.5 rounded-full text-[10px] font-bold text-emerald-600 shadow-sm">D1.2M</div>
                              </div>
-                             <h3 className="font-bold text-sm text-gray-800">Toyota Prado 2021</h3>
+                             <div className="px-1">
+                                <h3 className="font-bold text-sm text-gray-900">Toyota Prado 2021</h3>
+                                <p className="text-[10px] text-gray-500 mt-1">48,000 km • Automatic</p>
+                             </div>
                          </div>
                      </div>
                      
-                     {/* Navigation Bar */}
-                     <div className="absolute bottom-4 left-4 right-4 bg-gray-900/95 backdrop-blur-md rounded-2xl p-4 text-white flex justify-between items-center shadow-2xl">
-                         <Home size={20} className="text-emerald-400" />
-                         <Search size={20} className="text-gray-500" />
-                         <div className="w-10 h-10 bg-emerald-500 rounded-full -mt-8 border-4 border-gray-50 flex items-center justify-center shadow-lg">
-                             <span className="text-xl font-light">+</span>
+                     {/* Floating Tab Bar */}
+                     <div className="absolute bottom-6 left-5 right-5 bg-gray-900/90 backdrop-blur-xl rounded-[2rem] h-16 text-white flex justify-between items-center px-6 shadow-2xl shadow-emerald-900/20">
+                         <Home size={22} className="text-emerald-400" />
+                         <Search size={22} className="text-gray-500" />
+                         <div className="w-12 h-12 bg-emerald-500 rounded-full -mt-10 border-[6px] border-gray-50 flex items-center justify-center shadow-lg transform active:scale-95 transition-transform">
+                             <span className="text-2xl font-light text-white mb-1">+</span>
                          </div>
-                         <Briefcase size={20} className="text-gray-500" />
-                         <div className="w-6 h-6 rounded-full bg-gray-700 border border-gray-500"></div>
+                         <Briefcase size={22} className="text-gray-500" />
+                         <div className="w-7 h-7 rounded-full bg-gray-700 border border-gray-500"></div>
                      </div>
                 </div>
             </motion.div>
@@ -256,7 +262,7 @@ const InfiniteScrollMarquee = () => {
     )
 }
 
-// --- 4. Original Marketplace Grid (Unchanged) ---
+// --- 4. Marketplace Grid (Unchanged) ---
 const MarketplaceGrid = () => {
   const categories = [
     { title: "Residential", subtitle: "Apartments & Villas", icon: <Home className="text-white" />, img: "https://images.unsplash.com/photo-1613490493576-7fde63acd811?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80" },
@@ -610,7 +616,7 @@ export default function HomePage() {
       <Navbar />
       
       <main>
-        {/* REVISED HERO: 300vh height + Phone Scroll Animation */}
+        {/* REVISED HERO: Fixed overlap + Side popping buttons */}
         <HeroSection />
         
         {/* Infinite Scroll Marquee */}
