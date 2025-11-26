@@ -4,9 +4,9 @@ import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
-  Send, Mic, Image as ImageIcon, Paperclip, MoreVertical, 
+  Send, Mic, Image as ImageIcon, Paperclip,
   Phone, Video, ArrowLeft, Smile, X, Check, CheckCheck, 
-  Play, Pause, Trash2, Reply, Copy, AlertCircle, Clock, Lock
+  Play, Pause, Trash2, Reply, Copy, AlertCircle, Clock, Lock, CornerUpRight
 } from 'lucide-react';
 
 import { useAuth } from '@/lib/auth-store';
@@ -184,7 +184,7 @@ const MessageBubble = ({
                <Reply size={16} />
              </button>
              <button onClick={() => onForward(msg)} className="p-2 hover:bg-emerald-50 rounded-full text-emerald-600" title="Forward">
-               <MoreVertical size={16} />
+               <CornerUpRight size={16} />
              </button>
              {/* Only delete my own messages */}
              {isMe && !msg.isDeleted && (

@@ -333,7 +333,9 @@ function MessagingContent() {
   if (!user) return <div className="h-full flex items-center justify-center">Loading Auth...</div>;
 
   return (
-    <div className="flex h-full w-full bg-[#f0f2f5] relative overflow-hidden font-sans">
+    // FIX: Use 'h-full w-full' because the Parent (MainLayout) now dictates the exact size.
+    // 'absolute inset-0' ensures it snaps to the edges of the parent <main> tag.
+    <div className="absolute inset-0 flex h-full w-full bg-[#f0f2f5] overflow-hidden font-sans">
       
       {/* Background Ambient Mesh */}
       <div className="absolute top-[-20%] left-[-10%] w-[50%] h-[50%] bg-emerald-400/20 blur-[120px] rounded-full pointer-events-none mix-blend-multiply animate-pulse" />

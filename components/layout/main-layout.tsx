@@ -78,22 +78,23 @@ export default function MainLayout({ children }: MainLayoutProps) {
     return (
       <ToastProvider>
         <GlobalNotificationListener />
-        <div className="flex min-h-screen bg-gray-50 overflow-hidden">
+        
+        {/* Container is explicitly relative to allow absolute/fixed positioning of children */}
+        <div className="relative w-full h-full bg-gray-50">
+          
           <Sidebar />
           
-          {/* 
-             FIXED MAIN CONTAINER:
-             1. Logic: If it's the Messaging Page, we REMOVE the bottom padding (pb-24) 
-                and constrain the height to the viewport.
-             2. On Mobile: Height is 100dvh minus the Bottom Nav height (approx 70px-80px).
-             3. On Desktop: Height is 100vh.
-          */}
           <main 
             className={`
-              flex-1 ml-0 lg:ml-[280px] transition-all duration-300 relative
+              transition-all duration-300
               ${isMessagingPage 
-                ? 'h-[calc(100dvh-80px)] lg:h-screen p-0 overflow-hidden' // Mobile: Fit above nav. Desktop: Full screen.
-                : 'min-h-screen pb-24 lg:pb-0 p-0' // Standard scrolling behavior for other pages
+                ? // MESSAGING LAYOUT: FIXED POSITIONING (No Scrolling on Body)
+                  // Mobile: Fixed top, left, right. Bottom stops at 80px (height of mobile nav).
+                  // Desktop: Fixed top, right, bottom. Left starts at 280px (width of sidebar).
+                  'fixed top-0 right-0 left-0 bottom-[80px] lg:left-[280px] lg:bottom-0 z-0 overflow-hidden bg-[#f0f2f5]'
+                
+                : // STANDARD LAYOUT: FLOW POSITIONING (Normal Scrolling)
+                  'flex-1 min-h-screen ml-0 lg:ml-[280px] pb-24 lg:pb-0'
               }
             `}
           >
