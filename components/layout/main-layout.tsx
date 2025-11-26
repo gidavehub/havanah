@@ -6,6 +6,7 @@ import { useAuth } from '@/lib/auth-store';
 import Navbar from '@/components/layout/navbar/navbar';
 import Sidebar from '@/components/layout/sidebar/sidebar'; 
 import { ToastProvider } from '@/components/toast/toast';
+import GlobalNotificationListener from '@/components/messaging/GlobalNotificationListener';
 
 interface MainLayoutProps {
   children: React.ReactNode;
@@ -62,6 +63,7 @@ export default function MainLayout({ children }: MainLayoutProps) {
   if (isAuthPage) {
     return (
       <ToastProvider>
+        <GlobalNotificationListener />
         {children}
       </ToastProvider>
     );
@@ -71,6 +73,7 @@ export default function MainLayout({ children }: MainLayoutProps) {
   if (isSidebarRoute) {
     return (
       <ToastProvider>
+        <GlobalNotificationListener />
         <div className="flex min-h-screen bg-gray-50">
           <Sidebar />
           
@@ -92,6 +95,7 @@ export default function MainLayout({ children }: MainLayoutProps) {
   // CASE C: Public Pages
   return (
     <ToastProvider>
+      <GlobalNotificationListener />
       <div className="flex flex-col min-h-screen">
         <Navbar />
         <main className="flex-1 pt-[80px]">

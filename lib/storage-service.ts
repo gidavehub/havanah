@@ -1,72 +1,98 @@
-'use client';
+import { 
+  ref, 
+  uploadBytes, 
+  getDownloadURL, 
+  UploadMetadata 
+} from 'firebase/storage';
+import { getStorageInstance } from '@/lib/firebase'; // Ensure you have this export in your firebase.ts
 
-import { FirebaseStorage } from 'firebase/storage';
-import { getStorageInstance } from './firebase';
+// --- CONFIG ---
+const MAX_IMAGE_SIZE = 5 * 1024 * 1024; // 5MB
+const MAX_VIDEO_SIZE = 50 * 1024 * 1024; // 50MB
+const ALLOWED_IMAGE_TYPES = ['image/jpeg', 'image/png', 'image/webp', 'image/gif'];
+const ALLOWED_VIDEO_TYPES = ['video/mp4', 'video/webm', 'video/quicktime'];
 
 /**
- * Upload an image/file to Firebase Storage
- * @param file - The File object to upload
- * @param path - The storage path (e.g., 'listings/user123')
- * @returns Promise<string> - The download URL of the uploaded file
+ * Generic File Uploader
+ * Handles unique naming, path generation, and basic validation
  */
-export async function uploadImage(file: File, path: string): Promise<string> {
+async function uploadFile(
+  file: File, 
+  folderPath: string, 
+  allowedTypes: string[], 
+  maxSize: number
+): Promise<string> {
+  const storage = getStorageInstance();
+  
+  // 1. Validate Type
+  if (!allowedTypes.includes(file.type)) {
+    throw new Error(`File type ${file.type} is not supported.`);
+  }
+
+  // 2. Validate Size
+  if (file.size > maxSize) {
+    const sizeMB = maxSize / (1024 * 1024);
+    throw new Error(`File is too large. Max size is ${sizeMB}MB.`);
+  }
+
+  // 3. Generate Unique Path
+  // Format: folder/timestamp_random_sanitizedname
+  const timestamp = Date.now();
+  const randomStr = Math.random().toString(36).substring(2, 8);
+  const sanitizedName = file.name.replace(/[^a-zA-Z0-9.]/g, '_');
+  const fullPath = `${folderPath}/${timestamp}_${randomStr}_${sanitizedName}`;
+
+  // 4. Create Ref & Metadata
+  const storageRef = ref(storage, fullPath);
+  const metadata: UploadMetadata = {
+    contentType: file.type,
+    customMetadata: {
+      originalName: file.name,
+      uploadedAt: new Date().toISOString()
+    }
+  };
+
   try {
-    const storage = getStorageInstance();
+    // 5. Upload
+    const snapshot = await uploadBytes(storageRef, file, metadata);
     
-    // Dynamically import Firebase Storage functions to avoid TypeScript issues
-    const { ref, uploadBytes, getDownloadURL } = await import('firebase/storage');
-    
-    // Generate unique filename
-    const timestamp = Date.now();
-    const fileName = `${timestamp}_${file.name}`;
-    const fullPath = `${path}/${fileName}`;
-    
-    // Create reference
-    const fileRef = ref(storage, fullPath);
-    
-    // Upload file
-    await uploadBytes(fileRef, file);
-    
-    // Get download URL
-    const downloadURL = await getDownloadURL(fileRef);
-    
+    // 6. Get URL
+    const downloadURL = await getDownloadURL(snapshot.ref);
     return downloadURL;
   } catch (error) {
-    console.error('Error uploading file:', error);
-    throw new Error('Failed to upload file');
+    console.error("Storage Upload Error:", error);
+    throw new Error("Failed to upload file. Please try again.");
   }
 }
 
 /**
- * Upload multiple files to Firebase Storage
- * @param files - Array of File objects to upload
- * @param path - The storage path
- * @returns Promise<string[]> - Array of download URLs
+ * Upload an Image (for Chat or Status)
+ * Path suggestions: 
+ * - Chat: `conversations/{convId}`
+ * - Status: `statuses/{userId}`
  */
-export async function uploadImages(files: File[], path: string): Promise<string[]> {
-  try {
-    const urls = await Promise.all(
-      files.map(file => uploadImage(file, path))
-    );
-    return urls;
-  } catch (error) {
-    console.error('Error uploading multiple files:', error);
-    throw new Error('Failed to upload files');
-  }
+export async function uploadImage(file: File, path: string): Promise<string> {
+  return uploadFile(file, path, ALLOWED_IMAGE_TYPES, MAX_IMAGE_SIZE);
 }
 
 /**
- * Upload a video file to Firebase Storage
- * @param file - The video File object to upload
- * @param path - The storage path
- * @returns Promise<string> - The download URL of the uploaded video
+ * Upload a Video
  */
 export async function uploadVideo(file: File, path: string): Promise<string> {
-  try {
-    // Reuse uploadImage since Firebase Storage handles both
-    return await uploadImage(file, path);
-  } catch (error) {
-    console.error('Error uploading video:', error);
-    throw new Error('Failed to upload video');
-  }
+  return uploadFile(file, path, ALLOWED_VIDEO_TYPES, MAX_VIDEO_SIZE);
+}
+
+/**
+ * Upload an Audio Voice Note
+ */
+export async function uploadAudio(blob: Blob, path: string): Promise<string> {
+  // Convert Blob to File for consistency
+  const file = new File([blob], "voice_note.webm", { type: 'audio/webm' });
+  // Allow slightly larger size/types for audio if needed
+  return uploadFile(
+    file, 
+    path, 
+    ['audio/webm', 'audio/mp4', 'audio/mpeg', 'audio/wav'], 
+    20 * 1024 * 1024 // 20MB
+  );
 }
