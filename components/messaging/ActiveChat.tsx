@@ -6,6 +6,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { 
   Send, Mic, Image as ImageIcon, Paperclip,
   Phone, Video, ArrowLeft, Smile, X, Check, CheckCheck, 
+  MoreVertical,
   Play, Pause, Trash2, Reply, Copy, AlertCircle, Clock, Lock, CornerUpRight
 } from 'lucide-react';
 
